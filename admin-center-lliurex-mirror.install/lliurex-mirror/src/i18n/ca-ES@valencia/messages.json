@@ -1,0 +1,16 @@
+{
+  "messages" : {
+    "" : {
+      "domain" : "lliurex-mirror",
+      "lang"   : "ca-ES@valencia",
+      "plural_forms" : "nplurals=2; plural=(n != 1);"
+    },
+     "lliurex-mirror.Architecture":["Arquitectura"],
+     "lliurex-mirror.Origin":["Origen"],
+     "lliurex-mirror.Update":["Actualitza"],
+     "lliurex-mirror.Cancel":["Cancel·la"],
+     "lliurex-mirror.message":["Hi ha una nova actualització disponible en lliurex.net"],
+     "Mirror Manager":["Gestioneu les rèpliques de LliureX"]
+    
+}
+}

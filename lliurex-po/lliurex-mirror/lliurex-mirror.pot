@@ -1,0 +1,191 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-19 16:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:51
+msgid "Lliurex Xenial"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:146
+msgid "Name"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:158
+msgid "Banner"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:170
+msgid "Origin"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:182
+msgid "Distributions"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:194
+msgid "Sections"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:206
+msgid "Architectures"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:218
+msgid "Mirror path"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:230
+msgid "Check MD5 Sum"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:242
+msgid "Ignore GPG"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:254
+msgid "Ignore release"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:455
+msgid "Save"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:496
+msgid "LliureX Mirror"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:608
+msgid "Username"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:622
+msgid "Password"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:646
+msgid "Login"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:670
+msgid "Server IP    (Default value : server)"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:700
+msgid "button"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:747
+msgid "Lliurex Mirror"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:806
+msgid "Lliurex Xenial (i386)"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:819
+msgid "i386,amd64"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:859
+msgid "10%"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:899
+msgid "View Log"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:995
+msgid "Configuration"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1039
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1226
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:746
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1130
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1579
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1599
+msgid "Update"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1065
+msgid "Internet"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1100
+msgid "Local folder"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1162
+msgid "URL"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1282
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1367
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:750
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1223
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1580
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1600
+msgid "Export"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/rsrc/lliurex-mirror.ui:1300
+msgid "Destination"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:755
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:759
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1119
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1212
+msgid "Cancel"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1078
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1187
+#, python-format
+msgid "'%(mirror-name)s' is currently %(updating-or-exporting)s."
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1078
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1187
+msgid "updating"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1078
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1187
+msgid "exporting"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1082
+#, python-format
+msgid "'%(mirror-name)s' is currently exporting."
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1192
+#, python-format
+msgid "'%(mirror-name)s' is currently updating."
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1347
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1355
+msgid "Configuration Saved"
+msgstr ""
+
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1349
+#: ../lliurex-mirror-gui/usr/share/lliurex-mirror/lliurex-mirror.py:1357
+msgid "Could not save configuration"
+msgstr ""

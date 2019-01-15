@@ -1,0 +1,9 @@
+{
+  "id": "lliurex-mirror",
+  "version": "0.1",
+  "name": "LliureX Mirror",
+  "description": "Mirror Manager",
+  "main":"main.html",
+  "icon":"lliurex-mirror.png",
+  "components": []
+}

@@ -1,0 +1,5 @@
+#!/bin/bash
+destiny=$(mktemp)
+x=$(cat /var/log/lliurex-mirror.log | grep "MIRROR START AT "|tail -1)
+sed -n "/$x/,\$p" /var/log/lliurex-mirror.log > $destiny
+echo $destiny

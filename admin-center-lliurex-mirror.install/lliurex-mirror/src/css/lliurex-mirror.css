@@ -1,0 +1,60 @@
+#llxmirrorprogress svg{
+  max-width: 200px;
+  margin-right: auto;
+  margin-left: auto;
+}
+#llxmirrorprogress{
+  padding-top:25px;
+  padding-bottom:25px;
+}
+
+i.menu{
+	float:right;
+	background-image: url('images/mirror_not_configured1.png');
+	background-repeat: no-repeat;
+	height: 25px;
+	width: 15px;
+}
+
+#llxmirrorconfiguration.llxmirrordisabled{
+	/*background-color:yellow;*/
+
+	transition: max-height 1s;
+	max-height: 0px;
+	overflow: hidden;
+}
+
+#llxmirrorconfiguration{
+	/*background-color:yellow;*/
+	transition: max-height 1s;
+	max-height: 400px;
+	overflow: hidden;
+	background-color: rgba(0,0,0,0.8);
+}
+
+#llxmirrorconfigurationcontent{
+	margin:10px;
+}
+
+.llxmirrorhidden{
+	visibility: hidden;
+}
+
+#lliurex-mirror h3.panel-title{
+	display: inline-block;
+}
+
+.lliurexmirrorloader {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    40% { transform: rotate(200deg); }
+    90% { transform: rotate(340deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#lliurex-mirror{
+	padding: 10px;
+}

@@ -1,0 +1,2 @@
+cname=mirror.{{ INTERNAL_DOMAIN }},{{ HOSTNAME }}.{{ INTERNAL_DOMAIN }}
+cname=lliurex-mirror.{{ INTERNAL_DOMAIN }},{{ HOSTNAME }}.{{ INTERNAL_DOMAIN }}

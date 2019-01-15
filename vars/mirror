@@ -1,0 +1,12 @@
+{
+	"INTERNAL_DOMAIN": {
+		"packages": [
+			"n4d-lliurex-mirror"
+			]
+	},
+	"HOSTNAME":{
+		"packages": [
+			"n4d-lliurex-mirror"
+		]
+	}
+}

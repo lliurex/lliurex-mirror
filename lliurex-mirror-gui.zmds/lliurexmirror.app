@@ -1,0 +1,15 @@
+Name=lliurexmirror
+Name[en]=LliureX Mirror
+Name[es]=Réplica de LliureX
+Name[qcv]=Rèplica del LliureX
+Name[ca_ES]=Rèplica del LliureX
+Comment=LliureX's Mirror
+Comment[es]=Crea la réplica de LliureX
+Comment[qcv]=Creeu la rèplica del LliureX
+Comment[ca_ES]=Creeu la rèplica del LliureX
+Icon=lliurex-mirror
+Groups=admin;admins;adm
+Category=System
+ScriptPath=lliurexmirror.zmd
+Using=pe 
+Depends=zero-server-wizard

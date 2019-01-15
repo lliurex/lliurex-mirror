@@ -1,0 +1,17 @@
+{
+  "messages" : {
+    "" : {
+      "domain" : "lliurex-mirror",
+      "lang"   : "en-US",
+      "plural_forms" : "nplurals=2; plural=(n != 1);"
+    },
+     "lliurex-mirror.Architecture":["Architecture"],
+     "lliurex-mirror.Origin":["Origin"],
+     "lliurex-mirror.Update":["Update"],
+     "lliurex-mirror.Cancel":["Cancel"],
+     "lliurex-mirror.message":["There is a new update available in lliurex.net"],
+     "Mirror Manager":["Manage LliureX Mirror"]
+
+    
+}
+}

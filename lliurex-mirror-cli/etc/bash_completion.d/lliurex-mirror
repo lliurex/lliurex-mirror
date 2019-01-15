@@ -1,0 +1,34 @@
+have lliurex-mirror &&
+_lliurex-mirror()             
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    #
+	    #  The basic options we'll complete.
+	    #
+	    opts="setcname update rundebmirror volatileupdate isalive getmirrorarchitecture setmirrorarchitecture getmirrororig setmirrororig getchecksumvalidation setchecksumvalidation getpercentage enablewebserverforpath stopwebserver getavailabledistros -H --host -k --key -u --user -p --password stopupdate"
+	
+	   #
+	    #  Complete the arguments to some of the basic commands.
+	    #
+	    case "${prev}" in
+	        update|rundebmirror|getmirrorarchitecture|setmirrorarchitecture|getmirrororig|setmirrororig|getchecksumvalidation|setchecksumvalidation)
+	            local running=$( ls /etc/lliurex-mirror/conf/ | cut -d "." -f1 | tr "\n" " " )
+	            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+	            return 0
+	            ;;
+	        *)
+	        ;;
+	    esac
+	
+	
+	
+	   COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+	   return 0
+	}
+	[ "$have" ] && complete -F _lliurex-mirror lliurex-mirror
+
+

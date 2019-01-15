@@ -1,0 +1,13 @@
+{
+	"NAME":"LliureX Pandora",
+	"BANNER": "",
+	"ORIGS":{"1":"lliurex.net/pandora","2":"","3":""},
+	"ARCHITECTURES": [ "amd64", "i386"], 
+	"SECTIONS": ["main", "main/debian-installer", "universe", "restricted", "multiverse"],
+	"MIRROR_PATH": "/net/mirror/llx1306", 
+	"DISTROS": ["pandora"],
+	"IGN_GPG":1,
+	"IGN_RELEASE":0,
+	"CHK_MD5":0,
+	"CURRENT_UPDATE_OPTION":"1"
+}
