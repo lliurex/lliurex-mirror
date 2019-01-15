@@ -1,0 +1,1148 @@
+lliurex-mirror (29) bionic; urgency=medium
+
+  * first bionic release
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 02 May 2018 12:03:36 +0200
+
+lliurex-mirror (28.8.7) xenial; urgency=medium
+
+  * Updated categorization in zero-center
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 30 Apr 2018 09:04:36 +0200
+
+lliurex-mirror (28.8.6) xenial; urgency=medium
+
+  * Added option to allow update without changing config files
+  * Updated help menu from cli
+  * Improved error checking from cli
+  * Allow cancel update operation from cli
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Wed, 21 Mar 2018 17:26:45 +0100
+
+lliurex-mirror (28.8.5) xenial; urgency=high
+
+  *  Updated banner
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 03 Nov 2017 09:06:32 +0100
+
+lliurex-mirror (28.8.4) xenial; urgency=high
+
+  * Look & feel changes
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 02 Nov 2017 12:42:15 +0100
+
+lliurex-mirror (28.8.3) xenial; urgency=high
+
+  * Updated animation speed
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 May 2017 16:37:37 +0200
+
+lliurex-mirror (28.8.2) xenial; urgency=high
+
+  * Updated valencian translation
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 May 2017 14:50:58 +0200
+
+lliurex-mirror (28.8.1) xenial; urgency=high
+
+  * Fixed translation charset
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 27 Apr 2017 14:54:25 +0200
+
+lliurex-mirror (28.8) xenial; urgency=high
+
+  * Adding spanish translation
+  * Assuming HOME variable won't be accesible
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 26 Apr 2017 17:58:27 +0200
+
+lliurex-mirror (28.7) xenial; urgency=high
+
+  * Removing default user/password
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 26 Apr 2017 14:58:23 +0200
+
+lliurex-mirror (28.6) xenial; urgency=high
+
+  * Making sure preschool is in llx16 conf in /etc
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 26 Apr 2017 14:27:24 +0200
+
+lliurex-mirror (28.5) xenial; urgency=high
+
+  * Reduced cairo animations to 15 fps  
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 18 Apr 2017 10:28:33 +0200
+
+lliurex-mirror (28.4.4) xenial; urgency=medium
+
+  * Add n4d is_mirror_available method
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 21 Feb 2017 12:54:17 +0100
+
+lliurex-mirror (28.4.3-lliurex2) xenial; urgency=medium
+
+  * Add desktop file
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 08 Feb 2017 12:13:31 +0100
+
+lliurex-mirror (28.4.3-lliurex1) xenial; urgency=medium
+
+  * Removed partner component from llx13, llx14 and llx15 json
+
+ -- Juanma Navarro Mañez <juanma1980@gmail.com>  Fri, 03 Feb 2017 09:57:31 +0100
+
+lliurex-mirror (28.4.3-lliurex) xenial; urgency=medium
+
+  * Removed partner component
+  * Added preschool component
+
+ -- Juanma Navarro Mañez <juanma1980@gmail.com>  Fri, 03 Feb 2017 08:21:11 +0100
+
+lliurex-mirror (28.4.3) xenial; urgency=medium
+
+  * Fixed duplicated http:// on custom mirrors
+
+ -- Juanma Navarro Mañez <juanma1980@gmail.com>  Thu, 02 Feb 2017 14:57:19 +0100
+
+lliurex-mirror (28.4.2) xenial; urgency=medium
+
+  * Fixed i18n
+
+ -- Jose A. Murcia <joamuran@gmail.com>  Thu, 19 Jan 2017 12:34:24 +0100
+
+lliurex-mirror (28.4.1) xenial; urgency=medium
+
+  * Add feedback
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Wed, 18 Jan 2017 17:41:46 +0100
+
+lliurex-mirror (28.4) xenial; urgency=medium
+
+  * Replace update by interactiveupdate
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Wed, 18 Jan 2017 13:25:23 +0100
+
+lliurex-mirror (28.3) xenial; urgency=medium
+
+  * Enhanced cli
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Thu, 12 Jan 2017 13:49:24 +0100
+
+lliurex-mirror (28.2.4) xenial; urgency=medium
+
+  * Modified apache site to allow mirror with llx1605 needed into netinstall
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Mon, 05 Dec 2016 16:20:43 +0100
+
+lliurex-mirror (28.2.3) xenial; urgency=medium
+
+  * Fix bug to show zomando in zero-center
+
+ -- Juan Ramon Pelegria <juapesai@hotmail.com>  Tue, 29 Nov 2016 15:53:24 +0100
+
+lliurex-mirror (28.2.2) xenial; urgency=medium
+
+  * Fix bug with show message in admin-center
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 29 Nov 2016 10:09:07 +0100
+
+lliurex-mirror (28.2.1) xenial; urgency=medium
+
+  * Fix percentage text
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Wed, 16 Nov 2016 14:14:34 +0100
+
+lliurex-mirror (28.2) xenial; urgency=medium
+
+  * Add notifier when finish lliurex-mirror
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Wed, 16 Nov 2016 13:41:12 +0100
+
+lliurex-mirror (28.1.8) xenial; urgency=medium
+
+  * Refixed
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 15 Nov 2016 15:02:15 +0100
+
+lliurex-mirror (28.1.7) xenial; urgency=medium
+
+  * Fixed bug
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 15 Nov 2016 14:21:09 +0100
+
+lliurex-mirror (28.1.6) xenial; urgency=medium
+
+  * Fixed bash_completion
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 11 Nov 2016 14:47:48 +0100
+
+lliurex-mirror (28.1.5) xenial; urgency=high
+
+  * Adding update command support to lliurex-mirror cli.
+  * CLI moved to /usr/sbin 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 10 Nov 2016 14:43:25 +0100
+
+lliurex-mirror (28.1.4) xenial; urgency=medium
+
+  * fix bug in admin-center module
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Thu, 10 Nov 2016 12:19:18 +0100
+
+lliurex-mirror (28.1.3) xenial; urgency=medium
+
+  * dummy upgrade
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 08 Nov 2016 14:22:56 +0100
+
+lliurex-mirror (28.1.2) xenial; urgency=medium
+
+  * Removing variable definition 
+  * Fix bug in admin-center module
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 07 Nov 2016 14:02:29 +0100
+
+lliurex-mirror (28.1.1) xenial; urgency=high
+
+  * Dummy upgrade. 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 07 Nov 2016 09:56:36 +0100
+
+lliurex-mirror (28.1) xenial; urgency=high
+
+  * Fixed syntax error
+  * Fixed old version number in every replaces, provides ...
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 07 Nov 2016 09:19:27 +0100
+
+lliurex-mirror (28) xenial; urgency=high
+
+  * Adding lliurex-mirror package
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 04 Nov 2016 13:16:04 +0100
+
+lliurex-mirror (27.1) xenial; urgency=high
+
+  * Adding translation support
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 19 Oct 2016 17:03:49 +0200
+
+lliurex-mirror (27) xenial; urgency=high
+
+  * First new gui release
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 19 Oct 2016 10:23:07 +0200
+
+lliurex-mirror (26.4) xenial; urgency=high
+
+  * Dependecies fixed with old lliurex-mirror
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 12 Sep 2016 12:36:36 +0200
+
+lliurex-mirror (26.3) xenial; urgency=medium
+
+  * Fix load module
+
+ -- Jua Ramon Pelegrina <juapesai@hotmail.com>  Mon, 01 Aug 2016 13:51:15 +0200
+
+lliurex-mirror (26.2) xenial; urgency=medium
+
+  * Add i18n support
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 01 Aug 2016 13:31:49 +0200
+
+lliurex-mirror (26.1) xenial; urgency=medium
+
+  * Add update mirror control to GUI
+  * Fix control file
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 27 Jul 2016 14:11:35 +0200
+
+lliurex-mirror (26) xenial; urgency=medium
+
+  * New API and CLI
+  * New GUI for AdminCenter
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 26 Jul 2016 10:15:15 +0200
+
+lliurex-mirror (25) xenial; urgency=medium
+
+  * Updated to allow new lliurex.net/xenial repository
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Thu, 03 Mar 2016 14:59:54 +0100
+
+lliurex-mirror (24.5-lliurex1) xenial; urgency=medium
+
+  * Fixed dependencies
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 09 Feb 2016 15:34:00 +0100
+
+lliurex-mirror (24.5) xenial; urgency=high
+
+  * First xenial realease. IT DOES NOT WORK
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 02 Feb 2016 16:27:56 +0100
+
+lliurex-mirror (24.4) trusty; urgency=high
+
+  * GUI checks if lockfile exists
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 15 Jan 2016 09:07:02 +0100
+
+lliurex-mirror (24.3) trusty; urgency=high
+
+  * lliurex-mirror exits with the same rc reprepro update has
+  * return code can be queried via n4d
+  * if rc!=0 both cli and gui tools warn user to try updating again
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 23 Dec 2015 11:52:19 +0100
+
+lliurex-mirror (24.2) trusty; urgency=medium
+
+  * Add check when reprepro is finished with errors
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Thu, 12 Nov 2015 12:09:43 +0100
+
+lliurex-mirror (24.1) trusty; urgency=medium
+
+  * Fix: set_architecture is called when update, fixes wrong change architecture (in disk) when only selects button from gui whithout pressing update repo button.
+  * Add --ignore=undefinedtarget to reprepro options
+
+ -- lliurex <m.angel.juan@gmail.com>  Tue, 27 Oct 2015 16:58:21 +0100
+
+lliurex-mirror (24.0~rc9) trusty; urgency=high
+
+  * Added new strings to ca_ES@valencia and es_ES
+
+ -- joamuran <joamuran@gmail.com>  Tue, 27 Oct 2015 11:10:15 +0100
+
+lliurex-mirror (24.0~rc8) trusty; urgency=high
+
+  * Updated all again 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 21 Sep 2015 11:27:23 +0200
+
+lliurex-mirror (24.0~rc7) trusty; urgency=high
+
+  * Updated all in GUI 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 21 Sep 2015 10:39:14 +0200
+
+lliurex-mirror (24.0~rc6) trusty; urgency=high
+
+  * Updated architecture: all in 64 bits machine
+  * Updated app to depens zero-server-wizard 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 21 Sep 2015 10:31:52 +0200
+
+lliurex-mirror (24.0~rc5) trusty; urgency=high
+
+  * Small GUI changes. Should be a bit smaller now
+  * Fixed update from dir/ip when not having a mirror directory first
+  * Fixed updating from a path containing spaces
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 10 Nov 2014 16:58:23 +0100
+
+lliurex-mirror (24.0~rc4) trusty; urgency=high
+
+  * Fixed distro version
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 07 Nov 2014 11:52:56 +0100
+
+lliurex-mirror (24.0~rc3) trusty; urgency=high
+
+  * service to invoke-rc.d
+  * a2ensite to apacheinvoke
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 27 Oct 2014 13:19:06 +0100
+
+lliurex-mirror (24.0~rc2) trusty; urgency=high
+
+  * Fixed configuration files for lliurex-mirror
+  * Updated dependence to apache2-bin
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 24 Oct 2014 13:13:35 +0200
+
+lliurex-mirror (24.0~rc1) trusty; urgency=high
+
+  * First release for trusty
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 23 Oct 2014 15:53:01 +0200
+
+lliurex-mirror (22.12) precise; urgency=high
+
+  * Updated with some features:
+    - Abstract technology is working now
+    - Updated templates to solve some 32-64 bits problem
+    - Fixed "export" technology. 
+  * Added lliurex-mirror meta package to make easy the installation
+    of this technology.
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 25 Jun 2014 16:52:41 +0200
+
+lliurex-mirror (22.11) precise; urgency=high
+
+  * Updated lliurex-mirror-gui to test if the custom directory
+    contains a replica. If the directory not contains (or seems
+    that contains) a replica, show a little message. 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 25 Jun 2014 16:50:22 +0200
+
+lliurex-mirror (22.10) precise; urgency=high
+
+  * Updated postinst with n4d-client method to reload 
+    the cname for lliurex-mirror
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 16 Jun 2014 12:32:40 +0200
+
+lliurex-mirror (22.9) precise; urgency=high
+
+  * Added link at server page
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 16 May 2014 11:38:33 +0200
+
+lliurex-mirror (22.7) precise; urgency=high
+
+  * Fixed lliurex-mirror site
+  * Added deletion of lliurex-mirror-redirect in postinst in case it is still present 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 14 May 2014 11:48:38 +0200
+
+lliurex-mirror (22.6) precise; urgency=high
+
+  * Removed old apache redirect
+  * Adding lliurex-mirror to dns
+  * Fixed n4d site to support lliurex-mirror dns
+  * Added sanity checks before launching gui
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 02 May 2014 12:53:32 +0200
+
+lliurex-mirror (22.5) precise; urgency=high
+
+  * Fixed n4d variable
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 30 Apr 2014 13:44:11 +0200
+
+lliurex-mirror (22.4) precise; urgency=high
+
+  * Added $LOG_DIR Value
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 30 Apr 2014 13:43:01 +0200
+
+lliurex-mirror (22.3) precise; urgency=high
+
+  * Removed /usr/sbin/lliurex-mirror-gui link
+  * Fixed apache sites
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 16 Apr 2014 13:33:38 +0200
+
+lliurex-mirror (22.2) precise; urgency=high
+
+  * Fixed import from device
+  * Now LliureX Mirror rocks!
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 16 Apr 2014 12:36:15 +0200
+
+lliurex-mirror (22.0) precise; urgency=high
+
+  * Added translation support
+  * Fixed gui threads
+  * Added functios to cli to support threads
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 10 Apr 2014 13:13:38 +0200
+
+lliurex-mirror (21.11) precise; urgency=high
+
+  * Fixed local access. This time for sure
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 10 Apr 2014 13:02:33 +0200
+
+lliurex-mirror (21.10) precise; urgency=high
+
+  * Changed platinum  to pandora
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 10 Apr 2014 13:01:27 +0200
+
+lliurex-mirror (21.9) precise; urgency=high
+
+  * DUMMY UPGRADE
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 10 Apr 2014 12:28:56 +0200
+
+lliurex-mirror (21.8) precise; urgency=low
+
+  * Fixed localhost access (127.0.1.1)
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 10 Apr 2014 12:25:51 +0200
+
+lliurex-mirror (21.7) precise; urgency=high
+
+  * Updated with n4d functions
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 10 Apr 2014 10:33:45 +0200
+
+lliurex-mirror (21.5) precise; urgency=high
+
+  * Modified lliurex banner yet again
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 09 Apr 2014 12:33:07 +0200
+
+lliurex-mirror (21.4) precise; urgency=high
+
+  * Added prerm, that disable the site when remove this package
+  * Modified lliurex banner
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 09 Apr 2014 10:12:50 +0200
+
+lliurex-mirror (21.3) precise; urgency=high
+
+  * Added mod_rewrite to enable modules
+  * Added lliurex-mirror-redirect to sites enabled
+  * Added lliurex-mirror to sites enabled 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Tue, 08 Apr 2014 11:55:36 +0200
+
+lliurex-mirror (21.2) precise; urgency=low
+
+  * Html sort of ready
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 01 Apr 2014 14:08:07 +0200
+
+lliurex-mirror (21.1) precise; urgency=high
+
+  * Added llx1406 configuration files
+  * New optional parameter (distro_name) 
+    - For example: lliurex-mirror llx1306 update
+  * Postinst now copies configuration templates to /etc/lliurex-mirror/conf/
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 01 Apr 2014 14:08:05 +0200
+
+lliurex-mirror (20.2) precise; urgency=high
+
+  * Solving the braindamage
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 10 Jan 2014 10:48:38 +0100
+
+lliurex-mirror (20.1) precise; urgency=high
+
+  * More optimized (du removed) 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 05 Dec 2013 11:26:34 +0100
+
+lliurex-mirror (18.5) precise; urgency=high
+
+  * Added methods to set the architectures from the cli
+  * Added methods to set get the architectures from the cli 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Tue, 19 Nov 2013 10:55:37 +0100
+
+lliurex-mirror (18.4) precise; urgency=high
+
+  * Updated distributions
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 28 Oct 2013 16:45:50 +0100
+
+lliurex-mirror (18.3) precise; urgency=high
+
+  * Updated update_all template  
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 28 Oct 2013 16:26:01 +0100
+
+lliurex-mirror (18.2) precise; urgency=high
+
+  * Upgrade to be more ubuntu-compliant
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 28 Oct 2013 12:48:52 +0100
+
+lliurex-mirror (18.1) precise; urgency=high
+
+  * Dummy upgrade 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 21 Oct 2013 13:51:59 +0200
+
+lliurex-mirror (18.0) precise; urgency=high
+
+  * Updated with a new and meravelous mechanism
+    to solve the "Update In The Middle" attack. 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Tue, 15 Oct 2013 17:23:33 +0200
+
+lliurex-mirror (17.1) precise; urgency=high
+
+  * Updated with a new binary 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 10 Oct 2013 12:02:43 +0200
+
+lliurex-mirror (17.0) precise; urgency=high
+
+  * Update lliurex-mirror-gui to solve the GUI problem 
+    of update from ip. 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 10 Oct 2013 11:54:37 +0200
+
+lliurex-mirror (16.2) precise; urgency=high
+
+  * Yoda speaker... 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 04 Oct 2013 14:28:53 +0200
+
+lliurex-mirror (16.1) precise; urgency=high
+
+  * Fixed sed syntax
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Sun, 22 Sep 2013 09:47:09 +0200
+
+lliurex-mirror (16) precise; urgency=high
+
+  * Updated version 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 20 Sep 2013 09:38:19 +0200
+
+lliurex-mirror (15.9) precise; urgency=high
+
+  * Updated version 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 20 Sep 2013 08:33:50 +0200
+
+lliurex-mirror (15.8) precise; urgency=low
+
+  * Added update_from_ip IP method
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 20 Sep 2013 08:16:03 +0200
+
+lliurex-mirror (15.7) precise; urgency=high
+
+  * Updated the do_sanity_checks to solve the braindamage problem
+    of delete accidentally the "/net/mirror/llx1306/" directory
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Tue, 17 Sep 2013 20:01:37 +0200
+
+lliurex-mirror (15.6) precise; urgency=low
+
+  * Updated check mirror from ltsp-admin
+
+ -- Jose A. Múrcia <joamuran@gmail.com>  Fri, 13 Sep 2013 14:27:54 +0200
+
+lliurex-mirror (15.5) precise; urgency=high
+
+  * Updated urgency
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 13 Sep 2013 08:16:42 +0200
+
+lliurex-mirror (15.4) precise; urgency=low
+
+  * Updated dependence 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 13 Sep 2013 08:12:39 +0200
+
+lliurex-mirror (15.3) precise; urgency=high
+
+  * Updated with bug in updates_64
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Tue, 30 Jul 2013 08:34:00 +0200
+
+lliurex-mirror (15.2) precise; urgency=low
+
+  * Remove link before create it 
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Wed, 17 Jul 2013 09:21:20 +0200
+
+lliurex-mirror (15.1) precise; urgency=low
+
+  * Fixed apache link 
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Tue, 16 Jul 2013 12:48:49 +0200
+
+lliurex-mirror (15.0) precise; urgency=low
+
+  * Updated with:
+    + Bash completion
+    + Export option (CLI AND GUI)
+    + Import option (CLI AND GUI)
+    + Minor fixes
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 11 Jul 2013 12:06:48 +0200
+
+lliurex-mirror (14.0) precise; urgency=high
+
+  * Updated trivial
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 04 Jul 2013 14:23:54 +0200
+
+lliurex-mirror (13.8) precise; urgency=low
+
+  * Updated the translations
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 04 Jul 2013 14:09:37 +0200
+
+lliurex-mirror (13.7) precise; urgency=high
+
+  * Updated gui button
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 03 Jul 2013 14:03:49 +0200
+
+lliurex-mirror (13.5) precise; urgency=high
+
+  * Updated mirror with lliurex-gui
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 03 Jul 2013 12:44:15 +0200
+
+lliurex-mirror (13.4) precise; urgency=high
+
+  * Updated lliurex-mirror with only i386
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 28 Jun 2013 08:40:29 +0200
+
+lliurex-mirror (13.3.15) precise; urgency=low
+
+  * Added json for server webpage
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Fri, 21 Jun 2013 09:08:33 +0200
+
+lliurex-mirror (13.3.14) precise; urgency=low
+
+  * Fixed dns alias
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Wed, 19 Jun 2013 12:58:39 +0200
+
+lliurex-mirror (13.3.13) precise; urgency=low
+
+  * fixed method names.
+
+ -- joamuran <joamuran@gmail.com>  Thu, 13 Jun 2013 22:00:36 +0200
+
+lliurex-mirror (13.3.12) precise; urgency=low
+
+  * Restored logging capabilities for ltsp
+
+ -- joamuran <joamuran@gmail.com>  Thu, 13 Jun 2013 18:55:46 +0200
+
+lliurex-mirror (13.3.11) precise; urgency=low
+
+  * Restored Binary Plugin as LliurexMirrorNonGtk class
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Wed, 12 Jun 2013 22:07:15 +0200
+
+lliurex-mirror (13.3.10) precise; urgency=low
+
+  * Fixed error
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Mon, 10 Jun 2013 15:00:02 +0200
+
+lliurex-mirror (13.3.9) precise; urgency=low
+
+  * Fixed errors 
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Mon, 10 Jun 2013 14:53:00 +0200
+
+lliurex-mirror (13.3.8) precise; urgency=low
+
+  * Added n4d-features
+
+ -- David Montalva Furio <montalva_dav@gva.es>  Mon, 10 Jun 2013 13:56:02 +0200
+
+lliurex-mirror (13.3.7) precise; urgency=low
+
+  * NOT RELEASED YET 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 02 May 2013 13:48:46 +0200
+
+lliurex-mirror (13.3.6) precise; urgency=low
+
+  * Never be enough comillas
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 02 May 2013 13:20:21 +0200
+
+lliurex-mirror (13.3.5) precise; urgency=low
+
+  * This releases closes this bug :
+    https://bugs.launchpad.net/lliurex-1306/+bug/1175518
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 02 May 2013 10:53:59 +0200
+
+lliurex-mirror (13.3.4) precise; urgency=low
+
+  * Updated version to solve some launchpad problem
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 02 May 2013 10:53:03 +0200
+
+lliurex-mirror (13.3.3) precise; urgency=low
+
+  * This releases closes this bug
+  * https://bugs.launchpad.net/lliurex-1306/+bug/1175488 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 02 May 2013 10:19:55 +0200
+
+lliurex-mirror (13.3.2) precise; urgency=low
+
+  * Get Status
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Thu, 25 Apr 2013 10:18:17 +0200
+
+lliurex-mirror (13.3.1) precise; urgency=low
+
+  * Added configuration file for get_status n4d plugin
+  * Fixed version for precise
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Wed, 27 Mar 2013 12:18:33 +0100
+
+lliurex-mirror (13.1) precise; urgency=low
+
+  * Added python-llxvars dependence
+  * Added n4dvars files 
+
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Fri, 08 Feb 2013 09:22:12 +0100
+
+lliurex-mirror (13.0) precise; urgency=low
+
+  * LliureX Mirror reborns!
+  * LliureX Mirror now is n4d powered
+  
+ -- Angel Berlanas Vicente <angel.berlanas@gmail.com>  Mon, 28 Jan 2013 14:32:34 +0100
+
+lliurex-mirror (2.3.06) unstable; urgency=low
+
+  * Added Save Button
+  * Fixed alternate between radio buttons 
+
+ -- Jaime Munyoz Fayos <munyoz_jaifay@gva.es>  Tue, 24 Jul 2012 10:20:14 +0200
+
+lliurex-mirror (2.3.05) unstable; urgency=low
+
+  * Fixed nemo instead of marty in arxiu.lliurex.net
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 14 Jun 2012 09:07:09 +0200
+
+lliurex-mirror (2.3.04) unstable; urgency=low
+
+  * Emergency update
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 31 May 2012 09:24:30 +0200
+
+lliurex-mirror (2.3.03) unstable; urgency=low
+
+  * Fixed label
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 31 May 2012 09:24:11 +0200
+
+lliurex-mirror (2.3.02) unstable; urgency=low
+
+  * Adding gpg private key
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 12 Apr 2012 11:02:52 +0200
+
+lliurex-mirror (2.3) unstable; urgency=low
+
+  * Really updated to Nemo.
+    - lliurex-mirror-non-gtk now upgrades to 12.06
+    - Fixed gui to manage nemo's pool.
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 23 Feb 2012 11:46:01 +0100
+
+lliurex-mirror (2.2.05) lucid; urgency=low
+
+  * ToNemo
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 23 Feb 2012 11:45:00 +0100
+
+lliurex-mirror (2.2.04) unstable; urgency=low
+
+  * Using STDERR output to show the progress
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Fri, 28 Oct 2011 09:59:55 +0200
+
+lliurex-mirror (2.2.03) unstable; urgency=low
+
+  * Fixed translation
+  * Fixed msgbox
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 13 Oct 2011 08:50:10 +0200
+
+lliurex-mirror (2.2.02) unstable; urgency=low
+
+  * Fixed cron script for lliurex-mirror.
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 11 Oct 2011 12:10:06 +0200
+
+lliurex-mirror (2.2.01) unstable; urgency=low
+
+  * Fixed memory of previuos upgrades
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 11 Oct 2011 11:45:10 +0200
+
+lliurex-mirror (2.2) unstable; urgency=low
+
+  * Added arxiu.lliurex.net in a form of update
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Fri, 22 Jul 2011 10:44:20 +0200
+
+lliurex-mirror (2.1) unstable; urgency=low
+
+  * Fixed lliurex-mirror
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Fri, 22 Jul 2011 10:27:30 +0200
+
+lliurex-mirror (2.0) lucid; urgency=low
+
+  * New version...launched!
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Fri, 22 Jul 2011 10:26:03 +0200
+
+lliurex-mirror (1.25) unstable; urgency=low
+
+  * Scheduler added by Vicente Balaguer and Francisco Javier Estelles Dasi.
+  * Added more logic and fixed some bugs
+  * Updated NON-INTERACTIVE script to upgrade the server at the same time
+    that the mirror is updated.
+  * New GUI. 
+  * Updated translation and new actions added
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 09 May 2011 09:22:33 +0200
+
+lliurex-mirror (1.24) unstable; urgency=low
+
+  * Added un wget antes de comenzar la descarga para forzar 
+    la actualizacion del fichero Packages.gz desde la red de centros.
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 09 Nov 2010 13:08:04 +0100
+
+lliurex-mirror (1.23) unstable; urgency=low
+
+  * Fixed mirror app
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 09 Nov 2010 12:36:11 +0100
+
+lliurex-mirror (1.22) unstable; urgency=low
+
+  * Fixed mirror app
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 04 Nov 2010 13:51:11 +0100
+
+lliurex-mirror (1.21) unstable; urgency=low
+
+  * Fixed spelling errors
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 04 Nov 2010 13:38:32 +0100
+
+lliurex-mirror (1.20) unstable; urgency=low
+
+  * Fixed mirror links
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 04 Nov 2010 13:34:12 +0100
+
+lliurex-mirror (1.19) unstable; urgency=low
+
+  * Fixed mirror links
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 04 Nov 2010 08:32:33 +0100
+
+lliurex-mirror (1.18) unstable; urgency=low
+
+  * Added link on /srv/page on server to solve some access problems
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 28 Oct 2010 14:34:43 +0200
+
+lliurex-mirror (1.17) unstable; urgency=low
+
+  * Fixed qcv translation
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 28 Oct 2010 12:31:16 +0200
+
+lliurex-mirror (1.16) unstable; urgency=low
+
+  * Fixed "switching pools bug"
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 11 Oct 2010 09:52:31 +0200
+
+lliurex-mirror (1.15) unstable; urgency=low
+
+  * Fixed mirror
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 07 Oct 2010 12:12:45 +0200
+
+lliurex-mirror (1.13) unstable; urgency=low
+
+  * Fixed dependence
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 07 Oct 2010 09:27:37 +0200
+
+lliurex-mirror (1.12) unstable; urgency=low
+
+  * Added translation
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 07 Oct 2010 08:40:25 +0200
+
+lliurex-mirror (1.11) unstable; urgency=low
+
+  * Added translations
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 05 Oct 2010 09:29:13 +0200
+
+lliurex-mirror (1.10) unstable; urgency=low
+
+  * Added copy menu
+  * Fixed translations
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 30 Sep 2010 12:21:21 +0200
+
+lliurex-mirror (1.9) unstable; urgency=low
+
+  * Fixed updates from lliurex.net
+  * Fixed updates from other servers
+  * Fixed updates from file
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 28 Sep 2010 08:47:59 +0200
+
+lliurex-mirror (1.8) unstable; urgency=low
+
+  * Fixed backslash
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 06 Sep 2010 09:37:13 +0200
+
+lliurex-mirror (1.7) unstable; urgency=low
+
+  * Added /mirror/ to Document root as a link to /net/mirror
+  * Added mirror to dns to resolve "mirror" petitions
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Wed, 30 Jun 2010 10:17:35 +0200
+
+lliurex-mirror (1.6) unstable; urgency=low
+
+  * Added partner to component's list
+  * Removed udev components from mirror repositories
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 31 May 2010 11:41:38 +0200
+
+lliurex-mirror (1.5) unstable; urgency=low
+
+  * Fixed app to use pe
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 17 May 2010 09:48:13 +0200
+
+lliurex-mirror (1.4) unstable; urgency=low
+
+  * Used the new cpkg-update file to force llxcfg-cpkg update
+  * Updated zomando category Network->System
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Tue, 04 May 2010 10:32:19 +0200
+
+lliurex-mirror (1.3) unstable; urgency=low
+
+  * Fixed UTF-8 codification 
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 03 May 2010 13:29:39 +0200
+
+lliurex-mirror (1.2) unstable; urgency=low
+
+  * Fixed syntax on .app for zero-center
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 03 May 2010 13:27:55 +0200
+
+lliurex-mirror (1.1) unstable; urgency=low
+
+  * Using zero-dev for better zero-center integration
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Thu, 22 Apr 2010 10:35:33 +0200
+
+lliurex-mirror (1.0) unstable; urgency=low
+
+  * Changed all
+  * LliureX mirror needs a complete revision, now is better, faster 
+    and more powerful than never before.
+  * Mono is the chosen language 
+
+ -- Angel Berlanas Vicente <lliurex_devel2@edu.gva.es>  Mon, 19 Apr 2010 13:25:45 +0200
+
+lliurex-mirror (0.4.4) unstable; urgency=low
+
+  * Fixed valencian translation for valid mirror
+
+ -- Fco Javier Lopez Perez <lliurex_devel1@edu.gva.es>  Fri, 15 Jan 2010 13:05:21 +0100
+
+lliurex-mirror (0.4.3) unstable; urgency=low
+
+  [ Fco Javier Lopez Perez ]
+  * Added export parameter in reprepro-wrapper
+
+  [ Javier Garcia Escribano ]
+  * Fixed minor translations
+
+ -- Fco Javier Lopez Perez <lliurex_devel1@edu.gva.es>  Tue, 01 Dec 2009 12:59:55 +0100
+
+lliurex-mirror (0.4.2) unstable; urgency=low
+
+  * Webaccess link fixed in lliurex-mirror script
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Thu, 03 Sep 2009 11:23:52 +0200
+
+lliurex-mirror (0.4.1) unstable; urgency=low
+
+  * Include in mirror script for lliurex-express fixed
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Mon, 22 Jun 2009 19:56:04 +0200
+
+lliurex-mirror (0.4) unstable; urgency=low
+
+  * debian/control
+    - Added llxcfg-httpd and lliurex-express-server dependences in recommends
+    - Uploaders updated
+    - Bumped Standard-Version to 3.8.0
+  * debian/dirs
+    - added llxcfg-httpd/srv/links
+  * Moved link files to new srv location
+  * lliurex-mirror script updated with llx0909 info
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Tue, 14 Oct 2008 10:07:22 +0200
+
+lliurex-mirror (0.3.3) unstable; urgency=low
+
+  * systax of exit_messages updated
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Tue, 14 Oct 2008 07:41:50 +0200
+
+lliurex-mirror (0.3.2) unstable; urgency=low
+
+  * Mirror name fixed in lliurex-mirror script
+  * Deactivate option added
+  * Preinst and postinst added
+     - Creation of mirror data in postinst, webaccess granted
+     - Deletion of webaccess when removeing or purgin the package
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Wed, 08 Oct 2008 13:33:21 +0200
+
+lliurex-mirror (0.3.1) unstable; urgency=low
+
+  * Server express script updated to show a message in status
+  * suite in template for distributions reprepro conf fixed
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Wed, 08 Oct 2008 10:39:03 +0200
+
+lliurex-mirror (0.3) unstable; urgency=low
+
+  * textdomain fixed in script for server-express
+  * Updated valencian translations
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Mon, 06 Oct 2008 16:49:08 +0200
+
+lliurex-mirror (0.2.1) unstable; urgency=low
+
+  * Gettext support in lliurex-mirror script added
+  * Spanish translations updated
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Mon, 06 Oct 2008 16:10:08 +0200
+
+lliurex-mirror (0.2) unstable; urgency=low
+
+  * Delete action added.
+  * Added test to detect imcomplete earlier execution of reprepro
+  * Server-express script added
+  * Added translations, valencian pending
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Sun, 05 Oct 2008 23:32:14 +0200
+
+lliurex-mirror (0.1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Fco Javier Lopez Perez <lopez_frajav@gva.es>  Tue, 09 Sep 2008 17:25:58 +0200

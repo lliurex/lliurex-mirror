@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case $1 in
+	remove|purge)
+		a2dissite mirror || true
+		a2dissite lliurex-mirror || true
+		service apache2 reload || true
+		rm /etc/lliurex-mirror/conf/*.json || true
+		rm /etc/lliurex-mirror/debmirror/* || true
+		;;
+	*)
+		echo "Nothing to do"
+		;;
+esac
+
+#DEBHELPER#
