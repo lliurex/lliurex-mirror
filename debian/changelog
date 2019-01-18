@@ -1,3 +1,9 @@
+lliurex-mirror (29.1) bionic; urgency=medium
+
+  * Removed old llxcfg dependency. Needs to be ported to new zero-dev helper
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 18 Jan 2019 13:06:24 +0100
+
 lliurex-mirror (29) bionic; urgency=medium
 
   * first bionic release
