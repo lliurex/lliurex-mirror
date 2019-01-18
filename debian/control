@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Equipo LliureX <lliurex@gva.es>
 Uploaders: Miguel Garcia Gomez <garcia_miggom@gva.es>,Raul Rodrigo Segura <lliurex_devel3@edu.gva.es>, David Montalva Furio <montalva_dav@gva.es>, Hector Garcia Huerta <lliurex_devel1@edu.gva.es>
-Build-Depends: debhelper (>= 7.0), n4d-dev, zero-dev, llxcfg-dev,  python-support, llxsrchelper
+Build-Depends: debhelper (>= 7.0), n4d-dev, llxsrchelper
 Standards-Version: 3.9.7
 
 Package: lliurex-mirror
