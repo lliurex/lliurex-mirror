@@ -1,6 +1,6 @@
 function LliurexMirror(){
-  this.distros = {'llx16':{}};
-  this.activedistro = 'llx16';
+  this.distros = {'llx16':{}, 'llx19':{}};
+  this.activedistro = 'llx19';
   this.progresscolors = {'new':'#4caf50' ,'ok' : '#4caf50' , 'error' : 'red', 'working':'#03A9F4','default':'black'};
   this.bars = {};
   this.edit = null;
