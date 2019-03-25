@@ -29,7 +29,7 @@ class MirrorManager:
 		self.defaultpath = '/etc/lliurex-mirror/'
 		self.debmirrorconfpath = os.path.join(self.defaultpath,'debmirror')
 		self.configpath = os.path.join(self.defaultpath,'conf')
-		self.distro="llx16"
+		self.distro="llx19"
 		self.httpd = {}
 		self.debmirrorprocess = None
 
@@ -43,7 +43,8 @@ class MirrorManager:
 		self.defaultmirrorinfo = {"status_mirror":"New","last_mirror_date":None,"mirror_size":0,"progress":0}
 		self.valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
 		self.exitting = False
-		self.default_path_configs = { 	'llx16':	'/usr/share/lliurex-mirror/conf/llx16.json',
+		self.default_path_configs = { 	'llx19':	'/usr/share/lliurex-mirror/conf/llx19.json',
+		                                'llx16':	'/usr/share/lliurex-mirror/conf/llx16.json',
 						'llx15':	'/usr/share/lliurex-mirror/templates/llx15.json',
 						'llx14':	'/usr/share/lliurex-mirror/templates/llx14.json',
 						'llx13':	'/usr/share/lliurex-mirror/templates/llx13.json',
