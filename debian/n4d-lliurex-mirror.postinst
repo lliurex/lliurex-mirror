@@ -24,31 +24,6 @@ case $1 in
         	fi
         done
 
-	if dpkg --compare-versions "$2" lt 28.6; then
-
-		LLX16CONF="/etc/lliurex-mirror/conf/llx16.json"
-
-                if [ -e $LLX16CONF ]; then
-		
-			RET=$(grep preschool $LLX16CONF || echo "" )
-			if [ "$RET" = ""  ]; then
-				cp /usr/share/lliurex-mirror/conf/llx16.json $LLX16CONF
-
-				echo "* [LliurexMirror] Preschool component added. You need to update your LLX16 mirror."
-
-				FOLDER_PATH="/net/mirror/llx16/pool/preschool"
-				if [ ! -e $FOLDER_PATH ]; then
-						mkdir -p $FOLDER_PATH
-				fi
-				
-				
-			fi
-
-    		fi
-
-	fi
-
-
 	;;
 	*)
 		echo "Nothing to do"

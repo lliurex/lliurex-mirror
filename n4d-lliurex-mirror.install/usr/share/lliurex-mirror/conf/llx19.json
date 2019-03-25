@@ -1,0 +1,13 @@
+{
+	"NAME":"LliureX Bionic",
+	"BANNER": "lliurex-bionic",
+	"ORIGS":{"1":"lliurex.net/bionic","2":"","3":""},
+	"ARCHITECTURES": [ "amd64", "i386"], 
+	"SECTIONS": ["main", "main/debian-installer", "universe", "restricted", "multiverse", "preschool"],
+	"MIRROR_PATH": "/net/mirror/llx19", 
+	"DISTROS": ["bionic","bionic-updates","bionic-security"],
+	"IGN_GPG":1,
+	"IGN_RELEASE":0,
+	"CHK_MD5":0,
+	"CURRENT_UPDATE_OPTION":"1"
+}
