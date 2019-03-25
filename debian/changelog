@@ -1,3 +1,9 @@
+lliurex-mirror (29.3) bionic; urgency=medium
+
+  * Add n4d-lliurex-mirror.dirs, fix missing empty directories
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Mon, 25 Mar 2019 12:48:49 +0100
+
 lliurex-mirror (29.2) bionic; urgency=medium
 
   * Adding sudo group
