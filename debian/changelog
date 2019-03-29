@@ -1,3 +1,9 @@
+lliurex-mirror (29.4) bionic; urgency=medium
+
+  * Adding sudo group to zomando
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 29 Mar 2019 13:30:52 +0100
+
 lliurex-mirror (29.3) bionic; urgency=medium
 
   * Add n4d-lliurex-mirror.dirs, fix missing empty directories
