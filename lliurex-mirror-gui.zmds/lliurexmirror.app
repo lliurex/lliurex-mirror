@@ -11,5 +11,5 @@ Icon=lliurex-mirror
 Groups=admin;admins;sudo
 Category=System
 ScriptPath=lliurexmirror.zmd
-Using=pe 
+Using=pkexec 
 Depends=zero-server-wizard
