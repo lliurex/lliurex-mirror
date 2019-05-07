@@ -44,7 +44,7 @@ class MirrorManager:
 		self.valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
 		self.exitting = False
 		self.default_path_configs = { 	'llx19':	'/usr/share/lliurex-mirror/conf/llx19.json',
-		                                'llx16':	'/usr/share/lliurex-mirror/conf/llx16.json',
+		                                'llx16':	'/usr/share/lliurex-mirror/templates/llx16.json',
 						'llx15':	'/usr/share/lliurex-mirror/templates/llx15.json',
 						'llx14':	'/usr/share/lliurex-mirror/templates/llx14.json',
 						'llx13':	'/usr/share/lliurex-mirror/templates/llx13.json',
