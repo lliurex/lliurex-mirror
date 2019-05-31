@@ -37,11 +37,11 @@
       <stop
          id="stop1289"
          offset="0"
-         style="stop-color:#394a53;stop-opacity:1" />
+         style="stop-color:#495f6a;stop-opacity:1" />
       <stop
          id="stop1291"
          offset="1"
-         style="stop-color:#718e9d;stop-opacity:1" />
+         style="stop-color:#93a9b4;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        id="linearGradient1281"
@@ -105,8 +105,8 @@
        inkscape:collect="always"
        xlink:href="#linearGradient1281"
        id="linearGradient2770"
-       x1="58.019348"
-       y1="282.06995"
+       x1="56.304081"
+       y1="290.90103"
        x2="45.108177"
        y2="239.89174"
        gradientUnits="userSpaceOnUse" />
@@ -140,15 +140,15 @@
     <filter
        inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
-       id="filter1269"
-       x="-0.038198173"
-       width="1.0763963"
-       y="-0.034041055"
-       height="1.0680821">
+       id="filter854"
+       x="-0.012732724"
+       width="1.0254654"
+       y="-0.011347018"
+       height="1.022694">
       <feGaussianBlur
          inkscape:collect="always"
-         stdDeviation="0.79773865"
-         id="feGaussianBlur1271" />
+         stdDeviation="0.26591288"
+         id="feGaussianBlur856" />
     </filter>
   </defs>
   <sodipodi:namedview
@@ -158,9 +158,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="407.59902"
-     inkscape:cy="353.6208"
+     inkscape:zoom="2.8"
+     inkscape:cx="136.07987"
+     inkscape:cy="140.6257"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -196,7 +196,7 @@
      transform="translate(0,-229.26665)">
     <g
        transform="matrix(1.0467099,0,0,1.0467099,-1.5980938,-10.960851)"
-       style="fill:#000000;fill-opacity:1;filter:url(#filter1269);stroke-width:0.38214982;stroke-miterlimit:4;stroke-dasharray:none;stroke:none;stroke-opacity:1"
+       style="fill:#000000;fill-opacity:1;stroke-width:0.38214982;stroke-miterlimit:4;stroke-dasharray:none;stroke:none;stroke-opacity:1;filter:url(#filter854)"
        id="g871">
       <path
          inkscape:connector-curvature="0"
