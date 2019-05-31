@@ -1,3 +1,9 @@
+lliurex-mirror (29.6) bionic; urgency=medium
+
+  * Added window icon
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 31 May 2019 09:22:10 +0200
+
 lliurex-mirror (29.5) bionic; urgency=medium
 
   * Changed pe by pkexec in lliurexmirror.app file
