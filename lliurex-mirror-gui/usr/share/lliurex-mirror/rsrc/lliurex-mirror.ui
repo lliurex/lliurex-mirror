@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkBox" id="configuration_box">
@@ -772,6 +772,10 @@
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="hide_titlebar_when_maximized">True</property>
+    <property name="icon_name">lliurex-mirror</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <placeholder/>
     </child>
