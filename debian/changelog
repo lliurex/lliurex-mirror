@@ -1,3 +1,9 @@
+lliurex-mirror (29.8) bionic; urgency=medium
+
+  * Added missing buildep
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 20 Jun 2019 13:30:00 +0200
+
 lliurex-mirror (29.7) bionic; urgency=medium
 
   * Fixed valencian translations
