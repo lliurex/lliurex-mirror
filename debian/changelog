@@ -1,3 +1,9 @@
+lliurex-mirror (29.8-1) bionic; urgency=medium
+
+  * Missing rules steps for translation support
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 25 Jun 2019 13:50:48 +0200
+
 lliurex-mirror (29.8) bionic; urgency=medium
 
   * Added missing buildep
