@@ -1,3 +1,9 @@
+lliurex-mirror (29.9) bionic; urgency=medium
+
+  * Added lliurex-bionic banner
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 22 Jul 2019 15:04:42 +0200
+
 lliurex-mirror (29.8-1) bionic; urgency=medium
 
   * Missing rules steps for translation support
