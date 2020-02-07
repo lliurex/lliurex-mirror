@@ -658,7 +658,9 @@ class MirrorManager:
 
 	def is_update_available(self,distro):
 
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro==None:
+			return {'status':False,'msg':"No distro selected",'action':'nothing'}
+		configpath = os.path.join(self.configpath,"%s.json"%distro)
 		config = json.load(open(configpath,'r'))
 		path = config["MIRROR_PATH"]
 		file_time_name = "time-of-last-update"

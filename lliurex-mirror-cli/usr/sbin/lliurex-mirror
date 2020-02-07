@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import xmlrpclib as x
+import xmlrpc.client as x
+import ssl
 import sys
 import getpass
 import tempfile
@@ -24,8 +25,11 @@ class LliurexMirror(object):
 			except:
 				print("Error: bad credentials")
 				sys.exit(1)
-		self.client = x.ServerProxy("https://"+self.ip+":9779",allow_none=True)
-		self.localclient = x.ServerProxy("https://localhost:9779",allow_none=True)
+		context=ssl._create_unverified_context()
+		self.client = x.ServerProxy("https://%s:9779"%self.ip,context=context,allow_none=True)
+#		self.client = x.ServerProxy("https://"+self.ip+":9779",allow_none=True)
+		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
+#		self.localclient = x.ServerProxy("https://localhost:9779",allow_none=True)
 		self.localcredentials = self.get_local_credentials()
 		self.volatilebkp={}
 
@@ -40,10 +44,10 @@ class LliurexMirror(object):
 	def setCname(self):
 		result = self.client.set_cname(self.credentials,"MirrorManager")
 		if 'msg' in result:
-		    print result['msg']
+		    print (result['msg'])
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def noninteractiveUpdate(self,mirror,pathtoupdate,volatile=False):
@@ -80,33 +84,33 @@ class LliurexMirror(object):
 		if len(pathtoupdate) != 0:
 			if pathtoupdate.lower().startswith("http"):
 				if volatile:
-				    try:
-					ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '3')
-					if not ret['status']:
-					    raise Exception(ret['msg'])
-					else:
-					    mirrororig=ret['msg']
-				    except Exception as e:
-					print e
-					return 1
-				    try:
-					ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
-					if not ret['status']:
-					    raise Exception(ret['msg'])
-					else:
-					    optionorig=ret['msg']
-					optionused='3'
-				    except Exception as e:
-					print e
-					return 1
+					try:
+						ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '3')
+						if not ret['status']:
+						    raise Exception(ret['msg'])
+						else:
+						    mirrororig=ret['msg']
+					except Exception as e:
+						print (e)
+						return 1
+					try:
+						ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
+						if not ret['status']:
+						    raise Exception(ret['msg'])
+						else:
+						    optionorig=ret['msg']
+						optionused='3'
+					except Exception as e:
+						print (e)
+						return 1
 				res = self.setMirrorOrig(mirror,pathtoupdate,3)
 				if res == 0:
 				    res = self.setOptionUpdate(mirror,3)
 				    if res != 0:
-				        print 'Error setting update option'
+				        print ('Error setting update option')
 				        return 1
 				else:
-				    print 'Error setting mirror orig'
+				    print ('Error setting mirror orig')
 				    return 1
 			elif os.path.exists(pathtoupdate):
 				result = self.client.get_client_ip('','MirrorManager','')
@@ -114,25 +118,25 @@ class LliurexMirror(object):
 				result = self.localclient.enable_webserver_into_folder(self.localcredentials,'MirrorManager',pathtoupdate)
 				tempserver = tempserver + ":" + str(result['msg'])
 				if volatile:
-				    try:
-					ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '2')
-					if not ret['status']:
-					    raise Exception(ret['msg'])
-					else:
-					    mirrororig=ret['msg']
-				    except Exception as e:
-					print e
-					return 1
-				    try:
-					ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
-					if not ret['status']:
-					    raise Exception(ret['msg'])
-					else:
-					    optionorig=ret['msg']
-					optionused='2'
-				    except Exception as e:
-					print e
-					return 1
+					try:
+						ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '2')
+						if not ret['status']:
+						    raise Exception(ret['msg'])
+						else:
+						    mirrororig=ret['msg']
+					except Exception as e:
+						print (e)
+						return 1
+					try:
+						ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
+						if not ret['status']:
+						    raise Exception(ret['msg'])
+						else:
+						    optionorig=ret['msg']
+						optionused='2'
+					except Exception as e:
+						print (e)
+						return 1
 				self.setMirrorOrig(mirror,tempserver,2)
 				self.setOptionUpdate(mirror,2)
 			else:
@@ -144,10 +148,10 @@ class LliurexMirror(object):
 		    self.volatilebkp={}
 		result = self.client.update(self.credentials,"MirrorManager",'',mirror,None,self.volatilebkp)
 		if 'msg' in result:
-		    print result['msg']
+		    print (result['msg'])
 		    return  0 if result['status'] else 1
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def exportMirror(self,mirror,dest):
@@ -176,15 +180,15 @@ class LliurexMirror(object):
 		callback_args['ip'] = ip
 		callback_args['port'] = port
 		# Execute mirror
-		print self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args)
+		print (self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args))
 
 	def get_percentage_export(self):
 		try:
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			print result['msg'][0]
+			print (result['msg'][0])
 			return 0
 		except Exception as e:
-			print e
+			print (e)
 			return 1
 			
 	#def get_percentage_export
@@ -194,144 +198,144 @@ class LliurexMirror(object):
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
 			return result
 		except Exception as e:
-			print e
+			print (e)
 			return None
 
 
 	def setOptionUpdate(self,mirror,option):
 		result = self.client.set_option_update(self.credentials,"MirrorManager",mirror,option)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def isAlive(self):
 		result = self.client.is_alive(self.credentials,"MirrorManager")
-		print "True" if result['status'] else "False"
+		print ("True") if result['status'] else ("False")
 		return  0 if result['status'] else 1 
 
 	def getMirrorArchitecture(self,distro):
 		result = self.client.get_mirror_architecture(self.credentials,"MirrorManager",distro)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def setMirrorArchitecture(self,distro,archs):
 		result = self.client.set_mirror_architecture(self.credentials,"MirrorManager",distro,archs)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def getMirrorOrig(self,distro, option):
 		result = self.client.get_mirror_orig(self.credentials,"MirrorManager", distro, option)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def setMirrorOrig(self,distro,url,option):
 		result = self.client.set_mirror_orig(self.credentials,"MirrorManager",distro,url,option)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def getChecksumValidation(self,distro):
 		result = self.client.get_checksum_validation(self.credentials,"MirrorManager",distro)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def setChecksumValidation(self,distro,value):
 		check = 0 if not value else 1
 		result = self.client.set_checksum_validation(self.credentials,"MirrorManager",distro,check)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def getPercentage(self,distro):
 		result = self.client.get_percentage(self.credentials,"MirrorManager",distro)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def enableWebserverForPath(self,path):
 		result = self.client.enable_webserver_into_folder(self.credentials,"MirrorManager",path)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def stopWebserver(self,port):
 		result = self.client.stop_webserver(self.credentials,"MirrorManager",port)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def stopUpdate(self):
 		result = self.client.stopupdate(self.credentials,"MirrorManager")
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def getAvailableDistros(self):
 		result = self.client.get_available_mirrors(self.credentials,"MirrorManager")
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1 
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 	def isMirrorUpdate(self,distro):
 		result = self.client.is_update_available(self.credentials,"MirrorManager",distro)
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return  0 if result['status'] else 1
 		else:
-		    print result
+		    print (result)
 		    return 1
 	
 	def exit_now(self,*args,**kwargs):
 		self.exitting = True
-		print "\nCancelling, please wait...\n"
+		print ("\nCancelling, please wait...\n")
 		try:
-		    result = self.client.cancel_actions(self.credentials,"MirrorManager")
-		    if 'msg' in result:
-		        print str(result['msg'])
-			sys.exit(0) if result['status'] else sys.exit(1)
-		    else:
-			print result
-			sys.exit(1)
+			result = self.client.cancel_actions(self.credentials,"MirrorManager")
+			if 'msg' in result:
+				print (str(result['msg']))
+				sys.exit(0) if result['status'] else sys.exit(1)
+			else:
+				print (result)
+				sys.exit(1)
 		except:
 		    sys.exit(1)
 	
@@ -341,10 +345,10 @@ class LliurexMirror(object):
 		else:
 		    return 1
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return 0 if result['status'] else 1
 		else:
-		    print result
+		    print (result)
 		    return 1
 	
 	def resetConfig(self,distro):
@@ -353,10 +357,10 @@ class LliurexMirror(object):
 		else:
 		    return 1
 		if 'msg' in result:
-		    print str(result['msg'])
+		    print (str(result['msg']))
 		    return 0 if result['status'] else 1
 		else:
-		    print result
+		    print (result)
 		    return 1
 
 def usage():

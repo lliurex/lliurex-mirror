@@ -1,4 +1,6 @@
-import xmlrpclib
+#import xmlrpclib
+import xmlrpc.client as x
+import ssl
 import base64
 import tempfile
 import os
@@ -23,7 +25,9 @@ class LliurexMirrorN4d:
 
 
 	def connect(self,server):
-		self.client = xmlrpclib.ServerProxy('https://' + server + ':9779',allow_none=True)
+		context=ssl._create_unverified_context()
+		self.client = x.ServerProxy("https://%s:9779"%server,context=context,allow_none=True)
+#		self.client = xmlrpclib.ServerProxy('https://' + server + ':9779',allow_none=True)
 		self.serverip = server
 		try:
 			self.client.get_methods()
@@ -34,7 +38,9 @@ class LliurexMirrorN4d:
 	#def connect
 
 	def local_connect(self):
-		self.localclient = xmlrpclib.ServerProxy('https://localhost:9779',allow_none=True)
+		context=ssl._create_unverified_context()
+		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
+#		self.localclient = xmlrpclib.ServerProxy('https://localhost:9779',allow_none=True)
 		try:
 			self.localclient.get_methods()
 		except:
@@ -86,8 +92,8 @@ class LliurexMirrorN4d:
 			return result
 			
 		except Exception as e:
-			print "[!] Error saving configuration: [!]"
-			print e
+			print ("[!] Error saving configuration: [!]")
+			print (e)
 			return None
 		
 	#def save_config
@@ -127,7 +133,7 @@ class LliurexMirrorN4d:
 				result = self.client.get_client_ip('','MirrorManager','')
 				tempserver = result['msg']
 				result = self.localclient.enable_webserver_into_folder(self.localcredentials,'MirrorManager',data)
-				print result
+				print (result)
 				tempserver = tempserver + ":" + str(result['msg'])
 				data = tempserver
 				callback_args = {}
@@ -140,7 +146,7 @@ class LliurexMirrorN4d:
 			return result['status']
 			
 		except Exception as e:
-			print e
+			print (e)
 			
 			return None
 			
@@ -172,7 +178,7 @@ class LliurexMirrorN4d:
 			callback_args['ip'] = ip
 			callback_args['port'] = port
 			# Execute mirror
-			print self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args)
+			print (self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args))
 			return True
 		except:
 			
@@ -184,7 +190,7 @@ class LliurexMirrorN4d:
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
 			return result['msg'][0]
 		except Exception as e:
-			print e
+			print (e)
 			return None
 			
 	#def get_percentage_export
@@ -194,7 +200,7 @@ class LliurexMirrorN4d:
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
 			return result
 		except Exception as e:
-			print e
+			print (e)
 			return None
 		
 
@@ -208,7 +214,7 @@ class LliurexMirrorN4d:
 				return result['msg']
 				
 		except Exception as e:
-			print e
+			print (e)
 			return None
 			
 	#def get_percentage
@@ -242,7 +248,7 @@ class LliurexMirrorN4d:
 			return tmp_file[1]
 			
 		except Exception as e:
-			print e
+			print (e)
 			return None
 
 	#def get_last_log
@@ -252,7 +258,7 @@ class LliurexMirrorN4d:
 			result = self.client.is_update_available(self.credentials,'MirrorManager',mirror)
 			return result['status']
 		except Exception as e:
-			print e
+			print (e)
 			return None
 			
 	#def is_update_available
@@ -264,7 +270,7 @@ class LliurexMirrorN4d:
 			result = self.client.stopupdate(self.credentials,'MirrorManager')
 			return result['status']
 		except Exception as e:
-			print e
+			print (e)
 			return None
 			
 	#def stop_update
@@ -276,7 +282,7 @@ class LliurexMirrorN4d:
 			result = self.localclient.stopgetmirror(self.credentials,'MirrorManager')
 			return result['status']
 		except Exception as e:
-			print e
+			print (e)
 			return None
 			
 	#def stop_update

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -7,11 +7,14 @@ gi.require_version('PangoCairo', '1.0')
 import cairo
 import os
 import threading
-import ConfigParser
+#import ConfigParser
+import configparser
 import platform
 import json
 import random
-import xmlrpclib
+import xmlrpc.client as x
+import ssl
+#import xmlrpclib
 import time
 import math
 import sys
@@ -465,7 +468,7 @@ class LliurexMirror:
 	
 	def set_css_info(self):
 		
-		css = """
+		css = b"""
 		
 		#BLUE_HEADER {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#455A64),  to (#455A64));;
@@ -525,7 +528,7 @@ class LliurexMirror:
 		}
 		
 		#SECTION_LABEL {
-			font: 16pt Roboto;
+			font: 16 Roboto;
 		}
 		
 		
@@ -537,61 +540,61 @@ class LliurexMirror:
 		
 		#BUTTON_LABEL{
 			color:white;
-			font: 10pt Roboto;
+			font: 10 Roboto;
 		}
 		
 		
 		#WHITE_MIRROR_NAME {
 			color: white;
-			font: 20pt Roboto Medium;
+			font: 20 Roboto Medium;
 		
 		}
 		
 		#WHITE_EXTRA_INFO {
 			color: white;
-			font: 12pt Roboto Light;
+			font: 12 Roboto Light;
 		
 		}
 		
 		#BLUE_FONT {
 			color: #3366cc;
-			font: 10pt Roboto;
+			font: 10 Roboto;
 			
 		}
 
 		#LABEL_OPTION{
 		
 			color: #808080;
-			font: 11pt Roboto;
+			font: 11 Roboto;
 		}
 		
 		#LOGIN_BUTTON {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#448AFF),  to (#448AFF));;
 			color: #FFFFFF;
-			font: 12pt Roboto; 
+			font: 12 Roboto; 
 		}
 		
 		#LOGIN_BUTTON_OVER {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#449fff),  to (#449fff));;
 			color: #FFFFFF;
-			font: 12pt Roboto; 
+			font: 12 Roboto; 
 		}
 		
 		#LOGIN_BUTTON_DISABLED {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#666666),  to (#666666));;
 			color: #FFFFFF;
-			font: 12pt Roboto; 
+			font: 12 Roboto; 
 		}
 		
 		#LOGIN_BUTTON_DISABLED_OVER {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#888888),  to (#888888));;
 			color: #FFFFFF;
-			font: 12pt Roboto; 
+			font: 12 Roboto; 
 		}
 		
 		#ERROR_FONT {
 			color: #CC0000;
-			font: 10pt Roboto; 
+			font: 10 Roboto; 
 		}
 		
 
@@ -917,7 +920,7 @@ class LliurexMirror:
 
 	def add_clicked(self,widget,event):
 		
-		print "add clicked"
+#		print ("add clicked")
 		
 		self.add_flag=True
 	
@@ -1084,14 +1087,14 @@ class LliurexMirror:
 			#print "INTERNET"
 		
 		if self.local_folder_rb.get_active():
-			print "LOCAL_FOLDER: %s"%self.folder_fcb.get_filename()
+#			print ("LOCAL_FOLDER: %s"%self.folder_fcb.get_filename())
 			mode="2"
 			data=self.folder_fcb.get_filename()
 			self.current_mirror.info["ORIGS"]["2"]=data
 			
 			
 		if self.url_rb.get_active():
-			print "URL: %s"%self.url_entry.get_text()
+#			print ("URL: %s"%self.url_entry.get_text())
 			mode="3"
 			data=self.url_entry.get_text()
 			self.current_mirror.info["ORIGS"]["3"]=data
@@ -1177,7 +1180,7 @@ class LliurexMirror:
 	
 	def export_clicked(self,widget,event):
 		
-		print "Export clicked: %s"%self.destination_fcb.get_filename()
+#		print ("Export clicked: %s"%self.destination_fcb.get_filename())
 		
 		
 		if self.updating_mirror!=None and self.updating_mirror!=self.current_mirror:
@@ -1244,7 +1247,7 @@ class LliurexMirror:
 	
 	def conf_clicked(self,widget,event):
 		
-		print "Configuration clicked"
+#		print ("Configuration clicked")
 		self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
 		self.stack.set_visible_child_name("configuration")
 		
@@ -1389,7 +1392,9 @@ class LliurexMirror:
 	def validate_thread(self):
 		
 		
-		c=xmlrpclib.ServerProxy("https://"+self.server_ip+":9779")
+#		c=xmlrpclib.ServerProxy("https://"+self.server_ip+":9779")
+		context=ssl._create_unverified_context()
+		c = x.ServerProxy("https://%s:9779"%self.server_ip,context=context,allow_none=True)
 		self.ret=None
 
 		try:
