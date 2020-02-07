@@ -1,3 +1,9 @@
+lliurex-mirror (30.0) bionic; urgency=medium
+
+  * Port to python3
+
+ -- Juanma1980 <juanma1980@gmail.com>  Fri, 07 Feb 2020 12:49:01 +0100
+
 lliurex-mirror (29.9) bionic; urgency=medium
 
   * Added lliurex-bionic banner
