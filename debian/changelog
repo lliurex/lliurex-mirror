@@ -1,3 +1,9 @@
+lliurex-mirror (30.1) bionic; urgency=medium
+
+  * Add rule to no delete files on cleanup action
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 18 Feb 2020 14:04:01 +0100
+
 lliurex-mirror (30.0) bionic; urgency=medium
 
   * Port to python3
