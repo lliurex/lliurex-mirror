@@ -65,9 +65,10 @@ class LliurexMirror(object):
 					sys.stdout.write(percentage+" %")
 					break
 			progress = clock[clockpercentage%4]
-			sys.stdout.write(percentage+" % " + progress)
-			sys.stdout.flush()
-			sys.stdout.write("\r\33[2K")
+			#sys.stdout.write(percentage+" % " + progress)
+			#sys.stdout.flush()
+			#sys.stdout.write("\r\33[2K")
+			print(percentage+" % " + progress,end='\r')
 			time.sleep(0.1)
 			counter += 1
 			if counter == 40:
