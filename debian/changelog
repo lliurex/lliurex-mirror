@@ -1,3 +1,9 @@
+lliurex-mirror (30.2.1) bionic; urgency=medium
+
+  * Fix CLI percentage showing 
+
+ -- Juanma1980 <juanma1980@gmail.com>  Thu, 21 May 2020 13:17:59 +0200
+
 lliurex-mirror (30.2) bionic; urgency=medium
 
   * check type of msg before writing changelog
