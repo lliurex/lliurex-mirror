@@ -528,7 +528,7 @@ class LliurexMirror:
 		}
 		
 		#SECTION_LABEL {
-			font: 16 Roboto;
+			font: 16px Roboto;
 		}
 		
 		
@@ -540,61 +540,61 @@ class LliurexMirror:
 		
 		#BUTTON_LABEL{
 			color:white;
-			font: 10 Roboto;
+			font: 10px Roboto;
 		}
 		
 		
 		#WHITE_MIRROR_NAME {
 			color: white;
-			font: 20 Roboto Medium;
+			font: 20px Roboto Medium;
 		
 		}
 		
 		#WHITE_EXTRA_INFO {
 			color: white;
-			font: 12 Roboto Light;
+			font: 12px Roboto Light;
 		
 		}
 		
 		#BLUE_FONT {
 			color: #3366cc;
-			font: 10 Roboto;
+			font: 10px Roboto;
 			
 		}
 
 		#LABEL_OPTION{
 		
 			color: #808080;
-			font: 11 Roboto;
+			font: 11px Roboto;
 		}
 		
 		#LOGIN_BUTTON {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#448AFF),  to (#448AFF));;
 			color: #FFFFFF;
-			font: 12 Roboto; 
+			font: 12px Roboto; 
 		}
 		
 		#LOGIN_BUTTON_OVER {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#449fff),  to (#449fff));;
 			color: #FFFFFF;
-			font: 12 Roboto; 
+			font: 12px Roboto; 
 		}
 		
 		#LOGIN_BUTTON_DISABLED {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#666666),  to (#666666));;
 			color: #FFFFFF;
-			font: 12 Roboto; 
+			font: 12px Roboto; 
 		}
 		
 		#LOGIN_BUTTON_DISABLED_OVER {
 			background-image:-gtk-gradient (linear,	left top, left bottom, from (#888888),  to (#888888));;
 			color: #FFFFFF;
-			font: 12 Roboto; 
+			font: 12px Roboto; 
 		}
 		
 		#ERROR_FONT {
 			color: #CC0000;
-			font: 10 Roboto; 
+			font: 10px Roboto; 
 		}
 		
 
