@@ -241,6 +241,8 @@ class LliurexMirrorN4d:
 		
 			ret=self.client.get_last_log(self.credentials,"MirrorManager")
 			txt=base64.b64decode(ret["msg"])
+			if (isinstance(txt,bytes)):
+				txt=txt.decode()
 			tmp_file=tempfile.mkstemp(suffix=".lliurex-mirror.log")
 			f=os.fdopen(tmp_file[0],"w")
 			f.write(txt)
