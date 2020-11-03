@@ -188,7 +188,14 @@ class LliurexMirrorN4d:
 	def get_percentage_export(self):
 		try:
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			return result['msg'][0]
+			if isinstance(result,dict):
+			    msg=result.get('msg')
+			elif isinstance(result,(int,str)):
+			    msg=result
+			if isinstance(msg,(int,str)):
+			    return msg
+			elif isinstance(msg,(tuple,list)) and len(msg) > 0:
+			    return msg[0]
 		except Exception as e:
 			print (e)
 			return None
@@ -291,7 +298,7 @@ class LliurexMirrorN4d:
 
 
 if __name__ == '__main__':
-	#c = LliurexMirrorN4d('localhost',['kbut','lliurex'])
+	#c = LliurexMirrorN4d('localhost',['lliurex','lliurex'])
 	#config = {'IGN_GPG': 1, 'NAME': 'Mi ppa', 'ORIGS': {'1': 'ppa.launchpad.net/llxdev/xenial/ubuntu', '3': '172.20.8.6/mirror/ppa-xenial/', '2': '/home/kbut/miMirrorPortatil'}, 'SECTIONS': ['main', 'universe', 'restricted', 'multiverse'], 'MIRROR_PATH': '/home/mirror-ppa', 'ARCHITECTURES': ['amd64', 'i386'], 'CHK_MD5': 0, 'IGN_RELEASE': 0, 'BANNER': '', 'CURRENT_UPDATE_OPTION': '1', 'DISTROS': ['xenial']}
 	#print c.save_config('mippa',config)
 	#print c.create_conf(config)
@@ -301,7 +308,7 @@ if __name__ == '__main__':
 	#print c.mirror_list()
 	#print c.export('mippa','/home/mirror16')
 	#print c.is_alive_export()
-	#print c.get_percentage_export()
+	#print(c.get_percentage_export())
 	#print c.get_percentage('mippa')
 	#print c.is_alive()
 	#print c.stop_export()
