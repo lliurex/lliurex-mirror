@@ -1,4 +1,5 @@
 /etc/lliurex-mirror
 /etc/lliurex-mirror/debmirror
 /etc/lliurex-mirror/conf
+/etc/lliurex-mirror/domirror
 

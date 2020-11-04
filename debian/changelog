@@ -1,3 +1,9 @@
+lliurex-mirror (30.3) bionic; urgency=medium
+
+  * Allow other mirroring tools 
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Wed, 04 Nov 2020 14:18:42 +0100
+
 lliurex-mirror (30.2.1) bionic; urgency=medium
 
   * Fix CLI percentage showing 
