@@ -30,7 +30,7 @@ class LliurexMirror(object):
 #		self.client = x.ServerProxy("https://"+self.ip+":9779",allow_none=True)
 		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
 #		self.localclient = x.ServerProxy("https://localhost:9779",allow_none=True)
-		self.localcredentials = self.get_local_credentials()
+		self.localcredentials = credentials if not None else self.get_local_credentials()
 		self.volatilebkp={}
 
 	def get_local_credentials(self):
@@ -186,7 +186,14 @@ class LliurexMirror(object):
 	def get_percentage_export(self):
 		try:
 			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			print (result['msg'][0])
+			if isinstance(result,dict):
+			    msg=result.get('msg')
+			elif isinstance(result,(int,str)):
+			    msg=result
+			if isinstance(msg,(int,str)):
+			    print(msg)
+			elif isinstance(msg,(tuple,list)) and len(msg) > 0:
+			    print(msg[0])
 			return 0
 		except Exception as e:
 			print (e)
@@ -386,7 +393,7 @@ def usage():
 			puts("* setmirrororig MIRROR URL OPTION            (Set mirror origin into optional update slot)")
 			puts("  getchecksumvalidation                      (Get mirror checksum)")
 			puts("* setchecksumvalidation [0|1]                (Set checksum validation when download deb's)")
-			puts("  getpercentage                              (Get current update percentage)")
+			puts("  getpercentage DISTRO                       (Get current update percentage)")
 			puts("  getpercentageexport                        (Get current exportation percentage)")
 			puts("* enablewebserverforpath PATH                (Setup webserver to export mirror from path)")
 			puts("  stopwebserver PORT                         (Stop current local webserver)")

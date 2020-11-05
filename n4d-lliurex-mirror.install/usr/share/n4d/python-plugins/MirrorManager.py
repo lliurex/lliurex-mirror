@@ -26,10 +26,33 @@ class MirrorManager:
 
 	def __init__(self):
 		#Default values
-		self.defaultpath = '/etc/lliurex-mirror/'
-		self.debmirrorconfpath = os.path.join(self.defaultpath,'debmirror')
-		self.configpath = os.path.join(self.defaultpath,'conf')
+		self.app="domirror" # debmirror
 		self.distro="llx19"
+		self.llxpath = '/etc/lliurex-mirror/'
+		self.applications={
+			"domirror":{
+				"command":"/usr/bin/domirror",
+				"filename":"mirror.list",
+				"configpath":"/etc/apt",
+				"killsignal": signal.SIGUSR1,
+				"needparams": True
+			},
+			"debmirror":{
+				"command":"/usr/bin/debmirror",
+				"filename":"debmirror.conf",
+				"configpath":"/etc",
+				"killsignal": signal.SIGKILL,
+				"needparams": False
+			}
+		}
+		self.llxappconfpath = os.path.join(self.llxpath,self.app)
+		self.appcommand = self.applications[self.app]["command"]
+		self.appneedparams = self.applications[self.app]["needparams"]
+		self.appconfigfilename = self.applications[self.app]["filename"]
+		self.appconfigfile = os.path.join(self.applications[self.app]["configpath"],self.applications[self.app]["filename"])
+		self.appkillsignal = self.applications[self.app]["killsignal"]
+		self.llxconfigspath = os.path.join(self.llxpath,'conf')
+		self.llxappconfig = os.path.join(self.llxappconfpath,self.distro)
 		self.httpd = {}
 		self.debmirrorprocess = None
 
@@ -53,11 +76,11 @@ class MirrorManager:
 {
 	"NAME": "",
 	"BANNER": "",
-	"ORIGS" : {"1":"lliurex.net/xenial","2":"","3":""}, # 1 ORIGINAL ; 2 LOCALFILESYSTEM; 3 REMOTEURL
+	"ORIGS" : {"1":"lliurex.net/bionic","2":"","3":""}, # 1 ORIGINAL ; 2 LOCALFILESYSTEM; 3 REMOTEURL
 	"ARCHITECTURES": [ "amd64", "i386"],
 	"SECTIONS": ["main", "main/debian-installer", "universe", "restricted", "multiverse", "preschool"],
-	"MIRROR_PATH": "/net/mirror/llx16",
-	"DISTROS": ["xenial","xenial-updates","xenial-security"],
+	"MIRROR_PATH": "/net/mirror/llx19",
+	"DISTROS": ["bionic","bionic-updates","bionic-security"],
 	"IGN_GPG":1,
 	"IGN_RELEASE":0,
 	"CHK_MD5":0,
@@ -67,17 +90,17 @@ class MirrorManager:
 	#def init
 	
 	def debug(self,*args,**kwargs):
-	    if not DEBUG:
-		return None
-	    try:
-		caller = sys._getframe().f_back.f_code.co_name
-	    except:
-		caller = ""
-	    with open('/var/log/lliurex-mirror.log','a') as fp:
-		for a in args:
-		    fp.write("{}:> {}\n".format(caller,a))
+		if not DEBUG:
+			return None
+		try:
+			caller = sys._getframe().f_back.f_code.co_name
+		except:
+			caller = ""
+		with open('/var/log/lliurex-mirror.log','a') as fp:
+			for a in args:
+				fp.write("{}:> {}\n".format(caller,a))
 		for kw in kwargs:
-		    fp.write("{}:> {}={}\n".format(caller,kw,kwargs.get(kw)))
+			fp.write("{}:> {}={}\n".format(caller,kw,kwargs.get(kw)))
 	
 	def startup(self,options):
 		self.n4d_vars=objects["VariablesManager"]
@@ -131,14 +154,15 @@ class MirrorManager:
 	#def restore
 	
 	def cancel_actions(self):
-	    try:
-		self.exitting = True
-		time.sleep(3)
-		self.debmirrorprocess.kill(signal.SIGKILL)
-		self.debmirrorprocess.close(force=True)
-		return {'status':True,'msg':'Killed'}
-	    except Exception as e:
-		return {'status':False,'msg':e}
+		try:
+			self.exitting = True
+			time.sleep(3)
+			ret=self.debmirrorprocess.kill(self.appkillsignal)
+			time.sleep(3)
+			self.debmirrorprocess.close(force=True)
+			return {'status':True,'msg':'Killed'}
+		except Exception as e:
+			return {'status':False,'msg':e}
 	#def cancel_actions(self)
 	
 	def set_cname(self):
@@ -183,6 +207,8 @@ class MirrorManager:
 	#def update
 	
 	def _update(self,ip,distro,callback_args,restore_info):
+		if distro is None:
+			distro = self.distro
 		if not self.variable.has_key(distro):
 			self.variable[distro]=self.defaultmirrorinfo 
 		# link config debmirror to correct path with distro name
@@ -191,23 +217,30 @@ class MirrorManager:
 		self.variable[distro]['exception_msg'] = ""
 		self.n4d_vars.set_variable("LLIUREXMIRROR",self.variable)
 		self.build_debmirror_config(distro)
-		if os.path.lexists('/etc/debmirror.conf'):
-			os.remove('/etc/debmirror.conf')
-		os.symlink(os.path.join(self.debmirrorconfpath,distro),'/etc/debmirror.conf')
+		if os.path.lexists(self.appconfigfile):
+			os.remove(self.appconfigfile)
+		os.symlink(os.path.join(self.llxappconfpath,distro),self.appconfigfile)
 		self.mirrorworking = distro
 		fd = open('/var/log/lliurex-mirror.log','a')
 		import datetime
 		fd.write("MIRROR START AT " + str(datetime.datetime.now())+ " \n")
 		fd.flush()
 		errors_found = False
-		self.debmirrorprocess=pexpect.spawn("/usr/bin/debmirror")
+		ret = None
+		if self.appneedparams:
+			ret = self.get_checksum_validation(distro)
+			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
+				ret = ret['CHK_MD5']
+		if ret is not None and (ret == 1 or ret == True):
+			self.appcommand += " -v -rf"
+		self.debmirrorprocess=pexpect.spawn(self.appcommand)
 		download_packages = False
 		emergency_counter = 0
 		try:
 			objects["ZCenterVariables"].add_pulsating_color("lliurexmirror")
 		except:
 			pass
-		fd.write('Starting Loop, reading debmirror process {}\n'.format(self.debmirrorprocess.pid))
+		fd.write('Starting Loop, reading {} process {}\n'.format(self.app,self.debmirrorprocess.pid))
 		fd.flush()
 		while True and not self.exitting:
 			try:
@@ -216,8 +249,7 @@ class MirrorManager:
 					download_packages = True
 				self.debmirrorprocess.expect('\n',timeout=480)
 				line =self.debmirrorprocess.before
-
-				if line.find("Files to download") >= 0 :
+				if line.find("Files to download") >= 0 or line.lower().find('starting apt-mirror'):
 					download_packages = True
 				line1=line.strip()
 				if download_packages:
@@ -225,7 +257,7 @@ class MirrorManager:
 						self.percentage=(int(line1[1:4].strip()),self.debmirrorprocess.exitstatus)
 						self.variable[distro]['progress'] = self.percentage[0]
 						self.n4d_vars.set_variable("LLIUREXMIRROR",self.variable)
-					if line1.startswith("Everything OK"):
+					if line1.startswith("Everything OK") or line1.lower().startswith("end apt-mirror"):
 						self.percentage=(100,self.debmirrorprocess.exitstatus)
 						self.variable[distro]['progress'] = 100
 						self.n4d_vars.set_variable("LLIUREXMIRROR",self.variable)
@@ -243,7 +275,7 @@ class MirrorManager:
 					fd.flush()
 					line1 = self.debmirrorprocess.before
 					if line1 != "" and line1.startswith("[") and line1[5] == "]":
-							self.percentage=(int(line1[1:4].strip()),self.debmirrorprocess.exitstatus)
+						self.percentage=(int(line1[1:4].strip()),self.debmirrorprocess.exitstatus)
 					self.debmirrorprocess.close()
 					status = self.debmirrorprocess.exitstatus
 					self.percentage=(self.percentage[0],status)
@@ -254,9 +286,10 @@ class MirrorManager:
 			except Exception as e:
 				fd.write("Errors detected: '{}'\n".format(line1))
 				fd.flush()
-				self.debmirrorprocess.kill(signal.SIGKILL)
-				self.debmirrorprocess.close(force=True)
-				print e
+				#self.debmirrorprocess.kill(self.appkillsignal)
+				#self.debmirrorprocess.close(force=True)
+				self.cancel_actions()
+				print(e)
 				self.variable[distro]['status_mirror'] = "Error"
 				self.variable[distro]["exception_msg"] = str(e)
 				status = self.debmirrorprocess.exitstatus
@@ -269,14 +302,14 @@ class MirrorManager:
 		fd.flush()
 		
 		if restore_info and isinstance(restore_info,dict):
-		    if 'distro' in restore_info:
-			self.debug(restore=restore_info)
-			if 'mirrororig' in restore_info and 'optionorig' in restore_info:
-			    self.debug(msg='setting mirror orig')
-			    self.set_mirror_orig(restore_info['distro'],restore_info['mirrororig'],restore_info['optionused'])
-			if 'optionorig' in restore_info:
-			    self.debug(msg='setting option orig')
-			    self.set_option_update(restore_info['distro'],restore_info['optionorig'])
+			if 'distro' in restore_info:
+				self.debug(restore=restore_info)
+				if 'mirrororig' in restore_info and 'optionorig' in restore_info:
+					self.debug(msg='setting mirror orig')
+					self.set_mirror_orig(restore_info['distro'],restore_info['mirrororig'],restore_info['optionused'])
+				if 'optionorig' in restore_info:
+					self.debug(msg='setting option orig')
+					self.set_option_update(restore_info['distro'],restore_info['optionorig'])
 
 		if self.exitting:
 			fd.write("Forced exit from update process!!!\n")
@@ -289,7 +322,7 @@ class MirrorManager:
 			self.exitting = False
 			return 0
 		else:
-		    fd.close()
+			fd.close()
 
 		if not errors_found and type(callback_args) == type({}):
 			if callback_args.has_key('port'):
@@ -312,13 +345,10 @@ class MirrorManager:
 	#def is_alive
 
 	def set_mirror_info(self,distro=None):
-		
-		if distro!=None:
-			distro=distro
-		else:
+		if distro is None:
 			distro=self.distro
 		
-		configpath = os.path.join(self.configpath, distro + ".json")
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		config = json.load(open(configpath,'r'))
 
 		mirrorpath = config["MIRROR_PATH"]
@@ -347,7 +377,7 @@ class MirrorManager:
 	#def set_mirror_info(self):
 	    
 	def get_distro_options(self,distro):
-		configpath = os.path.join(self.configpath, distro + ".json")
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		try:
 		    config = json.load(open(configpath,'r'))
 		except Exception as e:
@@ -361,12 +391,10 @@ class MirrorManager:
 	#def get_distro_options(self,distro)
 	
 	def update_size_info(self,distro):
-		if distro!=None:
-			distro=distro
-		else:
+		if distro is None:
 			distro=self.distro
 		
-		configpath = os.path.join(self.configpath, distro + ".json")
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		config = json.load(open(configpath,'r'))
 
 		mirrorpath = config["MIRROR_PATH"]
@@ -398,28 +426,31 @@ class MirrorManager:
 			needle = None
 			lines = f.readlines()
 			for x in lines:
-					if re.match('\s*'+fieldname,x):
-							needle = x.strip()
+				if re.match('\s*'+fieldname,x):
+					needle = x.strip()
 			return needle
 		except:
 			return None
 	# def search_field
 	
 	def get_mirror_architecture(self,distro):
-
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		if not os.path.lexists(configpath):
-			return {'status':False,'msg':'not exists debmirror.conf to '+ distro }
+			return {'status':False,'msg':'not exists {} to {}'.format(self.appconfigfilename,distro) }
 
 		if "ARCHITECTURES" in config.keys():
 			return {'status':True,'msg':config["ARCHITECTURES"] }
 
-		return {'status':False,'msg':"debmirror.conf hasn't architecture variable" }
+		return {'status':False,'msg':"{} hasn't architecture variable".format(self.appconfigfilename) }
 	#def get_mirror_architecture
 	
 	def set_mirror_architecture(self,distro,archs):
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		config['ARCHITECTURES'] = archs
 		f=open(configpath,"w")
@@ -432,31 +463,34 @@ class MirrorManager:
 	#def set_mirror_architecture
 	
 	def get_mirror_orig(self,distro,option):
-
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		if not os.path.lexists(configpath):
-			return {'status':False,'msg':'not exists debmirror.conf to '+ distro }
+			return {'status':False,'msg':'not exists {} to {}'.format(self.appconfigfilename,distro) }
 
 		if "ORIGS" in config.keys():
 			if option:
-			    if option in config['ORIGS']:
-				return {'status':True,'msg':config["ORIGS"][option] }
-			    else:
-				return {'status':False,'msg':'No such option available'}
+				if option in config['ORIGS']:
+					return {'status':True,'msg':config["ORIGS"][option] }
+				else:
+					return {'status':False,'msg':'No such option available'}
 			else:
-			    ret=[]
-			    for opt in config['ORIGS']:
-				ret.append({opt:config['ORIGS'][opt]})
-			    return {'status':True,'msg':ret}
-			
-		return {'status':False,'msg':"debmirror.conf hasn't orig variable" }	
+				ret=[]
+				for opt in config['ORIGS']:
+					ret.append({opt:config['ORIGS'][opt]})
+				return {'status':True,'msg':ret}
+
+		return {'status':False,'msg':"{} hasn't orig variable".format(self.appconfigfilename) }
 	#def get_mirror_from
 
 	def set_mirror_orig(self,distro,url,option):
-		if url == None:
+		if distro is None:
+			distro = self.distro
+		if url is None:
 			return {'status':False,'msg':'url is None'}
-		configpath = os.path.join(self.configpath, distro + ".json")
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		config = json.load(open(configpath,'r'))
 		config['ORIGS'][str(option)] = url
 		f=open(configpath,"w")
@@ -468,7 +502,9 @@ class MirrorManager:
 	#def set_mirror_architecture
 
 	def get_option_update(self,distro):
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		if not os.path.lexists(configpath):
 			return {'status':False,'msg':' no configfile {} available'.format(configpath) }
@@ -480,7 +516,9 @@ class MirrorManager:
 	#def get_option_update
 
 	def set_option_update(self,distro,option):
-		configpath = os.path.join(self.configpath, distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		config = json.load(open(configpath,'r'))
 		#Sanitize mirror url if it's a custom one
 		customMirror=config['ORIGS']['3']
@@ -505,27 +543,30 @@ class MirrorManager:
 	#def get_percentage
 
 	def build_debmirror_config(self,distro):
+		if distro is None:
+			distro = self.distro
 		result = self.render_debmirror_config(distro)
 		string_template = result['msg']
-		conffile = os.path.join(self.debmirrorconfpath,distro)
-		f = open(conffile,'w')
+		f = open(os.path.join(self.llxappconfpath,distro),'w')
 		f.write(string_template)
 		f.close()
 	#def build_debmirror_config
 
 	def reset_debmirror_config(self,distro):
+		if distro is None:
+			distro = self.distro
 		try:
-		    try:
-			config=self.default_path_configs[distro]
-			with open(config,'r') as fp_orig:
-			    with open(os.path.join(self.configpath,distro + ".json"),'w') as fp_dest:
-				fp_dest.write(fp_orig.read())
-		    except:
-			return {'status': False, 'msg': e}
-		    self.build_debmirror_config(distro)
-		    return {'status': True, 'msg': 'CONFIG RESET'}
+			try:
+				config=self.default_path_configs[distro]
+				with open(config,'r') as fp_orig:
+					with open(os.path.join(self.llxconfigspath,distro + ".json"),'w') as fp_dest:
+						fp_dest.write(fp_orig.read())
+			except:
+				return {'status': False, 'msg': e}
+			self.build_debmirror_config(distro)
+			return {'status': True, 'msg': 'CONFIG RESET'}
 		except Exception as e:
-		    return {'status': False, 'msg': e}
+			return {'status': False, 'msg': e}
 	#def reset_debmirror_config(self,distro)
 	
 	def render_debmirror_config(self,arg):
@@ -536,19 +577,18 @@ class MirrorManager:
 	#def render_debmirror_config
 
 	def _render_debmirror_config_distro(self,distro):
-		template = self.tpl_env.get_template('debmirror.conf')
-		configpath = os.path.join(self.configpath,distro + ".json")
+		template = self.tpl_env.get_template(self.appconfigfilename)
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		return {'status':True,'msg':template.render(config).encode('utf-8')}
 	#def render_debmirror_config
 
 	def _render_debmirror_config_values(self,config):
-		template = self.tpl_env.get_template('debmirror.conf')
+		template = self.tpl_env.get_template(self.appconfigfilename)
 		return {'status':True,'msg':template.render(config).encode('utf-8')}
 	#def _render_debmirror_config_values
 
 	def enable_webserver_into_folder(self,path):
-		
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind(('localhost', 0))
 		addr, port = s.getsockname()
@@ -568,7 +608,7 @@ class MirrorManager:
 			handler.protocol_version = proto
 			self.httpd[str(port)] = BaseHTTPServer.HTTPServer(sock,handler)
 			self.httpd[str(port)].serve_forever()
-		except Exception, e:
+		except Exception as e:
 			return None
 	#_enable_webserver_into_folder
 
@@ -581,7 +621,9 @@ class MirrorManager:
 	#stop_webserver
 	
 	def set_checksum_validation(self,distro,status):
-		configpath = os.path.join(self.configpath, distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath, distro + ".json")
 		config = json.load(open(configpath,'r'))
 		config['CHK_MD5'] = status
 
@@ -595,39 +637,41 @@ class MirrorManager:
 	#set_checksum_validation
 	
 	def get_checksum_validation(self,distro):
-
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		if not os.path.lexists(configpath):
-			return {'status':False,'msg':'not exists debmirror.conf to '+ distro }
+			return {'status':False,'msg':'not exists {} to {}'.format(self.appconfigfilename,distro) }
 		if "IGN_GPG" in config.keys():
 			return {'status':True,'msg':config["CHK_MD5"] }
 
-		return {'status':False,'msg':"debmirror.conf hasn't orig variable" }
+		return {'status':False,'msg':"{} hasn't orig variable".format(self.appconfigfilename) }
 	#get_checksum_validation
 	
 	def get_available_mirrors(self):
-		versions = os.listdir(self.configpath)
+		versions = os.listdir(self.llxconfigspath)
 		versions = [ version.replace('.json','') for version in versions if version.endswith('.json')]
 		return {'status':True,'msg':versions}
 
 	def stopupdate(self):
 		try:
 			self.debmirrorprocess.terminate()
-			return {'status':True,'msg':'debmirror stopped'}
+			return {'status':True,'msg':'{} stopped'.format(self.app)}
 		except Exception as e:
 			return {'status':False,'msg':str(e)}
 
 	def stopgetmirror(self):
 		try:
 			self.get_mirror_process.terminate()
-			return {'status':True,'msg':'debmirror stopped'}
+			return {'status':True,'msg':'{} stopped'.format(self.app)}
 		except Exception as e:
 			return {'status':False,'msg':str(e)}
 
 	def download_time_file(self,distro):
-		
-		configpath = os.path.join(self.configpath,distro + ".json")
+		if distro is None:
+			distro = self.distro
+		configpath = os.path.join(self.llxconfigspath,distro + ".json")
 		config = json.load(open(configpath,'r'))
 		path=config["MIRROR_PATH"]
 		f="time-of-last-update"
@@ -638,9 +682,8 @@ class MirrorManager:
 
 		return self.get_time_file(url_mirror,dest)
 
-	# # def download_time_file			
+	# # def download_time_file
 
-		
 	def get_time_file(self,url,dest):
 		
 		try:
@@ -650,23 +693,20 @@ class MirrorManager:
 			f.close()
 			r.close()
 			return {'status':True,'msg':dest + 'successfully downloaded.'}
-		
 		except Exception as e:
-			return {'status':False,'msg':'Error downloading' + dest + ':' + str(e)}			
+			return {'status':False,'msg':'Error downloading' + dest + ':' + str(e)}
+	# def get_time_file
 
-	# def get_time_file		
+	def is_update_available(self,distro=None):
 
-	def is_update_available(self,distro):
-
-		if distro==None:
+		if distro is None:
 			return {'status':False,'msg':"No distro selected",'action':'nothing'}
-		configpath = os.path.join(self.configpath,"%s.json"%distro)
+		configpath = os.path.join(self.llxconfigspath,"%s.json"%distro)
 		config = json.load(open(configpath,'r'))
 		path = config["MIRROR_PATH"]
 		file_time_name = "time-of-last-update"
 		file_local_mirror = os.path.join(path,file_time_name)
 
-		
 		if os.path.isfile(file_local_mirror):
 			url_pool = "http://"+os.path.join(config["ORIGS"]['1'],file_time_name)
 			file_pool = os.path.join("/tmp",file_time_name)
@@ -710,9 +750,9 @@ class MirrorManager:
 
 		# Checks
 		if name == "":
-			return {'status':False,'msg':"Name can't void"}
+			return {'status':False,'msg':"Name can't be empty"}
 		while True:
-			newconfigpath = os.path.join(self.configpath,name + '.json')
+			newconfigpath = os.path.join(self.llxconfigspath,name + '.json')
 			if not os.path.lexists(newconfigpath):
 				break
 			name = name + "1"
@@ -726,10 +766,10 @@ class MirrorManager:
 	#def new_mirror_config
 
 	def get_all_configs(self):
-		versions = os.listdir(self.configpath)
+		versions = os.listdir(self.llxconfigspath)
 		allconfigs = {}
 		for version in versions:
-			configfile = os.path.join(self.configpath,version)
+			configfile = os.path.join(self.llxconfigspath,version)
 			f = open(configfile,'r')
 			allconfigs[version.replace('.json','')] = json.load(f)
 			f.close()
@@ -742,7 +782,7 @@ class MirrorManager:
 	#def get_all_configs
 
 	def update_mirror_config(self,mirror,config):
-		configpath = os.path.join(self.configpath,mirror + ".json")
+		configpath = os.path.join(self.configpaths,mirror + ".json")
 
 		f=open(configpath,"w")
 
@@ -768,7 +808,14 @@ class MirrorManager:
 	#def get_mirror
 
 	def _get_mirror(self,config_path,callback_args):
-		self.get_mirror_process = pexpect.spawn("/usr/bin/debmirror --config-file="+config_path)
+		ret = None
+		if self.appneedparams:
+			ret = self.get_checksum_validation(distro)
+			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
+				ret = ret['CHK_MD5']
+		if ret is not None and (ret == 1 or ret == True):
+			self.appcommand += " -v -rf"
+		self.get_mirror_process = pexpect.spawn("{} --config-file={}".format(self.appcommand,config_path))
 		while True:
 			try:
 				self.get_mirror_process.expect('\n')
@@ -777,13 +824,13 @@ class MirrorManager:
 				if line1.startswith("[") and line1[5] == "]":
 					self.exportpercentage = (int(line1[1:4].strip()),self.get_mirror_process.exitstatus)
 			except pexpect.EOF:
-					line1 = self.get_mirror_process.before
-					if line1 != "" and line1.startswith("[") and line1[5] == "]":
-							self.exportpercentage=(int(line1[1:4].strip()),self.get_mirror_process.exitstatus)
-					self.get_mirror_process.close()
-					status = self.get_mirror_process.exitstatus
-					self.exportpercentage=(self.exportpercentage[0],status)
-					break
+				line1 = self.get_mirror_process.before
+				if line1 != "" and line1.startswith("[") and line1[5] == "]":
+					self.exportpercentage=(int(line1[1:4].strip()),self.get_mirror_process.exitstatus)
+				self.get_mirror_process.close()
+				status = self.get_mirror_process.exitstatus
+				self.exportpercentage=(self.exportpercentage[0],status)
+				break
 			except Exception as e:
 				break
 		if callback_args.has_key('port') and callback_args.has_key('ip'):
@@ -803,19 +850,15 @@ class MirrorManager:
 	#def get_last_log(self):
 	
 	def is_mirror_available(self):
-	    import fnmatch
-	    
-	    config=self.get_all_configs()
-	    path=str(config['msg'][self.distro]['MIRROR_PATH'])
-	    
-	    found=False
-	    for root,dirnames,filenames in os.walk(path+'/pool/main/l/lliurex-version-timestamp/'):
-	        for filename in fnmatch.filter(filenames,'lliurex-version-timestamp_*.deb'):
-	            found=True
-	    if found:
-	        return {'status':True,'msg':'Mirror available'}
-	    else:
-	        return {'status':False,'msg':'Mirror unavailable'}
+		import fnmatch
+		config=self.get_all_configs()
+		path=str(config['msg'][self.distro]['MIRROR_PATH'])
+		found=False
+		for root,dirnames,filenames in os.walk(path+'/pool/main/l/lliurex-version-timestamp/'):
+			for filename in fnmatch.filter(filenames,'lliurex-version-timestamp_*.deb'):
+				found=True
+		if found:
+			return {'status':True,'msg':'Mirror available'}
+		else:
+			return {'status':False,'msg':'Mirror unavailable'}
 	#def is_mirror_available(self):
-
-
