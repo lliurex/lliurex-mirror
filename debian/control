@@ -32,7 +32,7 @@ Description: LliureX Mirror GUI
 
 Package: n4d-lliurex-mirror
 Architecture: all
-Depends: ${misc:Depends}, n4d, python-llxvars, python-jinja2, debmirror, apache2, python-pexpect, logrotate
+Depends: ${misc:Depends}, n4d, python-llxvars, python-jinja2, debmirror, apache2, python-pexpect, logrotate, apt-mirror
 Provides: lliurex-mirror-n4d-server, python-lliurex-mirror
 Conflicts: lliurex-mirror-n4d-server, lliurex-mirror-core (<< 26)
 Replaces: lliurex-mirror-n4d-server, lliurex-mirror-core (<< 26)
