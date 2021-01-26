@@ -1,3 +1,9 @@
+lliurex-mirror (30.3.1) bionic; urgency=medium
+
+  * Fix dists,pool link
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 26 Jan 2021 13:34:28 +0100
+
 lliurex-mirror (30.3) bionic; urgency=medium
 
   * Allow other mirroring tools 
