@@ -140,14 +140,23 @@ getpids(){
 }
 
 make_link(){
+    if [ -d "$MIRROR_DIR/pool" ]; then
+        mkdir -p $MIRROR_DIR/lliurex.net/bionic
+        mv $MIRROR_DIR/pool $MIRROR_DIR/lliurex.net/bionic
+    fi
     if [ ! -L "$MIRROR_DIR/pool" ];then
         POOL=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'pool')
         if [ -n "$POOL" ]; then
             if [ "$(echo $POOL|tr '\n' ' '| wc -w)" -gt 1 ];then
                 POOL=$(echo $POOL|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
             fi
-            ln -s $POOL $MIRROR_DIR/pool
+            ln -s lliurex.net/bionic/pool $MIRROR_DIR/pool
+            # Absolute link
+            # ln -s $POOL $MIRROR_DIR/pool
         fi
+    fi
+    if [ -d "$MIRROR_DIR/dists" ];then
+        mv $MIRROR_DIR/dists $MIRROR_DIR/old_dists
     fi
     if [ ! -L "$MIRROR_DIR/dists" ];then
         DISTS=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'dists')
@@ -155,7 +164,9 @@ make_link(){
             if [ "$(echo $DISTS|tr '\n' ' '|wc -w)" -gt 1 ];then
                 DISTS=$(echo $DISTS|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
             fi
-            ln -s $DISTS $MIRROR_DIR/dists
+            ln -s skel/lliurex.net/bionic/dists $MIRROR_DIR/dists
+            # Absolute link
+            # ln -s $DISTS $MIRROR_DIR/dists
         fi
     fi
 }
