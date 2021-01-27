@@ -140,7 +140,7 @@ getpids(){
 }
 
 make_link(){
-    if [ -d "$MIRROR_DIR/pool" ]; then
+    if [ -d "$MIRROR_DIR/pool" -a ! -L "$MIRROR_DIR/pool" ]; then
         mkdir -p $MIRROR_DIR/lliurex.net/bionic
         mv $MIRROR_DIR/pool $MIRROR_DIR/lliurex.net/bionic
     fi
@@ -155,7 +155,7 @@ make_link(){
             # ln -s $POOL $MIRROR_DIR/pool
         fi
     fi
-    if [ -d "$MIRROR_DIR/dists" ];then
+    if [ -d "$MIRROR_DIR/dists" -a ! -L "$MIRROR_DIR/dists" ];then
         mv $MIRROR_DIR/dists $MIRROR_DIR/old_dists
     fi
     if [ ! -L "$MIRROR_DIR/dists" ];then
