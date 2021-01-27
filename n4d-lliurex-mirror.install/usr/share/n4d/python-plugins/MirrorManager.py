@@ -656,6 +656,7 @@ class MirrorManager:
 
 	def stopupdate(self):
 		try:
+			self.cancel_actions()
 			self.debmirrorprocess.terminate()
 			return {'status':True,'msg':'{} stopped'.format(self.app)}
 		except Exception as e:
