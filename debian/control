@@ -2,8 +2,8 @@ Source: lliurex-mirror
 Section: python
 Priority: optional
 Maintainer: Equipo LliureX <lliurex@gva.es>
-Uploaders: Miguel Garcia Gomez <garcia_miggom@gva.es>,Raul Rodrigo Segura <lliurex_devel3@edu.gva.es>, David Montalva Furio <montalva_dav@gva.es>, Hector Garcia Huerta <lliurex_devel1@edu.gva.es>
-Build-Depends: debhelper (>= 7.0), n4d-dev, llxsrchelper,zero-dev, python3-poinstaller
+Uploaders: Raul Rodrigo Segura <lliurex_devel3@edu.gva.es>, Hector Garcia Huerta <lliurex_devel1@edu.gva.es>, M.Angel Juan <m.angel.juan@gmail.com>
+Build-Depends: debhelper (>= 7.0), n4d-dev, llxsrchelper, zero-dev, python3-poinstaller
 Standards-Version: 3.9.7
 
 Package: lliurex-mirror
@@ -14,7 +14,7 @@ Description: LliureX Mirror Package
 
 Package: lliurex-mirror-cli
 Architecture: all
-Depends: ${misc:Depends}, python, python-clint
+Depends: ${misc:Depends}, python3, python3-clint
 Provides: lliurex-mirror-core
 Conflicts: lliurex-mirror-core (<< 26)
 Replaces: lliurex-mirror-core (<< 26)
@@ -23,7 +23,7 @@ Description: LliureX Mirror Cli
  
 Package: lliurex-mirror-gui
 Architecture: all
-Depends: ${misc:Depends}, python, n4d-lliurex-mirror
+Depends: ${misc:Depends}, python3, n4d-lliurex-mirror
 Conflicts: python-lliurex-mirror (<< 26)
 Replaces: python-lliurex-mirror (<< 26)
 Provides: python-lliurex-mirror
@@ -32,10 +32,11 @@ Description: LliureX Mirror GUI
 
 Package: n4d-lliurex-mirror
 Architecture: all
-Depends: ${misc:Depends}, n4d, python-llxvars, python-jinja2, debmirror, apache2, python-pexpect, logrotate, apt-mirror
+Depends: ${misc:Depends}, n4d, python3-jinja2, apache2, python3-pexpect, logrotate, apt-mirror, zero-center
 Provides: lliurex-mirror-n4d-server, python-lliurex-mirror
 Conflicts: lliurex-mirror-n4d-server, lliurex-mirror-core (<< 26)
 Replaces: lliurex-mirror-n4d-server, lliurex-mirror-core (<< 26)
+Suggests: debmirror
 Description: LliureX Mirror - N4D plugin
  n4d-lliurex-mirror provides a n4d plugin
 

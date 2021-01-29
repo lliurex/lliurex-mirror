@@ -1,10 +1,12 @@
 {
 	"INTERNAL_DOMAIN": {
+		"value": "aula",
 		"packages": [
 			"n4d-lliurex-mirror"
 			]
 	},
 	"HOSTNAME":{
+		"value": "",
 		"packages": [
 			"n4d-lliurex-mirror"
 		]

@@ -1,3 +1,9 @@
+lliurex-mirror (31) focal; urgency=medium
+
+  * Focal port
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Thu, 28 Jan 2021 09:19:31 +0100
+
 lliurex-mirror (30.3.2) bionic; urgency=medium
 
   * Better checks making links

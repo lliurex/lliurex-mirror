@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import xmlrpc.client as x
+#import xmlrpc.client as x
+from n4d.client import Client,Key
 import ssl
 import sys
 import getpass
@@ -12,524 +13,535 @@ import time
 import signal
 
 class LliurexMirror(object):
-	"""docstring for LliurexMirror"""
-	def __init__(self,credentials,host):
-		super(LliurexMirror, self).__init__()
-		self.exitting = False
-		self.ip = host if host != None else "localhost"
-		if credentials != None:
-			self.credentials = credentials
-		else:
-			try:
-				self.credentials = self.get_local_credentials()
-			except:
-				print("Error: bad credentials")
-				sys.exit(1)
-		context=ssl._create_unverified_context()
-		self.client = x.ServerProxy("https://%s:9779"%self.ip,context=context,allow_none=True)
-#		self.client = x.ServerProxy("https://"+self.ip+":9779",allow_none=True)
-		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
-#		self.localclient = x.ServerProxy("https://localhost:9779",allow_none=True)
-		self.localcredentials = credentials if not None else self.get_local_credentials()
-		self.volatilebkp={}
+    """docstring for LliurexMirror"""
+    def __init__(self,credentials,host):
+        # super(LliurexMirror, self).__init__()
+        self.exitting = False
+        self.ip = host if host != None else "localhost"
+        # if credentials != None:
+        # 	self.credentials = credentials
+        # else:
+        # 	try:
+        # 		self.credentials = self.get_local_credentials()
+        # 	except:
+        # 		print("Error: bad credentials")
+        # 		sys.exit(1)
+        mk = Key.master_key()
+        mk.value = mk.value.strip()
+        if not mk.valid():
+            print("Error: bad credentials")
+            sys.exit(1)
+        self.credentials = mk
+        self.client = Client(address="https://{}:9779".format(self.ip),key=self.credentials)
+        self.localclient = Client(key=self.credentials)
+#		context=ssl._create_unverified_context()
+# 		self.client = x.ServerProxy("https://%s:9779"%self.ip,context=context,allow_none=True)
+# #		self.client = x.ServerProxy("https://"+self.ip+":9779",allow_none=True)
+# 		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
+# #		self.localclient = x.ServerProxy("https://localhost:9779",allow_none=True)
+#		self.localcredentials = credentials if not None else self.get_local_credentials()
+        self.volatilebkp={}
 
-	def get_local_credentials(self):
-		try:
-			f = open('/etc/n4d/key','r')
-			key = f.readline().strip()
-			return key
-		except:
-			return None
+    def get_local_credentials(self):
+        try:
+            f = open('/etc/n4d/key','r')
+            key = f.readline().strip()
+            return key
+        except:
+            return None
 
-	def setCname(self):
-		result = self.client.set_cname(self.credentials,"MirrorManager")
-		if 'msg' in result:
-		    print (result['msg'])
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def setCname(self):
+        result = self.client.MirrorManager.set_cname()
+        print(result['msg'])
+        return result['status'] 
 
-	def noninteractiveUpdate(self,mirror,pathtoupdate,volatile=False):
-		self.runDebmirror(mirror,pathtoupdate,volatile)
-		counter = 0
-		percentage = 0
-		clockpercentage = 0
-		clock = ['—','/','|','\\']
-		while True and not self.exitting:
-			if  counter ==  0:
-				result = self.client.get_percentage(self.credentials,"MirrorManager",mirror)
-				percentage = str(result['msg'])
-				result = self.client.is_alive(self.credentials,"MirrorManager")
-				if not result['status']:
-					sys.stdout.write(percentage+" %")
-					break
-			progress = clock[clockpercentage%4]
-			#sys.stdout.write(percentage+" % " + progress)
-			#sys.stdout.flush()
-			#sys.stdout.write("\r\33[2K")
-			print(percentage+" % " + progress,end='\r')
-			time.sleep(0.1)
-			counter += 1
-			if counter == 40:
-				counter = 0
-			clockpercentage +=1
-			if clockpercentage == 30:
-				clockpercentage = 0
-		sys.stdout.write("\n")
+    def noninteractiveUpdate(self,mirror,pathtoupdate,volatile=False):
+        self.runDebmirror(mirror,pathtoupdate,volatile)
+        counter = 0
+        percentage = 0
+        clockpercentage = 0
+        clock = ['—','/','|','\\']
+        while True and not self.exitting:
+            if  counter ==  0:
+                try:
+                    percentage = self.client.MirrorManager.get_percentage(mirror)
+                except Exception as e:
+                    print(e.message)
+                    return e.code
+                try:
+                    result = self.client.MirrorManager.is_alive()
+                except Exception as e:
+                    print(e.message)
+                    return e.code
+                if not result:
+                    sys.stdout.write('{} %'.format(percentage))
+                    break
+            progress = clock[clockpercentage%4]
+            #sys.stdout.write(percentage+" % " + progress)
+            #sys.stdout.flush()
+            #sys.stdout.write("\r\33[2K")
+            print("{} % {}".format(percentage,progress),end='\r')
+            time.sleep(0.1)
+            counter += 1
+            if counter == 40:
+                counter = 0
+            clockpercentage +=1
+            if clockpercentage == 30:
+                clockpercentage = 0
+        sys.stdout.write("\n")
 
-	def runDebmirror(self,mirror,pathtoupdate,volatile=False):
-		mirrororig=""
-		optionorig=""
-		optionused=""
-		if len(pathtoupdate) != 0:
-			if pathtoupdate.lower().startswith("http"):
-				if volatile:
-					try:
-						ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '3')
-						if not ret['status']:
-						    raise Exception(ret['msg'])
-						else:
-						    mirrororig=ret['msg']
-					except Exception as e:
-						print (e)
-						return 1
-					try:
-						ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
-						if not ret['status']:
-						    raise Exception(ret['msg'])
-						else:
-						    optionorig=ret['msg']
-						optionused='3'
-					except Exception as e:
-						print (e)
-						return 1
-				res = self.setMirrorOrig(mirror,pathtoupdate,3)
-				if res == 0:
-				    res = self.setOptionUpdate(mirror,3)
-				    if res != 0:
-				        print ('Error setting update option')
-				        return 1
-				else:
-				    print ('Error setting mirror orig')
-				    return 1
-			elif os.path.exists(pathtoupdate):
-				result = self.client.get_client_ip('','MirrorManager','')
-				tempserver = result['msg']
-				result = self.localclient.enable_webserver_into_folder(self.localcredentials,'MirrorManager',pathtoupdate)
-				tempserver = tempserver + ":" + str(result['msg'])
-				if volatile:
-					try:
-						ret=self.client.get_mirror_orig(self.credentials,"MirrorManager", mirror, '2')
-						if not ret['status']:
-						    raise Exception(ret['msg'])
-						else:
-						    mirrororig=ret['msg']
-					except Exception as e:
-						print (e)
-						return 1
-					try:
-						ret=self.client.get_option_update(self.credentials,"MirrorManager", mirror)
-						if not ret['status']:
-						    raise Exception(ret['msg'])
-						else:
-						    optionorig=ret['msg']
-						optionused='2'
-					except Exception as e:
-						print (e)
-						return 1
-				self.setMirrorOrig(mirror,tempserver,2)
-				self.setOptionUpdate(mirror,2)
-			else:
-				print("Error on orig")
-				return 2
-		if volatile:
-		    self.volatilebkp={'distro':mirror,'mirrororig':mirrororig,'optionorig':optionorig,'optionused':optionused}
-		else:
-		    self.volatilebkp={}
-		result = self.client.update(self.credentials,"MirrorManager",'',mirror,None,self.volatilebkp)
-		if 'msg' in result:
-		    print (result['msg'])
-		    return  0 if result['status'] else 1
-		else:
-		    print (result)
-		    return 1
+    def runDebmirror(self,mirror,pathtoupdate,volatile=False):
+        mirrororig=""
+        optionorig=""
+        optionused=""
+        if len(pathtoupdate) != 0:
+            if pathtoupdate.lower().startswith("http"):
+                if volatile:
+                    try:
+                        ret=self.client.MirrorManager.get_mirror_orig(mirror, '3')
+                        if not ret['status']:
+                            raise Exception(ret['msg'])
+                        else:
+                            mirrororig=ret['msg']
+                    except Exception as e:
+                        print (e)
+                        return 1
+                    try:
+                        ret=self.client.MirrorManager.get_option_update(mirror)
+                        if not ret['status']:
+                            raise Exception(ret['msg'])
+                        else:
+                            optionorig=ret['msg']
+                        optionused='3'
+                    except Exception as e:
+                        print (e)
+                        return 1
+                res = self.setMirrorOrig(mirror,pathtoupdate,3)
+                if res == 0:
+                    res = self.setOptionUpdate(mirror,3)
+                    if res != 0:
+                        print ('Error setting update option')
+                        return 1
+                else:
+                    print ('Error setting mirror orig')
+                    return 1
+            elif os.path.exists(pathtoupdate):
+                result = self.client.MirrorManager.get_client_ip('','')
+                tempserver = result['return']
+                result = self.localclient.MirrorManager.enable_webserver_into_folder(pathtoupdate)
+                tempserver = tempserver + ":" + str(result['return'])
+                if volatile:
+                    try:
+                        ret=self.client.MirrorManager.get_mirror_orig(mirror, '2')
+                        if ret['status'] < 0:
+                            raise Exception(ret['msg'])
+                        else:
+                            mirrororig=ret['return']
+                    except Exception as e:
+                        print (e)
+                        return 1
+                    try:
+                        ret=self.client.MirrorManager.get_option_update(mirror)
+                        if ret['status'] < 0:
+                            raise Exception(ret['msg'])
+                        else:
+                            optionorig=ret['return']
+                        optionused='2'
+                    except Exception as e:
+                        print (e)
+                        return 1
+                self.setMirrorOrig(mirror,tempserver,2)
+                self.setOptionUpdate(mirror,2)
+            else:
+                print("Error on orig")
+                return 2
+        if volatile:
+            self.volatilebkp={'distro':mirror,'mirrororig':mirrororig,'optionorig':optionorig,'optionused':optionused}
+        else:
+            self.volatilebkp={}
+        try:
+            result = self.client.MirrorManager.update('','',mirror,'',self.volatilebkp)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        
+    def exportMirror(self,mirror,dest):
+        #
+        # This code is equal on lliurex_mirror_connect.py file. Don't forget modify on both files.
+        #
+        result = self.client.MirrorManager.get_all_configs()
+        config = result['result'][mirror]
+        result = self.client.MirrorManager.get_client_ip('','')
+        ip = result['return']
+        # Open webserver for mirror and get ip
+        result = self.client.MirrorManager.enable_webserver_into_folder(config['MIRROR_PATH'])
+        port = str(result['return'])
+        self.remoteport = port
+        # Modify Config and write
+        
+        config['MIRROR_PATH'] = dest
+        config['CURRENT_UPDATE_OPTION'] = '3'
+        config['ORIGS']['3'] = self.ip + ":" + str(port)
+        result = self.client.MirrorManager.render_debmirror_config(config)
+        temp_file = tempfile.mktemp()
+        f = open(temp_file,'w')
+        f.write(result['return'])
+        f.close()
+        callback_args = {}
+        callback_args['ip'] = ip
+        callback_args['port'] = port
+        # Execute mirror
+        print (self.localclient.MirrorManager.get_mirror(temp_file,callback_args))
 
-	def exportMirror(self,mirror,dest):
-		#
-		# This code is equal on lliurex_mirror_connect.py file. Don't forget modify on both files.
-		#
-		result = self.client.get_all_configs(self.credentials,'MirrorManager')
-		config = result['msg'][mirror]
-		result = self.client.get_client_ip('','MirrorManager','')
-		ip = result['msg']
-		# Open webserver for mirror and get ip
-		result = self.client.enable_webserver_into_folder(self.credentials,'MirrorManager',config['MIRROR_PATH'])
-		port = str(result['msg'])
-		self.remoteport = port
-		# Modify Config and write
-		
-		config['MIRROR_PATH'] = dest
-		config['CURRENT_UPDATE_OPTION'] = '3'
-		config['ORIGS']['3'] = self.ip + ":" + str(port)
-		result = self.client.render_debmirror_config(self.credentials,'MirrorManager',config)
-		temp_file = tempfile.mktemp()
-		f = open(temp_file,'w')
-		f.write(result['msg'])
-		f.close()
-		callback_args = {}
-		callback_args['ip'] = ip
-		callback_args['port'] = port
-		# Execute mirror
-		print (self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args))
+    def get_percentage_export(self):
+        try:
+            result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
+            if isinstance(result,dict):
+                msg=result.get('msg')
+            elif isinstance(result,(int,str)):
+                msg=result
+            if isinstance(msg,(int,str)):
+                print(msg)
+            elif isinstance(msg,(tuple,list)) and len(msg) > 0:
+                print(msg[0])
+            return 0
+        except Exception as e:
+            print (e)
+            return 1
+    #def get_percentage_export
 
-	def get_percentage_export(self):
-		try:
-			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			if isinstance(result,dict):
-			    msg=result.get('msg')
-			elif isinstance(result,(int,str)):
-			    msg=result
-			if isinstance(msg,(int,str)):
-			    print(msg)
-			elif isinstance(msg,(tuple,list)) and len(msg) > 0:
-			    print(msg[0])
-			return 0
-		except Exception as e:
-			print (e)
-			return 1
-			
-	#def get_percentage_export
+    def is_alive_export(self):
+        try:
+            result = self.localclient.MirrorManager.is_alive_get_mirror()
+            return result
+        except Exception as e:
+            print (e)
+            return None
 
-	def is_alive_export(self):
-		try:
-			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			return result
-		except Exception as e:
-			print (e)
-			return None
+    def setOptionUpdate(self,mirror,option):
+        try:
+            result = self.client.MirrorManager.set_option_update(mirror,option)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
+        
+    def isAlive(self):
+        try:
+            result = self.client.MirrorManager.is_alive()
+        except Exception as e:
+            print("False")
+            return e.code
+        print("True")
+        return 0
 
+    def getMirrorArchitecture(self,distro):
+        try:
+            result = self.client.MirrorManager.get_mirror_architecture(distro)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
+        
+    def setMirrorArchitecture(self,distro,archs):
+        try:
+            result = self.client.MirrorManager.set_mirror_architecture(distro,archs)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def setOptionUpdate(self,mirror,option):
-		result = self.client.set_option_update(self.credentials,"MirrorManager",mirror,option)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def getMirrorOrig(self,distro, option):
+        try:
+            result = self.client.MirrorManager.get_mirror_orig(distro, option)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def isAlive(self):
-		result = self.client.is_alive(self.credentials,"MirrorManager")
-		print ("True") if result['status'] else ("False")
-		return  0 if result['status'] else 1 
+    def setMirrorOrig(self,distro,url,option):
+        try:
+            result = self.client.MirrorManager.set_mirror_orig(distro,url,option)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def getMirrorArchitecture(self,distro):
-		result = self.client.get_mirror_architecture(self.credentials,"MirrorManager",distro)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def getChecksumValidation(self,distro):
+        try:
+            result = self.client.MirrorManager.get_checksum_validation(distro)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def setMirrorArchitecture(self,distro,archs):
-		result = self.client.set_mirror_architecture(self.credentials,"MirrorManager",distro,archs)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def setChecksumValidation(self,distro,value):
+        check = 0 if not value else 1
+        try:
+            result = self.client.MirrorManager.set_checksum_validation(distro,check)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def getMirrorOrig(self,distro, option):
-		result = self.client.get_mirror_orig(self.credentials,"MirrorManager", distro, option)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def getPercentage(self,distro):
+        try:
+            result = self.client.MirrorManager.get_percentage(distro)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def setMirrorOrig(self,distro,url,option):
-		result = self.client.set_mirror_orig(self.credentials,"MirrorManager",distro,url,option)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def enableWebserverForPath(self,path):
+        try:
+            result = self.client.MirrorManager.enable_webserver_into_folder(path)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def getChecksumValidation(self,distro):
-		result = self.client.get_checksum_validation(self.credentials,"MirrorManager",distro)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def stopWebserver(self,port):
+        try:
+            result = self.client.MirrorManager.stop_webserver(port)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def setChecksumValidation(self,distro,value):
-		check = 0 if not value else 1
-		result = self.client.set_checksum_validation(self.credentials,"MirrorManager",distro,check)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def stopUpdate(self):
+        try:
+            result = self.client.MirrorManager.stopupdate()
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def getPercentage(self,distro):
-		result = self.client.get_percentage(self.credentials,"MirrorManager",distro)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def getAvailableDistros(self):
+        try:
+            result = self.client.MirrorManager.get_available_mirrors()
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def enableWebserverForPath(self,path):
-		result = self.client.enable_webserver_into_folder(self.credentials,"MirrorManager",path)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def isMirrorUpdate(self,distro):
+        try:
+            result = self.client.MirrorManager.is_update_available(distro)
+        except Exception as e:
+            print(e.message)
+            return e.code
+        print('{}'.format(result))
+        return 0
 
-	def stopWebserver(self,port):
-		result = self.client.stop_webserver(self.credentials,"MirrorManager",port)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
+    def exit_now(self,*args,**kwargs):
+        self.exitting = True
+        print ("\nCancelling, please wait...\n")
+        try:
+            try:
+                result = self.client.MirrorManager.cancel_actions()
+            except Exception as e:
+                print(e.message)
+                sys.exit(e.code)
+            sys.exit(0)
+        except:
+            sys.exit(1)
+    
+    def distrolistoptions(self,distro):
+        if distro:
+            try:
+                result = self.client.MirrorManager.get_distro_options(distro)
+            except Exception as e:
+                print(e.message)
+                return e.code
+            print('{}'.format(result))
+            return 0
+        else:
+            return 1
 
-	def stopUpdate(self):
-		result = self.client.stopupdate(self.credentials,"MirrorManager")
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
-
-	def getAvailableDistros(self):
-		result = self.client.get_available_mirrors(self.credentials,"MirrorManager")
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1 
-		else:
-		    print (result)
-		    return 1
-
-	def isMirrorUpdate(self,distro):
-		result = self.client.is_update_available(self.credentials,"MirrorManager",distro)
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return  0 if result['status'] else 1
-		else:
-		    print (result)
-		    return 1
-	
-	def exit_now(self,*args,**kwargs):
-		self.exitting = True
-		print ("\nCancelling, please wait...\n")
-		try:
-			result = self.client.cancel_actions(self.credentials,"MirrorManager")
-			if 'msg' in result:
-				print (str(result['msg']))
-				sys.exit(0) if result['status'] else sys.exit(1)
-			else:
-				print (result)
-				sys.exit(1)
-		except:
-		    sys.exit(1)
-	
-	def distrolistoptions(self,distro):
-		if distro:
-		    result = self.client.get_distro_options(self.credentials,"MirrorManager",distro)
-		else:
-		    return 1
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return 0 if result['status'] else 1
-		else:
-		    print (result)
-		    return 1
-	
-	def resetConfig(self,distro):
-		if distro:
-		    result = self.client.reset_debmirror_config(self.credentials,"MirrorManager",distro)
-		else:
-		    return 1
-		if 'msg' in result:
-		    print (str(result['msg']))
-		    return 0 if result['status'] else 1
-		else:
-		    print (result)
-		    return 1
+    def resetConfig(self,distro):
+        if distro:
+            try:
+                result = self.client.MirrorManager.reset_debmirror_config(distro)
+            except Exception as e:
+                print(e.message)
+                return e.code
+            print('{}'.format(result))
+            return 0
+        else:
+            return 1
 
 def usage():
-	puts("Usage")
-	with indent(4):
-		puts("lliurex-mirror [FLAGS...] ACTION")
-		puts("Actions")
-		with indent(4):
-			puts("Options tagged with '*' need admin privileges, '[]' indicates optional parameter")
-			puts("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-			puts("* setcname                                   (Set DNS Name)")
-			puts("* update DISTRO [URL|FILEPATH]               (Update DISTRO mirror from URL or FILEPATH)")
-			puts("* rundebmirror DISTRO [URL|FILEPATH]         (Same option as update)")
-			puts("* volatileupdate DISTRO [URL|FILEPATH]       (Update without writing changes to config)")
-			puts("* unattendedupdate DISTRO [URL|FILEPATH]     (Automated update)")
-			puts("* exportmirror DISTRO DESTMIRROR             (Export current DISTRO mirror to DESTMIRROR)")
-			puts("  isalive                                    (Check if update thread is running)")
-			puts("  isaliveexport                              (Check if exportation thread is running)")
-			puts("  getmirrorarchitecture                      (Get current mirror architecture/s)")
-			puts("* setmirrorarchitecture DISTRO [ARCH ARCH..] (Set ARCH... as current DISTRO architecture)")
-			puts("  getmirrororig DISTRO [OPTION]              (Get origin/s from DISTRO)")
-			puts("* setmirrororig MIRROR URL OPTION            (Set mirror origin into optional update slot)")
-			puts("  getchecksumvalidation                      (Get mirror checksum)")
-			puts("* setchecksumvalidation [0|1]                (Set checksum validation when download deb's)")
-			puts("  getpercentage DISTRO                       (Get current update percentage)")
-			puts("  getpercentageexport                        (Get current exportation percentage)")
-			puts("* enablewebserverforpath PATH                (Setup webserver to export mirror from path)")
-			puts("  stopwebserver PORT                         (Stop current local webserver)")
-			puts("* stopupdate                                 (Cancel current update process)")
-			puts("  getavailabledistros                        (Get all distro available)")
-			puts("  distrolistoptions DISTRO                   (Get options for DISTRO)")
-			puts("  ismirrorupdate                             (Check if it's updating the mirror)")
-			puts("* resetconfig DISTRO                         (Reset all config files for DISTRO)")
-		puts("Flags")
-		with indent(4):
-			puts("-h --help : Show help")
-			puts("-H --host : Remove ip to launch mirror actions")
-			puts("-k --key : Magic key to run lliurex-mirror")
-			puts("-u --user : User to validation")
-			puts("-p --password : Password to validation")
+    puts("Usage")
+    with indent(4):
+        puts("lliurex-mirror [FLAGS...] ACTION")
+        puts("Actions")
+        with indent(4):
+            puts("Options tagged with '*' need admin privileges, '[]' indicates optional parameter")
+            puts("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            puts("* setcname                                   (Set DNS Name)")
+            puts("* update DISTRO [URL|FILEPATH]               (Update DISTRO mirror from URL or FILEPATH)")
+            puts("* rundebmirror DISTRO [URL|FILEPATH]         (Same option as update)")
+            puts("* volatileupdate DISTRO [URL|FILEPATH]       (Update without writing changes to config)")
+            puts("* unattendedupdate DISTRO [URL|FILEPATH]     (Automated update)")
+            puts("* exportmirror DISTRO DESTMIRROR             (Export current DISTRO mirror to DESTMIRROR)")
+            puts("  isalive                                    (Check if update thread is running)")
+            puts("  isaliveexport                              (Check if exportation thread is running)")
+            puts("  getmirrorarchitecture                      (Get current mirror architecture/s)")
+            puts("* setmirrorarchitecture DISTRO [ARCH ARCH..] (Set ARCH... as current DISTRO architecture)")
+            puts("  getmirrororig DISTRO [OPTION]              (Get origin/s from DISTRO)")
+            puts("* setmirrororig MIRROR URL OPTION            (Set mirror origin into optional update slot)")
+            puts("  getchecksumvalidation                      (Get mirror checksum)")
+            puts("* setchecksumvalidation [0|1]                (Set checksum validation when download deb's)")
+            puts("  getpercentage DISTRO                       (Get current update percentage)")
+            puts("  getpercentageexport                        (Get current exportation percentage)")
+            puts("* enablewebserverforpath PATH                (Setup webserver to export mirror from path)")
+            puts("  stopwebserver PORT                         (Stop current local webserver)")
+            puts("* stopupdate                                 (Cancel current update process)")
+            puts("  getavailabledistros                        (Get all distro available)")
+            puts("  distrolistoptions DISTRO                   (Get options for DISTRO)")
+            puts("  ismirrorupdate                             (Check if it's updating the mirror)")
+            puts("* resetconfig DISTRO                         (Reset all config files for DISTRO)")
+        puts("Flags")
+        with indent(4):
+            puts("-h --help : Show help")
+            puts("-H --host : Remove ip to launch mirror actions")
+            puts("-k --key : Magic key to run lliurex-mirror")
+            puts("-u --user : User to validation")
+            puts("-p --password : Password to validation")
 
-			
-	sys.exit(1)
+            
+    sys.exit(1)
 
 
 if __name__ == '__main__':
 
-	args = arguments.Args().copy
-	host = "localhost"
-	credentials = ""
-	user = None
-	password = None
-	if args.contains(["-h","--help"]) or len(args.all) == 0 :
-		usage()
-	
-	if args.contains(["-H","--host"]):
-		#host = args.value_after()
-		host = args.value_after("-H") if args.value_after("-H") != None else args.value_after("--host")
-		if host == None:
-			usage()
-		index = args.first(['-H',"--host"])
-		args.pop(index)
-		args.pop(index)
+    args = arguments.Args().copy
+    host = "localhost"
+    credentials = ""
+    user = None
+    password = None
+    if args.contains(["-h","--help"]) or len(args.all) == 0 :
+        usage()
+    
+    if args.contains(["-H","--host"]):
+        #host = args.value_after()
+        host = args.value_after("-H") if args.value_after("-H") != None else args.value_after("--host")
+        if host == None:
+            usage()
+        index = args.first(['-H',"--host"])
+        args.pop(index)
+        args.pop(index)
 
-	if not args.contains(["-k","--key","-u","--user","-p","--password","-P","--intpassword"]):
-		if os.access('/etc/n4d/key',os.R_OK):
-			f = open("/etc/n4d/key","r")
-			credentials = f.readlines()[0].strip()
+    if not args.contains(["-k","--key","-u","--user","-p","--password","-P","--intpassword"]):
+        if os.access('/etc/n4d/key',os.R_OK):
+            f = open("/etc/n4d/key","r")
+            credentials = f.readlines()[0].strip()
 
-	if args.contains(["-u","--user"]):
-		user = args.value_after("-u") if args.value_after("-u") != None else args.value_after("--user")
-		if user == None:
-			usage()
-		index = args.first(["-u","--user"])
-		args.pop(index)
-		args.pop(index)
+    if args.contains(["-u","--user"]):
+        user = args.value_after("-u") if args.value_after("-u") != None else args.value_after("--user")
+        if user == None:
+            usage()
+        index = args.first(["-u","--user"])
+        args.pop(index)
+        args.pop(index)
 
-	if args.contains(["-p","--password"]):
-		password = args.value_after("-p") if args.value_after("-p") != None else args.value_after("--password")
-		if password == None:
-			usage()
+    if args.contains(["-p","--password"]):
+        password = args.value_after("-p") if args.value_after("-p") != None else args.value_after("--password")
+        if password == None:
+            usage()
 
-		index = args.first(["-p","--password"])
-		args.pop(index)
-		args.pop(index)
+        index = args.first(["-p","--password"])
+        args.pop(index)
+        args.pop(index)
 
-	if args.contains(["-P","--intpassword"]):
-		if args.contains(["-u","--user"]):
-			password = getpass.getpass("Password: ")
-			index = args.first(["-P","--intpassword"])
-			args.pop(index)
-		else:
-			usage()
+    if args.contains(["-P","--intpassword"]):
+        if args.contains(["-u","--user"]):
+            password = getpass.getpass("Password: ")
+            index = args.first(["-P","--intpassword"])
+            args.pop(index)
+        else:
+            usage()
 
-	if user != None and password != None:
-		credentials = (user,password)
+    if user != None and password != None:
+        credentials = (user,password)
 
-	if args.contains(["-k","--key"]):
-		credentials = args.value_after("-k") if args.value_after("-k") != None else args.value_after("--key")
-		if credentials == None:
-			usage()
-		index = args.first(["-k","--key"])
-		args.pop(index)
-		args.pop(index)
-	action = args.pop(0)
-	lliurexmirror = LliurexMirror(credentials,host)
-	signal.signal(signal.SIGTERM, lliurexmirror.exit_now)
-	signal.signal(signal.SIGQUIT, lliurexmirror.exit_now)
-	signal.signal(signal.SIGINT, lliurexmirror.exit_now)
-	if action == "distrolistoptions":
-		sys.exit(lliurexmirror.distrolistoptions(args.get(0)))
-	elif action == "setcname":
-		sys.exit(lliurexmirror.setCname())
-	elif action == "volatileupdate":
-		mirror = args.get(0)
-		pathtoupdate = " ".join(args[1:])
-		lliurexmirror.noninteractiveUpdate(mirror,pathtoupdate,volatile=True)
-	elif action == "rundebmirror" or action =="update":
-		mirror = args.get(0)
-		pathtoupdate = " ".join(args[1:])
-		lliurexmirror.noninteractiveUpdate(mirror,pathtoupdate)
-	elif action =="unattendedupdate":
-		mirror = args.get(0)
-		pathtoupdate = " ".join(args[1:])
-		sys.exit(lliurexmirror.runDebmirror(mirror,pathtoupdate))
-	elif action == "isalive":
-		sys.exit(lliurexmirror.isAlive())
-	elif action == "isaliveexport":
-		sys.exit(lliurexmirror.is_alive_export())
-	elif action == "getmirrorarchitecture":
-		sys.exit(lliurexmirror.getMirrorArchitecture(args.get(0)))
-	elif action == "setmirrorarchitecture":
-		sys.exit(lliurexmirror.setMirrorArchitecture(args.pop(0),args.all))
-	elif action == "getmirrororig":
-		sys.exit(lliurexmirror.getMirrorOrig(args.get(0),args.get(1)))
-	elif action == "setmirrororig":
-		sys.exit(lliurexmirror.setMirrorOrig(args.get(0),args.get(1),args.get(2)))
-	elif action == "getchecksumvalidation":
-		sys.exit(lliurexmirror.getChecksumValidation(args.get(0)))
-	elif action == "setchecksumvalidation":
-		checkvalue = 1 if args.get(1) == "True" else 0
-		sys.exit(lliurexmirror.setChecksumValidation(args.get(0),checkvalue))
-	elif action == "getpercentage":
-		sys.exit(lliurexmirror.getPercentage(args.get(0)))
-	elif action == "getpercentageexport":
-		sys.exit(lliurexmirror.get_percentage_export())
-	elif action == "enablewebserverforpath":
-		sys.exit(lliurexmirror.enableWebserverForPath(args.get(0)))
-	elif action == "stopwebserver":
-		sys.exit(lliurexmirror.stopWebserver(args.get(0)))
-	elif action == "getavailabledistros":
-		sys.exit(lliurexmirror.getAvailableDistros())
-	elif action == "stopupdate":
-		sys.exit(lliurexmirror.stopUpdate())
-	elif action == "ismirrorupdate":
-		sys.exit(lliurexmirror.isMirrorUpdate(args.get(0)))
-	elif action == "exportmirror":
-		mirror = args.get(0)
-		destmirror = " ".join(args[1:])
-		sys.exit(lliurexmirror.exportMirror(mirror,destmirror))
-	elif action == "resetconfig":
-		distro = args.get(0)
-		sys.exit(lliurexmirror.resetConfig(distro))
-		
+    if args.contains(["-k","--key"]):
+        credentials = args.value_after("-k") if args.value_after("-k") != None else args.value_after("--key")
+        if credentials == None:
+            usage()
+        index = args.first(["-k","--key"])
+        args.pop(index)
+        args.pop(index)
+    action = args.pop(0)
+    lliurexmirror = LliurexMirror(credentials,host)
+    signal.signal(signal.SIGTERM, lliurexmirror.exit_now)
+    signal.signal(signal.SIGQUIT, lliurexmirror.exit_now)
+    signal.signal(signal.SIGINT, lliurexmirror.exit_now)
+    if action == "distrolistoptions":
+        sys.exit(lliurexmirror.distrolistoptions(args.get(0)))
+    elif action == "setcname":
+        sys.exit(lliurexmirror.setCname())
+    elif action == "volatileupdate":
+        mirror = args.get(0)
+        pathtoupdate = " ".join(args[1:])
+        lliurexmirror.noninteractiveUpdate(mirror,pathtoupdate,volatile=True)
+    elif action == "rundebmirror" or action =="update":
+        mirror = args.get(0)
+        pathtoupdate = " ".join(args[1:])
+        lliurexmirror.noninteractiveUpdate(mirror,pathtoupdate)
+    elif action =="unattendedupdate":
+        mirror = args.get(0)
+        pathtoupdate = " ".join(args[1:])
+        sys.exit(lliurexmirror.runDebmirror(mirror,pathtoupdate))
+    elif action == "isalive":
+        sys.exit(lliurexmirror.isAlive())
+    elif action == "isaliveexport":
+        sys.exit(lliurexmirror.is_alive_export())
+    elif action == "getmirrorarchitecture":
+        sys.exit(lliurexmirror.getMirrorArchitecture(args.get(0)))
+    elif action == "setmirrorarchitecture":
+        sys.exit(lliurexmirror.setMirrorArchitecture(args.pop(0),args.all))
+    elif action == "getmirrororig":
+        sys.exit(lliurexmirror.getMirrorOrig(args.get(0),args.get(1)))
+    elif action == "setmirrororig":
+        sys.exit(lliurexmirror.setMirrorOrig(args.get(0),args.get(1),args.get(2)))
+    elif action == "getchecksumvalidation":
+        sys.exit(lliurexmirror.getChecksumValidation(args.get(0)))
+    elif action == "setchecksumvalidation":
+        checkvalue = 1 if args.get(1) == "True" else 0
+        sys.exit(lliurexmirror.setChecksumValidation(args.get(0),checkvalue))
+    elif action == "getpercentage":
+        sys.exit(lliurexmirror.getPercentage(args.get(0)))
+    elif action == "getpercentageexport":
+        sys.exit(lliurexmirror.get_percentage_export())
+    elif action == "enablewebserverforpath":
+        sys.exit(lliurexmirror.enableWebserverForPath(args.get(0)))
+    elif action == "stopwebserver":
+        sys.exit(lliurexmirror.stopWebserver(args.get(0)))
+    elif action == "getavailabledistros":
+        sys.exit(lliurexmirror.getAvailableDistros())
+    elif action == "stopupdate":
+        sys.exit(lliurexmirror.stopUpdate())
+    elif action == "ismirrorupdate":
+        sys.exit(lliurexmirror.isMirrorUpdate(args.get(0)))
+    elif action == "exportmirror":
+        mirror = args.get(0)
+        destmirror = " ".join(args[1:])
+        sys.exit(lliurexmirror.exportMirror(mirror,destmirror))
+    elif action == "resetconfig":
+        distro = args.get(0)
+        sys.exit(lliurexmirror.resetConfig(distro))
+        
