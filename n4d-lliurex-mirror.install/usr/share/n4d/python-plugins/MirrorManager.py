@@ -181,16 +181,16 @@ class MirrorManager:
 		template = self.tpl_env.get_template("cname")
 		list_variables = {}
 		try:
-			list_variables = literal_eval(self.n4d.get_variable_list(['INTERNAL_DOMAIN','HOSTNAME'])).get('return',{})
+			list_variables = self.n4d.get_variable_list(['INTERNAL_DOMAIN','HOSTNAME']).get('return',{})
 		except Exception as e:
 			return n4d.responses.build_invalid_arguments_response(-1)
 		for x in list_variables.keys():
-			if list_variables.get(x,None) is None:
-				return n4d.responses.build_failed_call_response(ret_msg='Variable {} not defined'.format(x))
+			if list_variables.get(x,None) in [ '', None ]:
+				return n4d.responses.build_failed_call_response(ret_msg='Variable {} not defined or empty'.format(x))
 				# return {'status':False,'msg':'Variable ' + x + ' not defined'}
 			
 		#Encode vars to UTF-8
-		string_template = template.render(list_variables).encode('UTF-8')
+		string_template = template.render(list_variables)
 		#Open template file
 		fd, tmpfilepath = tempfile.mkstemp()
 		new_export_file = open(tmpfilepath,'w')
@@ -243,11 +243,9 @@ class MirrorManager:
 		ret = None
 		if self.appneedparams:
 			try:
-				ret = literal_eval(self.get_checksum_validation(distro).get('msg'))
+				ret = self.get_checksum_validation(distro)
 			except Exception as e:
 				return n4d.responses.build_unhandled_error_response()
-			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
-				ret = ret['CHK_MD5']
 		if ret is not None and (ret == 1 or ret == True):
 			self.appcommand += " -v -rf"
 		self.debmirrorprocess=pexpect.spawn(self.appcommand)
@@ -607,7 +605,7 @@ class MirrorManager:
 		result = self.render_debmirror_config(distro)
 		string_template = result['return']
 		f = open(os.path.join(self.llxappconfpath,distro),'w')
-		f.write(string_template.decode('utf8'))
+		f.write(string_template)
 		f.close()
 	#def build_debmirror_config
 
@@ -645,23 +643,26 @@ class MirrorManager:
 			config = json.load(open(configpath,'r'))
 		except Exception as e:
 			return n4d.responses.build_failed_call_response(ret_msg="Error importing json file, {}".format(configpath))
-		return n4d.responses.build_successful_call_response(template.render(config).encode('utf-8'))
+		return n4d.responses.build_successful_call_response(template.render(config))
 		# return {'status':True,'msg':template.render(config).encode('utf-8')}
 	#def render_debmirror_config
 
 	def _render_debmirror_config_values(self,config):
 		template = self.tpl_env.get_template(self.appconfigfilename)
-		return n4d.responses.build_successful_call_response(template.render(config).encode('utf-8'))
+		return n4d.responses.build_successful_call_response(template.render(config))
 		# return {'status':True,'msg':template.render(config).encode('utf-8')}
 	#def _render_debmirror_config_values
 
 	def enable_webserver_into_folder(self,path):
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind(('localhost', 0))
-		addr, port = s.getsockname()
-		s.close()
-		self.webserverprocess[str(port)] = Process(target=self._enable_webserver_into_folder,args=(port,path,))
-		self.webserverprocess[str(port)].start()
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.bind(('localhost', 0))
+			addr, port = s.getsockname()
+			s.close()
+			self.webserverprocess[str(port)] = Process(target=self._enable_webserver_into_folder,args=(port,path,))
+			self.webserverprocess[str(port)].start()
+		except Exception as e:
+			return n4d.responses.build_failed_call_response(ret_msg='{}'.format(e))
 		return n4d.responses.build_successful_call_response(port)
 		# return {'status':True,'msg':port}
 	#enable_webserver_into_folder
@@ -674,7 +675,7 @@ class MirrorManager:
 			os.chdir(path)
 			handler = SimpleHTTPRequestHandler
 			handler.protocol_version = proto
-			self.httpd[str(port)] = HTTPServer.HTTPServer(sock,handler)
+			self.httpd[str(port)] = HTTPServer(sock,handler)
 			self.httpd[str(port)].serve_forever()
 		except Exception as e:
 			return None
@@ -722,7 +723,7 @@ class MirrorManager:
 		except Exception as e:
 			return n4d.responses.build_failed_call_response(ret_msg='Error importing json distro file {},{}'.format(configpath,e))
 		if "IGN_GPG" in config.keys():
-			return n4d.responses.build_successful_call_response(ret_msg=str(config["CHK_MD5"]))
+			return n4d.responses.build_successful_call_response(config["CHK_MD5"])
 			# return {'status':True,'msg':config["CHK_MD5"] }
 		return n4d.responses.build_failed_call_response(ret_msg="{} hasn't orig variable".format(self.appconfigfilename))
 		# return {'status':False,'msg':"{} hasn't orig variable".format(self.appconfigfilename) }
@@ -909,27 +910,35 @@ class MirrorManager:
 		self.get_mirror_thread = threading.Thread(target=self._get_mirror,args=(config_path,callback_args,))
 		self.get_mirror_thread.daemon = True
 		self.get_mirror_thread.start()
+		return n4d.responses.build_successful_call_response()
 	#def get_mirror
 
 	def _get_mirror(self,config_path,callback_args):
 		ret = None
 		if self.appneedparams:
-			ret = literal_eval(self.get_checksum_validation(distro))
-			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
-				ret = ret['CHK_MD5']
+			try:
+				ret = self.get_checksum_validation(self.distro)
+				ret = ret.get('return')
+			except Exception as e:
+				print("Error getting checksum validation")
+				return -1
 		if ret is not None and (ret == 1 or ret == True):
 			self.appcommand += " -v -rf"
 		self.get_mirror_process = pexpect.spawn("{} --config-file={}".format(self.appcommand,config_path))
 		while True:
 			try:
-				self.get_mirror_process.expect('\n')
+				self.get_mirror_process.expect('\n',timeout=480)
 				line =self.get_mirror_process.before.decode('utf8').strip()
 				if line.startswith("[") and line[5] == "]":
 					self.exportpercentage = (int(line[1:4].strip()),self.get_mirror_process.exitstatus)
+				if line.lower().startswith("end apt-mirror"):
+					self.exportpercentage = (100,self.get_mirror_process.exitstatus)
 			except pexpect.EOF:
 				line = self.get_mirror_process.before.decode('utf8').strip()
 				if line != "" and line.startswith("[") and line[5] == "]":
 					self.exportpercentage=(int(line[1:4].strip()),self.get_mirror_process.exitstatus)
+				if line.lower().startswith("end apt-mirror"):
+					self.exportpercentage = (100,self.get_mirror_process.exitstatus)
 				self.get_mirror_process.close()
 				status = self.get_mirror_process.exitstatus
 				self.exportpercentage=(self.exportpercentage[0],status)

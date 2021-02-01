@@ -171,22 +171,37 @@ class LliurexMirror(object):
         # This code is equal on lliurex_mirror_connect.py file. Don't forget modify on both files.
         #
         result = self.client.MirrorManager.get_all_configs()
-        config = result['result'][mirror]
-        result = self.client.MirrorManager.get_client_ip('','')
-        ip = result['return']
+        try:
+            config = result[mirror]
+        except Exception as e:
+            print('Mirror {} not available'.format(mirror))
+            return -1
+        try:
+            ip = self.client.MirrorManager.get_client_ip('','')
+        except Exception as e:
+            print('Error calling get_client_ip, {}'.format(e))
+            return -1
         # Open webserver for mirror and get ip
-        result = self.client.MirrorManager.enable_webserver_into_folder(config['MIRROR_PATH'])
-        port = str(result['return'])
+        try:
+            result = self.client.MirrorManager.enable_webserver_into_folder(config['MIRROR_PATH'])
+        except Excepcion as e:
+            print('Error enabling webserver, {}'.format(e))
+            return -1
+        port = str(result)
         self.remoteport = port
         # Modify Config and write
         
         config['MIRROR_PATH'] = dest
         config['CURRENT_UPDATE_OPTION'] = '3'
         config['ORIGS']['3'] = self.ip + ":" + str(port)
-        result = self.client.MirrorManager.render_debmirror_config(config)
+        try:
+            result = self.client.MirrorManager.render_debmirror_config(config)
+        except Exception as e:
+            print('Error rendering configuration file, {}'.format(e))
+            return -1
         temp_file = tempfile.mktemp()
         f = open(temp_file,'w')
-        f.write(result['return'])
+        f.write(result)
         f.close()
         callback_args = {}
         callback_args['ip'] = ip

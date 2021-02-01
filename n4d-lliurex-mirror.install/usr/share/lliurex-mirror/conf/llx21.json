@@ -3,7 +3,7 @@
 	"BANNER": "lliurex-focal",
 	"ORIGS":{"1":"lliurex.net/focal","2":"","3":""},
 	"ARCHITECTURES": [ "amd64" ], 
-	"SECTIONS": ["main", "main/debian-installer", "universe", "restricted", "multiverse"],
+	"SECTIONS": ["main"],
 	"MIRROR_PATH": "/net/mirror/llx21", 
 	"DISTROS": ["focal","focal-updates","focal-security"],
 	"IGN_GPG":1,
