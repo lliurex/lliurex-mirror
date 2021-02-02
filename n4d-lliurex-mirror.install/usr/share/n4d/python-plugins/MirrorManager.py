@@ -285,7 +285,7 @@ class MirrorManager:
 					errors_found = True
 					# error is printed on next line iteration
 
-			except pexpect.EOF:
+			except pexpect.exceptions.EOF:
 					fd.write("Exception EOF line:'{}'\n".format(line))
 					fd.flush()
 					line = self.debmirrorprocess.before.decode('utf8').strip()
@@ -486,7 +486,7 @@ class MirrorManager:
 			return n4d.responses.build_failed_call_response(ret_msg='Fail when parsing json file {}'.format(configpath))
 		config['ARCHITECTURES'] = archs
 		f=open(configpath,"w")
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f.write(data)
 		f.close()
 		self.build_debmirror_config(distro)
@@ -539,7 +539,7 @@ class MirrorManager:
 			return n4d.responses.build_failed_call_response(ret_msg='Fail when parsing json file {}'.format(configpath))
 		config['ORIGS'][str(option)] = url
 		f=open(configpath,"w")
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f.write(data)
 		f.close()
 		self.build_debmirror_config(distro)
@@ -582,7 +582,7 @@ class MirrorManager:
 		config['CURRENT_UPDATE_OPTION'] = str(option)
 
 		f=open(configpath,"w")
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f.write(data)
 		f.close()
 		self.build_debmirror_config(distro)
@@ -702,7 +702,7 @@ class MirrorManager:
 		config['CHK_MD5'] = status
 
 		f=open(configpath,"w")
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f.write(data)
 		f.close()
 
@@ -769,8 +769,10 @@ class MirrorManager:
 		f="time-of-last-update"
 		dest=os.path.join(path,f)
 
-		orig_mirror=self.get_mirror_orig(distro,"1")
-		url_mirror="http://"+os.path.join(orig_mirror['msg'],f)
+		orig_mirror=self.get_mirror_orig(distro,"1").get('return')
+		if not orig_mirror:
+			return n4d.responses.build_unhandled_error_response(ret_msg='Error gettting mirror orig')
+		url_mirror="http://"+os.path.join(orig_mirror,f)
 
 		return self.get_time_file(url_mirror,dest)
 	# def download_time_file
@@ -858,7 +860,7 @@ class MirrorManager:
 				break
 			name = name + "1"
 
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f = open(newconfigpath,'w')
 		f.write(data)
 		f.close()
@@ -889,7 +891,7 @@ class MirrorManager:
 
 		f=open(configpath,"w")
 
-		data=unicode(json.dumps(config,indent=4,encoding="utf-8",ensure_ascii=False)).encode("utf-8")
+		data=json.dumps(config,indent=4,ensure_ascii=False)
 		f.write(data)
 		f.close()
 		return n4d.responses.build_successful_call_response(ret_msg='Updated config')

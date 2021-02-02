@@ -12,7 +12,7 @@ import configparser
 import platform
 import json
 import random
-import xmlrpc.client as x
+from n4d.client import Client
 import ssl
 #import xmlrpclib
 import time
@@ -829,7 +829,7 @@ class LliurexMirror:
 		
 			m=MirrorButton(self.mirrors[key])
 			m.info["KEY"]=key
-			if key==mirror_key["msg"] and mirror_key["status"]:
+			if mirror_key:
 				m.info["executing"]=True
 				m.info["updating"]=True
 				self.updating_mirror=m
@@ -1390,22 +1390,16 @@ class LliurexMirror:
 	#validate_user
 	
 	def validate_thread(self):
-		
-		
-#		c=xmlrpclib.ServerProxy("https://"+self.server_ip+":9779")
-		context=ssl._create_unverified_context()
-		c = x.ServerProxy("https://%s:9779"%self.server_ip,context=context,allow_none=True)
-		self.ret=None
-
+		c = Client(user=self.user,password=self.password)
 		try:
-			self.ret=c.validate_user(self.user,self.password)
+			self.ret=c.validate_user()
+			if not self.ret:
+				raise Exception()
 		except Exception as e:
 			self.ret=[False,str(e)]
 			GLib.idle_add(self.set_login_msg,str(e))
 			GLib.idle_add(self.login_form_sensitive)
 			return
-
-		
 		if self.ret[0]:
 			GLib.timeout_add(10,self.update_login_animation)
 			GLib.idle_add(self.set_login_msg,"")
@@ -1555,7 +1549,7 @@ class LliurexMirror:
 
 		
 		ret={}
-		ret["status"]=False
+		ret=False
 		
 		if self.updating_mirror.info["updating"]:
 			ret=self.llx_conn.is_alive()
@@ -1582,7 +1576,7 @@ class LliurexMirror:
 
 		'''
 
-		if ret["status"]:
+		if ret:
 			return True
 		else:
 			
@@ -1598,7 +1592,7 @@ class LliurexMirror:
 
 			if not self.updating_mirror.info["cancelled"]:
 				ret=self.llx_conn.get_status(self.updating_mirror.info["KEY"])
-				if ret["status"]:
+				if ret:
 					pass
 				else:
 					error="Error:\n"
