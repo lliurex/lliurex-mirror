@@ -1224,7 +1224,7 @@ class LliurexMirror:
 			self.export_label.set_text(_("Export"))
 			self.update_label_box.set_name("BUTTON_COLOR")
 			self.export_label_box.set_name("BUTTON_COLOR")
-		
+			self.llx_conn.stop_export()
 		
 		
 		

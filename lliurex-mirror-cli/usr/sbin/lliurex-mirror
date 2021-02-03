@@ -212,24 +212,18 @@ class LliurexMirror(object):
     def get_percentage_export(self):
         try:
             result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-            if isinstance(result,dict):
-                msg=result.get('msg')
-            elif isinstance(result,(int,str)):
-                msg=result
-            if isinstance(msg,(int,str)):
-                print(msg)
-            elif isinstance(msg,(tuple,list)) and len(msg) > 0:
-                print(msg[0])
-            return 0
+            if isinstance(result,(tuple,list)) and len(result) > 0:
+                print(result[1])
+            return result[1]
         except Exception as e:
-            print (e)
-            return 1
+            print(e)
+            return None
     #def get_percentage_export
 
     def is_alive_export(self):
         try:
             result = self.localclient.MirrorManager.is_alive_get_mirror()
-            return result
+            return result[0]
         except Exception as e:
             print (e)
             return None

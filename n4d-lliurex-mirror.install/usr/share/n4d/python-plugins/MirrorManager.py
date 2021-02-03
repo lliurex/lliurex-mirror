@@ -682,6 +682,7 @@ class MirrorManager:
 	#_enable_webserver_into_folder
 
 	def stop_webserver(self,port):
+		port = str(port)
 		if isinstance(self.webserverprocess,dict) and port in self.webserverprocess:
 			self.webserverprocess[port].terminate()
 			self.webserverprocess.pop(port)
@@ -904,7 +905,7 @@ class MirrorManager:
 	#def get_client_ip
 
 	def is_alive_get_mirror(self):
-		return n4d.responses.build_successful_call_response(ret_value=self.get_mirror_thread.is_alive(),ret_msg='{}'.format(self.exportpercentage))
+		return n4d.responses.build_successful_call_response(ret_value=(self.get_mirror_thread.is_alive(),self.exportpercentage[0]))
 		# return {'status':self.get_mirror_thread.is_alive(),'msg':self.exportpercentage}
 	#def is_alive_get_mirror
 
@@ -927,15 +928,20 @@ class MirrorManager:
 		if ret is not None and (ret == 1 or ret == True):
 			self.appcommand += " -v -rf"
 		self.get_mirror_process = pexpect.spawn("{} --config-file={}".format(self.appcommand,config_path))
+		started = False
 		while True:
 			try:
 				self.get_mirror_process.expect('\n',timeout=480)
 				line =self.get_mirror_process.before.decode('utf8').strip()
 				if line.startswith("[") and line[5] == "]":
 					self.exportpercentage = (int(line[1:4].strip()),self.get_mirror_process.exitstatus)
+				if line.lower().startswith("starting apt-mirror"):
+					started = True
 				if line.lower().startswith("end apt-mirror"):
 					self.exportpercentage = (100,self.get_mirror_process.exitstatus)
-			except pexpect.EOF:
+			except pexpect.exceptions.EOF:
+				if not started:
+					raise Exception()
 				line = self.get_mirror_process.before.decode('utf8').strip()
 				if line != "" and line.startswith("[") and line[5] == "]":
 					self.exportpercentage=(int(line[1:4].strip()),self.get_mirror_process.exitstatus)

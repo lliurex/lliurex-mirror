@@ -14,8 +14,8 @@ class LliurexMirrorN4d:
 		self.localclient = None
 		self.connect(server)
 		self.local_connect()
-		self.credentials = credentials
-		self.localcredentials = self.get_local_credentials()
+		self.credentials = Credential(*credentials)
+		self.localcredentials = Credential(key=self.get_local_credentials())
 		self.localport = None
 		self.remoteport = None		
 		self.key_list=["NAME","ARCHITECTURES","CURRENT_UPDATE_OPTION","BANNER","DISTROS","SECTIONS","MIRROR_PATH","ORIGS","CHK_MD5","IGN_GPG","IGN_RELEASE"]
@@ -67,7 +67,7 @@ class LliurexMirrorN4d:
 
 	def is_alive(self):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			return self.client.MirrorManager.is_alive()
 		except:
 			return {'status':False,'msg':None}
@@ -79,8 +79,8 @@ class LliurexMirrorN4d:
 			parsed_mirror={}
 			for key in self.key_list:
 				parsed_mirror[key]=config[key]
-			self.client.credential = Credential(*self.credentials)
 			try:
+				self.client.credential = self.credentials
 				result = self.client.MirrorManager.update_mirror_config(mirror,parsed_mirror)
 			except Exception as e:
 				print("Fail to update mirror config, {}".format(e))
@@ -97,7 +97,7 @@ class LliurexMirrorN4d:
 			if type(self.client) == type(None):
 				return {}
 			try:
-				self.client.credential = Credential(*self.credentials)
+				self.client.credential = self.credentials
 				result = self.client.MirrorManager.new_mirror_config(config)
 			except Exception as e:
 				print('Error creating new mirror configuration, {}'.format(e))
@@ -121,12 +121,13 @@ class LliurexMirrorN4d:
 			if mode == '2':
 				self.mode = 2 
 				try:
+					self.client.credential = self.credentials
 					tempserver = self.client.MirrorManager.get_client_ip('','')
 				except Exception as e:
 					print('Error getting client ip,{}'.format(e))
 					return None
 				try:
-					self.localclient.credential = Credential(*self.localcredentials)
+					self.localclient.credential = self.localcredentials
 					result = self.localclient.MirrorManager.enable_webserver_into_folder(data)
 				except Exception as e:
 					print('Error enabling local webserver, {}'.format(e))
@@ -137,12 +138,12 @@ class LliurexMirrorN4d:
 				self.localport = str(result)
 			if data != None:
 				try:
-					self.client.credential = Credential(*self.credentials)
+					self.client.credential = self.credentials
 					self.client.MirrorManager.set_mirror_orig(mirror,data,mode)
 				except Exception as e:
 					print('Error setting mirrir origin,{}'.format(e))
 			try:
-				self.client.credential = Credential(*self.credentials)
+				self.client.credential = self.credentials
 				self.client.MirrorManager.set_option_update(mirror,mode)
 				result = self.client.MirrorManager.update('','',mirror,callback_args)
 			except Exception as e:
@@ -157,7 +158,7 @@ class LliurexMirrorN4d:
 	def export(self, mirror,folder):
 		try:
 			# Get config for this mirror
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			result = self.client.MirrorManager.get_all_configs()
 			config = result[mirror]
 			ip = self.client.MirrorManager.get_client_ip('','')
@@ -179,7 +180,7 @@ class LliurexMirrorN4d:
 			callback_args['ip'] = ip
 			callback_args['port'] = port
 			# Execute mirror
-			self.localclient.credential = Credential(*self.localcredentials)
+			self.localclient.credential = self.localcredentials
 			print(self.localclient.MirrorManager.get_mirror(temp_file,callback_args))
 			return True
 		except:
@@ -188,9 +189,9 @@ class LliurexMirrorN4d:
 
 	def get_percentage_export(self):
 		try:
-			self.localclient.credential = Credential(*self.localcredentials)
-			result = self.localclient.is_alive_get_mirror()
-			return result
+			self.localclient.credential = self.localcredentials
+			result = self.localclient.MirrorManager.is_alive_get_mirror()
+			return result[1]
 			# if isinstance(result,dict):
 			#     msg=result.get('msg')
 			# elif isinstance(result,(int,str)):
@@ -206,16 +207,16 @@ class LliurexMirrorN4d:
 
 	def is_alive_export(self):
 		try:
-			self.localclient.credential = Credential(*self.localcredentials)
+			self.localclient.credential = self.localcredentials
 			result = self.localclient.MirrorManager.is_alive_get_mirror()
-			return result
+			return result[0]
 		except Exception as e:
 			print (e)
 			return None
 
 	def get_percentage(self,mirror):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			result = self.client.MirrorManager.get_percentage(mirror)
 			return result
 		except Exception as e:
@@ -226,7 +227,7 @@ class LliurexMirrorN4d:
 	
 	def get_status(self,mirror):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			var=self.client.get_variable("LLIUREXMIRROR")
 			if var[mirror]["status_mirror"]=="Ok":
 				return {"status": True, "msg": None}
@@ -239,7 +240,7 @@ class LliurexMirrorN4d:
 	
 	def get_last_log(self):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			ret=self.client.MirrorManager.get_last_log()
 			txt=base64.b64decode(ret)
 			if (isinstance(txt,bytes)):
@@ -256,7 +257,7 @@ class LliurexMirrorN4d:
 
 	def is_update_available(self,mirror):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			result = self.client.MirrorManager.is_update_available(mirror)
 			return result
 		except Exception as e:
@@ -267,9 +268,9 @@ class LliurexMirrorN4d:
 	def stop_update(self):
 		try:
 			if self.mode == '2':
-				self.localclient.credential = Credential(*self.localcredentials)
+				self.localclient.credential = self.localcredentials
 				self.localclient.MirrorManager.stop_webserver(self.localport)
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			result = self.client.MirrorManager.stopupdate()
 			return True
 			#return result['status']
@@ -280,9 +281,9 @@ class LliurexMirrorN4d:
 
 	def stop_export(self):
 		try:
-			self.client.credential = Credential(*self.credentials)
+			self.client.credential = self.credentials
 			self.client.MirrorManager.stop_webserver(self.remoteport)
-			self.localclient.credential = Credential(*self.localcredentials)
+			self.localclient.credential = self.localcredentials
 			try:
 				result = self.localclient.MirrorManager.stopgetmirror()
 			except Exception as e:
