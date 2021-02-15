@@ -331,6 +331,7 @@ if [ $verify ]; then
                 SHA1SUM=$(which sha1sum)
                 if [ -z "${SHA1SUM}" -o ! -f "$SHA1SUM" ];then
                     echo "sha1sum not found, install coreutils first!, skipping verify process"
+                else
                     if [ -f "$VAR_DIR/$t" ]; then
                         ret1=$(cd $MIRROR_DIR;LANG=C sha1sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
                     else
@@ -342,6 +343,7 @@ if [ $verify ]; then
                 SHA256SUM=$(which sha256sum)
                 if [ -z "${SHA256SUM}" -o ! -f "$SHA256SUM" ];then
                     echo "sha256sum not found, install coreutils first!, skipping verify process"
+                else
                     if [ -f "$VAR_DIR/$t" ]; then
                         ret2=$(cd $MIRROR_DIR;LANG=C sha256sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
                     else
@@ -353,6 +355,7 @@ if [ $verify ]; then
                 MD5SUM=$(which md5sum)
                 if [ -z "${MD5SUM}" -o ! -f "$MD5SUM" ];then
                     echo "md5sum not found, install coreutils first!, skipping verify process"
+                else
                     if [ -f "$VAR_DIR/$t" ]; then
                         ret3=$(cd $MIRROR_DIR;LANG=C md5sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
                     else
@@ -383,8 +386,8 @@ if [ $verify ]; then
         done
     fi
     if [ $q -eq 1 -o ! -z "$retry_failed" ];then
-        echo "Retrying some packages"
         if [ $(echo $ret1|wc -c) -gt 1 -o $(echo $ret2|wc -c) -gt 1  -o $(echo $ret3|wc -c) -gt 1 ];then
+            echo "Retrying some packages"
             nretry=0
             for x in $ret1; do
                 if [ -f "$MIRROR_DIR/$x" ];then
