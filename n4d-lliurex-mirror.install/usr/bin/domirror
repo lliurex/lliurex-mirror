@@ -304,6 +304,7 @@ if [ $interactive -a $execute ]; then
         printf "[%3s%%]\n" "$?"
         getpids
     done;
+    printf "[%3s%%]\n" "100"
 fi
 
 if [ $verify ]; then
