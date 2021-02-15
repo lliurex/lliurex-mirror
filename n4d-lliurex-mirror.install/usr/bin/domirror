@@ -1,5 +1,6 @@
 #!/bin/bash
 
+DISTRO='bionic'
 #set cleanscript $var_path/clean.sh
 #set defaultarch  amd64
 #set postmirror_script $var_path/postmirror.sh
@@ -23,23 +24,23 @@
 ##clean http://archive.ubuntu.com/ubuntu
 CONFIG="
 set base_path    /tmp
-set mirror_path  $base_path/mirror-bionic
+set mirror_path  $base_path/mirror-$DISTRO
 set skel_path    $mirror_path/skel
 set var_path     $mirror_path/var
 set nthreads     20
 set _tilde 0
 set _autoclean 1
 
-deb-i386 http://lliurex.net/bionic bionic main/debian-installer
-deb-amd64 http://lliurex.net/bionic bionic main/debian-installer
-deb-i386 http://lliurex.net/bionic bionic-updates main/debian-installer
-deb-amd64 http://lliurex.net/bionic bionic-updates main/debian-installer
-deb-i386 http://lliurex.net/bionic bionic-security main/debian-installer
-deb-amd64 http://lliurex.net/bionic bionic-security main/debian-installer
-clean http://lliurex.net/bionic
+deb-i386 http://lliurex.net/$DISTRO $DISTRO main/debian-installer
+deb-amd64 http://lliurex.net/$DISTRO $DISTRO main/debian-installer
+deb-i386 http://lliurex.net/$DISTRO $DISTRO-updates main/debian-installer
+deb-amd64 http://lliurex.net/$DISTRO $DISTRO-updates main/debian-installer
+deb-i386 http://lliurex.net/$DISTRO $DISTRO-security main/debian-installer
+deb-amd64 http://lliurex.net/$DISTRO $DISTRO-security main/debian-installer
+clean http://lliurex.net/$DISTRO
 "
 
-# MIRRORDIR=/tmp/mirror-bionic
+# MIRRORDIR=/tmp/mirror-$DISTRO
 # ALLDIR=$MIRRORDIR/var/ALL
 # SIGFILES="MD5 SHA1 SHA256"
 # SIGDIR=$MIRRORDIR/var
@@ -111,7 +112,46 @@ else
         exit 1
     fi
 fi
-
+REALPATH=$(which realpath)
+if [ -z "${REALPATH}" -o ! -f "$REALPATH" ];then
+    echo "Realpath not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+COMM=$(which comm)
+if [ -z "${COMM}" -o ! -f "$COMM" ];then
+    echo "Comm not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+DIRNAME=$(which dirname)
+if [ -z "${DIRNAME}" -o ! -f "$DIRNAME" ];then
+    echo "dirname not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+BASENAME=$(which basename)
+if [ -z "${BASENAME}" -o ! -f "$BASENAME" ];then
+    echo "Basename not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+MKTEMP=$(which mktemp)
+if [ -z "${MKTEMP}" -o ! -f "$MKTEMP" ];then
+    echo "mktemp not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+APTMIRROR=$(which apt-mirror)
+if [ -z "${APTMIRROR}" -o ! -f "$APTMIRROR" ];then
+    echo "apt-mirror not found, install apt-mirror first!, unable to continue"
+    exit 1
+fi
+PGREP=$(which pgrep)
+if [ -z "${PGREP}" -o ! -f "$PGREP" ];then
+    echo "pgrep not found, install procps first!, unable to continue"
+    exit 1
+fi
+GPG=$(which gpg)
+if [ -z "${GPG}" -o ! -f "$GPG" ];then
+    echo "gpg not found, install gpg first!, unable to continue"
+    exit 1
+fi
 MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
 if [ -z "$MIRROR_DIR" ];then
     echo "Unable to read MIRROR_DIR"
@@ -136,8 +176,8 @@ if [ -n "$incremental" ];then
 fi
 
 make_temps(){
-    TMP_CURRENT="$(mktemp)"
-    TMP_ALL="$(mktemp)"
+    TMP_CURRENT="$($MKTEMP)"
+    TMP_ALL="$($MKTEMP)"
 }
 make_temps
 
@@ -155,17 +195,17 @@ badthings(){
 
 run(){
     if [ $config_file ];then
-        $(cat $config_file|apt-mirror &>/dev/null &)
+        $($APTMIRROR $config_file &>/dev/null &)
     else
-        $(apt-mirror &>/dev/null &)
+        $($APTMIRROR &>/dev/null &)
     fi
-    pid=$(pgrep -P $ME||true)
+    pid=$($PGREP -P $ME||true)
 }
 
 getpids(){
-    pid=$(pgrep -f apt-mirror||true)
+    pid=$($PGREP -f apt-mirror||true)
     if [ -n "$pid" ];then
-        gets=$(pgrep -P $pid -f wget||true)
+        gets=$($PGREP -P $pid -f wget||true)
     else
         gets=""
     fi
@@ -173,8 +213,8 @@ getpids(){
 
 make_link(){
     if [ -d "$MIRROR_DIR/pool" -a ! -L "$MIRROR_DIR/pool" ]; then
-        mkdir -p $MIRROR_DIR/lliurex.net/bionic
-        mv $MIRROR_DIR/pool $MIRROR_DIR/lliurex.net/bionic
+        mkdir -p $MIRROR_DIR/lliurex.net/$DISTRO
+        mv $MIRROR_DIR/pool $MIRROR_DIR/lliurex.net/$DISTRO
     fi
     if [ ! -L "$MIRROR_DIR/pool" ];then
         POOL=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'pool')
@@ -182,23 +222,25 @@ make_link(){
             if [ "$(echo $POOL|tr '\n' ' '| wc -w)" -gt 1 ];then
                 POOL=$(echo $POOL|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
             fi
-            ln -s lliurex.net/bionic/pool $MIRROR_DIR/pool
-            # Absolute link
-            # ln -s $POOL $MIRROR_DIR/pool
+            rp="$($REALPATH --relative-to=$MIRROR_DIR $POOL)"
+            if [ -n "$rp" ];then
+                ln -s $rp $MIRROR_DIR/pool
+            fi
         fi
     fi
     if [ -d "$MIRROR_DIR/dists" -a ! -L "$MIRROR_DIR/dists" ];then
         mv $MIRROR_DIR/dists $MIRROR_DIR/old_dists
     fi
     if [ ! -L "$MIRROR_DIR/dists" ];then
-        DISTS=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'dists')
+        DISTS=$(find $MIRROR_DIR -type d -path '*/skel/*' -name 'dists')
         if [ -n "$DISTS" ]; then
             if [ "$(echo $DISTS|tr '\n' ' '|wc -w)" -gt 1 ];then
                 DISTS=$(echo $DISTS|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
             fi
-            ln -s skel/lliurex.net/bionic/dists $MIRROR_DIR/dists
-            # Absolute link
-            # ln -s $DISTS $MIRROR_DIR/dists
+            rp="$($REALPATH --relative-to=$MIRROR_DIR $DISTS)"
+            if [ -n "$rp" ];then
+                ln -s $rp $MIRROR_DIR/dists
+            fi
         fi
     fi
 }
@@ -211,22 +253,22 @@ calcule(){
     if [ -f $ALL_FILE ]; then
         retry=2
         while [ $retry -gt 0 ]; do
-            asize1=$(echo $(ls -s /net/mirror/llx19/var/ALL |cut -d/ -f1))
+            asize1=$(echo $(ls -s $ALL_FILE |cut -d/ -f1))
             sleep 1
-            asize2=$(echo $(ls -s /net/mirror/llx19/var/ALL |cut -d/ -f1))
+            asize2=$(echo $(ls -s $ALL_FILE |cut -d/ -f1))
             retry=$(($retry-1))
         done
-        if [ "x$asize1" != "x$asize2" ]; then
+        if [ -n "$asize1" -a "x$asize1" != "x$asize2" ]; then
             return $OLD_PERCENT
         fi
         cat $ALL_FILE |sort|uniq > $TMP_ALL
         if [ -n "$incremental" ]; then
             find $MIRROR_DIR -type f \( -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -E 's@.*(lliurex\.net)(.*)@\1\2@'|sort|uniq > $TMP_CURRENT
-            old=$(comm -23 $TMP_CURRENT $TMP_ALL)
+            old=$($COMM -23 $TMP_CURRENT $TMP_ALL)
             if [ -n "$old" ];then
                 for x in $old; do
-                    dn=$(dirname $x)
-                    bn=$(basename $x)
+                    dn=$($DIRNAME $x)
+                    bn=$($BASENAME $x)
                     mkdir -p $OLD_DIR/$dn
                     mv $MIRROR_DIR/$x $OLD_DIR/$dn/$bn
                 done
@@ -271,7 +313,7 @@ if [ $verify ]; then
     find $MIRROR_DIR -type f -name InRelease \( -not -path '*/var/*' -not -path '*/skel/*' \) | while read file; do
         valid=0
         for kring in $KEYRINGS; do
-            if gpg --keyring $kring --verify $file  &> /dev/null; then
+            if $GPG --keyring $kring --verify $file  &> /dev/null; then
                 valid=1
             fi
         done;
@@ -285,13 +327,37 @@ if [ $verify ]; then
     for t in $SIGFILES; do
         case $t in
             SHA1)
-                ret1=$(cd $MIRROR_DIR;LANG=C sha1sum --quiet -c $MIRROR_DIR/var/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                SHA1SUM=$(which sha1sum)
+                if [ -z "${SHA1SUM}" -o ! -f "$SHA1SUM" ];then
+                    echo "sha1sum not found, install coreutils first!, skipping verify process"
+                    if [ -f "$VAR_DIR/$t" ]; then
+                        ret1=$(cd $MIRROR_DIR;LANG=C sha1sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                    else
+                        echo "skipping $t checking, sumfile not available"
+                    fi
+                fi
             ;;
             SHA256)
-                ret2=$(cd $MIRROR_DIR;LANG=C sha256sum --quiet -c $MIRROR_DIR/var/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                SHA256SUM=$(which sha256sum)
+                if [ -z "${SHA256SUM}" -o ! -f "$SHA256SUM" ];then
+                    echo "sha256sum not found, install coreutils first!, skipping verify process"
+                    if [ -f "$VAR_DIR/$t" ]; then
+                        ret2=$(cd $MIRROR_DIR;LANG=C sha256sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                    else
+                        echo "skipping $t checking, sumfile not available"
+                    fi
+                fi
             ;;
             MD5)
-                ret3=$(cd $MIRROR_DIR;LANG=C md5sum --quiet -c $MIRROR_DIR/var/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                MD5SUM=$(which md5sum)
+                if [ -z "${MD5SUM}" -o ! -f "$MD5SUM" ];then
+                    echo "md5sum not found, install coreutils first!, skipping verify process"
+                    if [ -f "$VAR_DIR/$t" ]; then
+                        ret3=$(cd $MIRROR_DIR;LANG=C md5sum --quiet -c $VAR_DIR/$t 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                    else
+                        echo "skipping $t checking, sumfile not available"
+                    fi
+                fi
             ;;
         esac
     done
@@ -300,7 +366,7 @@ if [ $verify ]; then
     q=0
     if [ ! $retry_failed ];then
         while [ $q -eq 0 ]; do
-            echo -n "$nfailed files failed md5sum, [R|r]etry [S|s]how [C|c]ontinue ?"
+            echo -n "$nfailed files failed verify process, [R|r]etry [S|s]how [C|c]ontinue ?"
             read x;
             case $x in
                 s|S)
@@ -349,7 +415,7 @@ if [ $verify ]; then
                     nretry=$(($nretry+1))
                 fi
             done
-            echo $nretry files for redownload
+            echo "$nretry files for redownload"
             if [ -f $TMP_CURRENT ]; then
                 rm $TMP_CURRENT
             fi
