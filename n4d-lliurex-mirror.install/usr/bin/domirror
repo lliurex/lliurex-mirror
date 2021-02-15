@@ -191,6 +191,7 @@ badthings(){
 }
 
 run(){
+    make_link
     if [ $config_file ];then
         $($APTMIRROR $config_file &>/dev/null &)
     else
@@ -214,7 +215,7 @@ make_link(){
         mv $MIRROR_DIR/pool $MIRROR_DIR/lliurex.net/$DISTRO
     fi
     if [ ! -L "$MIRROR_DIR/pool" ];then
-        POOL=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'pool')
+        POOL=$(find $MIRROR_DIR -type d -not -path '*/skel/*' -name 'pool' -print)
         if [ -n "$POOL" ]; then
             if [ "$(echo $POOL|tr '\n' ' '| wc -w)" -gt 1 ];then
                 POOL=$(echo $POOL|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
@@ -229,7 +230,7 @@ make_link(){
         mv $MIRROR_DIR/dists $MIRROR_DIR/old_dists
     fi
     if [ ! -L "$MIRROR_DIR/dists" ];then
-        DISTS=$(find $MIRROR_DIR -type d -path '*/skel/*' -name 'dists')
+        DISTS=$(find $MIRROR_DIR -type d -path '*/skel/*' -name 'dists' -print)
         if [ -n "$DISTS" ]; then
             if [ "$(echo $DISTS|tr '\n' ' '|wc -w)" -gt 1 ];then
                 DISTS=$(echo $DISTS|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
