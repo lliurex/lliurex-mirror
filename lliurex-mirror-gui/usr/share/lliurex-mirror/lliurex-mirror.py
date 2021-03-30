@@ -20,7 +20,11 @@ import math
 import sys
 import tempfile
 from math import pi
-import lliurex_mirror_connect
+try:
+	import lliurex_mirror_connect
+except:
+	sys.path.insert(0,'/usr/share/lliurex-mirror')
+	import lliurex_mirror_connect
 
 from gi.repository import Gtk, Gdk, GObject, GLib, PangoCairo, Pango,GdkPixbuf
 
@@ -829,7 +833,7 @@ class LliurexMirror:
 		
 			m=MirrorButton(self.mirrors[key])
 			m.info["KEY"]=key
-			if mirror_key:
+			if mirror_key.get('status'):
 				m.info["executing"]=True
 				m.info["updating"]=True
 				self.updating_mirror=m
@@ -1576,7 +1580,7 @@ class LliurexMirror:
 
 		'''
 
-		if ret:
+		if ((isinstance(ret,dict) and ret.get('status')) or (isinstance(ret,bool) and ret)):
 			return True
 		else:
 			
@@ -1592,7 +1596,7 @@ class LliurexMirror:
 
 			if not self.updating_mirror.info["cancelled"]:
 				ret=self.llx_conn.get_status(self.updating_mirror.info["KEY"])
-				if ret:
+				if ((isinstance(ret,dict) and ret.get('status')) or (isinstance(ret,bool) and ret)):
 					pass
 				else:
 					error="Error:\n"
