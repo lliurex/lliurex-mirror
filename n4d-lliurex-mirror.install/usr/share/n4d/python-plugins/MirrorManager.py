@@ -981,12 +981,18 @@ class MirrorManager:
 	#def get_last_log(self):
 	
 	def is_mirror_available(self):
-		config=literal_eval(self.get_all_configs())
-		if not isinstance(config,dict):
-			return n4d.responses.build_unhandled_error_response()
-		path=str(config['msg'][self.distro]['MIRROR_PATH'])
+		# Used by admin-center-netinstall
+		config=self.get_all_configs()
+		if not isinstance(config,dict) or 'return' not in config or not isinstance(config['return'],dict) or self.distro not in config['return'] or not isinstance(config['return'][self.distro],dict):
+			return n4d.responses.build_failed_call_response(ret_msg='Unknown data from mirror')
+		else:
+			mirror_data = config.get('return').get(self.distro)
+
+		path=str(mirror_data.get('MIRROR_PATH'))
+		if not path:
+			return n4d.responses.build_failed_call_response(ret_msg='MIRROR_PATH not available into mirror data')
 		found=False
-		for root,dirnames,filenames in os.walk(path+'/pool/main/l/lliurex-version-timestamp/'):
+		for root,dirnames,filenames in os.walk(os.path.realpath(os.path.join(path,'/pool/main/l/lliurex-version-timestamp/'))):
 			for filename in fnmatch.filter(filenames,'lliurex-version-timestamp_*.deb'):
 				found=True
 		if found:
