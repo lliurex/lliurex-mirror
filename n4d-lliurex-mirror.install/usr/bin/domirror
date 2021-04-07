@@ -455,6 +455,7 @@ if [ -n "$last_update" ]; then
 else
     echo "WARNING! Can't download time-of-last-update file"
 fi
+make_link
 echo "End apt-mirror"
 if [ -f $TMP_CURRENT ]; then
     rm $TMP_CURRENT
