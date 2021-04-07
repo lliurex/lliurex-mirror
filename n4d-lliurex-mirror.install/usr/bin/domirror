@@ -153,6 +153,7 @@ if [ -z "${GPG}" -o ! -f "$GPG" ];then
     exit 1
 fi
 MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
+MIRROR_DIR=$($REALPATH $MIRROR_DIR)
 if [ -z "$MIRROR_DIR" ];then
     echo "Unable to read MIRROR_DIR"
     exit 1
@@ -186,6 +187,10 @@ trap badthings SIGUSR1
 
 badthings(){
     echo Killing $SON
+    if [ -z "$gets" ]; then
+    echo Nothing to kill
+    return
+    fi
     for x in $gets; do 
         kill -9 $x &> /dev/null
     done
@@ -263,9 +268,10 @@ calcule(){
             return $OLD_PERCENT
         fi
         cat $ALL_FILE |sort|uniq > $TMP_ALL
+        find $MIRROR_DIR -type f \( -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sort|uniq|sed -E 's@.*(lliurex\.net)(.*)@\1\2@' > $TMP_CURRENT
+        old=$($COMM -23 $TMP_CURRENT $TMP_ALL)
+        mirror_dir_len=$(($(echo $MIRROR_DIR | wc -c)-1))
         if [ -n "$incremental" ]; then
-            find $MIRROR_DIR -type f \( -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -E 's@.*(lliurex\.net)(.*)@\1\2@'|sort|uniq > $TMP_CURRENT
-            old=$($COMM -23 $TMP_CURRENT $TMP_ALL)
             if [ -n "$old" ];then
                 for x in $old; do
                     dn=$($DIRNAME $x)
@@ -274,10 +280,22 @@ calcule(){
                     mv $MIRROR_DIR/$x $OLD_DIR/$dn/$bn
                 done
             fi
+        else
+            echo $old | xargs -n1 | while read file; do
+                rp=$(realpath -e $MIRROR_DIR/$file)
+                if [ $? -eq 0 -a -n "$mirror_dir_len" -a "x0" != "x$mirror_dir_len" ]; then
+                    tmp=$(echo $MIRROR_DIR/$file|cut -c -$mirror_dir_len)
+                    if [ -n "$tmp" ]; then
+                        if [ "x$tmp" == "x$MIRROR_DIR" -a -f $MIRROR_DIR/$file ];then
+                            rm $MIRROR_DIR/$file
+                        fi
+                    fi
+                fi
+            done
         fi
-        find $MIRROR_DIR -type f \( -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sort|sed -E 's@.*(lliurex\.net)(.*)@\1\2@' > $TMP_CURRENT
-        ncurrent=$(cat $TMP_CURRENT|sort|uniq|wc -l)
-        nall=$(cat $TMP_ALL|sort|uniq|wc -l)
+        find $MIRROR_DIR -type f \( -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sort|uniq|sed -E 's@.*(lliurex\.net)(.*)@\1\2@' > $TMP_CURRENT
+        ncurrent=$(cat $TMP_CURRENT|wc -l)
+        nall=$(cat $TMP_ALL|wc -l)
         if [ -n "$nall" -a -n "$ncurrent" -a $ncurrent -gt 0 -a $nall -ge $ncurrent ]; then
             percent=$(echo $ncurrent*100/$nall|bc -q)
             make_link;
@@ -312,7 +330,7 @@ fi
 
 if [ $verify ]; then
     echo "Verifying mirror"
-    find $MIRROR_DIR -type f -name InRelease \( -not -path '*/var/*' -not -path '*/skel/*' \) | while read file; do
+    find $MIRROR_DIR -type f -name InRelease \( -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/old/*' \) | while read file; do
         valid=0
         for kring in $KEYRINGS; do
             if $GPG --keyring $kring --verify $file  &> /dev/null; then
@@ -430,6 +448,12 @@ if [ $verify ]; then
             exec bash $0 --config-file=$config_used
         fi
     fi
+fi
+last_update="$(wget -q http://lliurex.net/$DISTRO/time-of-last-update -O -)"
+if [ -n "$last_update" ]; then
+    echo $last_update > $MIRROR_DIR/time-of-last-update
+else
+    echo "WARNING! Can't download time-of-last-update file"
 fi
 echo "End apt-mirror"
 if [ -f $TMP_CURRENT ]; then

@@ -60,7 +60,7 @@ class MirrorManager:
 		self.update_thread=threading.Thread()
 		self.get_mirror_thread = threading.Thread()
 		self.percentage=(0,None)
-		self.exportpercentage = 0
+		self.exportpercentage = (None,None)
 		self.mirrorworking = None
 		self.webserverprocess = {}
 		self.defaultmirrorinfo = {"status_mirror":"New","last_mirror_date":None,"mirror_size":0,"progress":0}
@@ -783,7 +783,7 @@ class MirrorManager:
 	#def get_all_configs
 
 	def update_mirror_config(self,mirror,config):
-		configpath = os.path.join(self.configpaths,mirror + ".json")
+		configpath = os.path.join(self.llxconfigspath,mirror + ".json")
 
 		f=open(configpath,"w")
 
