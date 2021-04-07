@@ -282,7 +282,7 @@ calcule(){
             fi
         else
             echo $old | xargs -n1 | while read file; do
-                rp=$(realpath -e $MIRROR_DIR/$file)
+                rp=$(realpath -e $MIRROR_DIR/$file >/dev/null 2>&1)
                 if [ $? -eq 0 -a -n "$mirror_dir_len" -a "x0" != "x$mirror_dir_len" ]; then
                     tmp=$(echo $MIRROR_DIR/$file|cut -c -$mirror_dir_len)
                     if [ -n "$tmp" ]; then
