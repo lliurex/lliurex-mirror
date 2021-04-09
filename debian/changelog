@@ -1,3 +1,9 @@
+lliurex-mirror (32.2) focal; urgency=medium
+
+  * Fix startup & remove literal eval 
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 09 Apr 2021 13:06:24 +0200
+
 lliurex-mirror (32.1) focal; urgency=medium
 
   * Netinstall fix
