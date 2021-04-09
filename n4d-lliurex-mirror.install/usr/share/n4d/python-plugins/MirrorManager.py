@@ -29,7 +29,6 @@ from n4d.client import Client
 import base64
 import ssl
 from n4d.client import Client
-from ast import literal_eval
 
 DEBUG = True
 
@@ -128,14 +127,18 @@ class MirrorManager:
 			self.variable={}
 		
 		try:
-			for repo in literal_eval(self.get_available_mirrors().get('msg',None)):
-				if isinstance(self.variable,dict) and repo in self.variable and isinstance(self.variable[repo],dict) and "status_mirror" in self.variable[repo] and self.variable[repo]["status_mirror"] == "Working":
-					if not self.update_thread.isAlive():
-						self.variable[repo]["status_mirror"] = "Error"
-						self.n4d.set_variable("LLIUREXMIRROR",self.variable)
-				else:
-					if isinstance(self.variable,dict) and repo not in self.variable:
-						self.variable[repo] = self.defaultmirrorinfo
+			mirrors = self.get_available_mirrors().get('return',None)
+			if mirrors:
+				for repo in mirrors:
+					if repo in self.variable and isinstance(self.variable[repo],dict) and "status_mirror" in self.variable[repo] and self.variable[repo]["status_mirror"] == "Working":
+						if not self.update_thread.isAlive():
+							self.variable[repo]["status_mirror"] = "Error"
+					else:
+						if repo not in self.variable:
+							self.variable[repo] = self.defaultmirrorinfo
+				for other in [ key for key in self.variable.keys() if key not in mirrors ]:
+					del self.variable[other]
+				self.n4d.set_variable("LLIUREXMIRROR",self.variable)
 		except Exception as e:
 			pass
 	#def startup
@@ -992,7 +995,7 @@ class MirrorManager:
 		if not path:
 			return n4d.responses.build_failed_call_response(ret_msg='MIRROR_PATH not available into mirror data')
 		found=False
-		for root,dirnames,filenames in os.walk(os.path.realpath(os.path.join(path,'/pool/main/l/lliurex-version-timestamp/'))):
+		for root,dirnames,filenames in os.walk(os.path.realpath(os.path.join(path,'pool/main/l/lliurex-version-timestamp/'))):
 			for filename in fnmatch.filter(filenames,'lliurex-version-timestamp_*.deb'):
 				found=True
 		if found:
