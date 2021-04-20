@@ -16,7 +16,7 @@ case $1 in
 		fi
 
 		invoke-rc.d apache2 reload || true
-                n4d-modules enable-plugin /etc/n4d/conf.d/MirrorManager || true		
+                n4d-modules enable-plugin /etc/n4d/conf.d/MirrorManager.json || true
 
         for configurationfile in $(ls /usr/share/lliurex-mirror/conf); do
         	if [ ! -e "/etc/lliurex-mirror/conf/${configurationfile}" ];then

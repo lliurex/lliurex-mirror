@@ -1,3 +1,9 @@
+lliurex-mirror (32.2.1) focal; urgency=medium
+
+  * Fix postinst enabling n4d module 
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 20 Apr 2021 11:13:21 +0200
+
 lliurex-mirror (32.2) focal; urgency=medium
 
   * Fix startup & remove literal eval 
