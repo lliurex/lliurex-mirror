@@ -84,6 +84,7 @@ class MirrorManager:
 						'llx21':	'/usr/share/lliurex-mirror/conf/llx21.json',
 						'llx19':	'/usr/share/lliurex-mirror/conf/llx19.json',
 					    }
+		self.variable = {}
 		self.default_mirror_config = '''
 {
 	"NAME": "",
@@ -598,12 +599,15 @@ class MirrorManager:
 	#def set_option_update
 
 	def get_percentage(self,distro):
-		if isinstance(self.variable,dict) and distro in self.variable:
-			return n4d.responses.build_successful_call_response(self.variable[distro]['progress'])
-			# return {'status':True,'msg':self.variable[distro]['progress']}
-		else:
-			return n4d.responses.build_failed_call_response(ret_msg='this repo not has been configured')
-			# return {'status':False,'msg':'this repo nos has been configured'}
+		try:
+			if isinstance(self.variable,dict) and distro in self.variable:
+				return n4d.responses.build_successful_call_response(self.variable[distro]['progress'])
+				# return {'status':True,'msg':self.variable[distro]['progress']}
+			else:
+				return n4d.responses.build_failed_call_response(ret_msg='this repo not has been configured')
+				# return {'status':False,'msg':'this repo nos has been configured'}
+		except Exception as e:
+			return n4d.responses.build_failed_call_response(ret_msg=str(e))
 	#def get_percentage
 
 	def build_debmirror_config(self,distro):

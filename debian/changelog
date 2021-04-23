@@ -1,3 +1,9 @@
+lliurex-mirror (32.2.6) focal; urgency=medium
+
+  * Fix initialization issues
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 23 Apr 2021 15:59:57 +0200
+
 lliurex-mirror (32.2.5) focal; urgency=medium
 
   * Fix mirror dir initial creation
