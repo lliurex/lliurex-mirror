@@ -979,8 +979,8 @@ class MirrorManager:
 		f = open(path,'r')
 		content = f.readlines()
 		onelinecontent = ''.join(content)
-		if isinstance(onlinecontent,str):
-			onlinecontent = onlinecontent.encode('utf8')
+		if isinstance(onelinecontent,str):
+			onelinecontent = onelinecontent.encode('utf8')
 		return n4d.responses.build_successful_call_response('{}'.format(base64.b64encode(onelinecontent)))
 		# return {'status':True,'msg':base64.b64encode(onelinecontent)}
 	#def get_last_log(self):
