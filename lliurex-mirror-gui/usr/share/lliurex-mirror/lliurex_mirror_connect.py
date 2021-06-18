@@ -1,9 +1,10 @@
 #import xmlrpclib
-import xmlrpc.client as x
-import ssl
+#import xmlrpc.client as x
+#import ssl
 import base64
 import tempfile
 import os
+from n4d.client import Client,Key,Credential
 
 class LliurexMirrorN4d:
 	def __init__(self,server,credentials):
@@ -13,21 +14,16 @@ class LliurexMirrorN4d:
 		self.localclient = None
 		self.connect(server)
 		self.local_connect()
-		self.credentials = credentials
-		self.localcredentials = self.get_local_credentials()
+		self.credentials = Credential(*credentials)
+		self.localcredentials = Credential(key=self.get_local_credentials())
 		self.localport = None
-		self.remoteport = None
-		
+		self.remoteport = None		
 		self.key_list=["NAME","ARCHITECTURES","CURRENT_UPDATE_OPTION","BANNER","DISTROS","SECTIONS","MIRROR_PATH","ORIGS","CHK_MD5","IGN_GPG","IGN_RELEASE"]
-		
-		
 	#def __init__
 
 
 	def connect(self,server):
-		context=ssl._create_unverified_context()
-		self.client = x.ServerProxy("https://%s:9779"%server,context=context,allow_none=True)
-#		self.client = xmlrpclib.ServerProxy('https://' + server + ':9779',allow_none=True)
+		self.client = Client(address="https://{}:9779".format(server))
 		self.serverip = server
 		try:
 			self.client.get_methods()
@@ -38,9 +34,7 @@ class LliurexMirrorN4d:
 	#def connect
 
 	def local_connect(self):
-		context=ssl._create_unverified_context()
-		self.localclient = x.ServerProxy("https://localhost:9779",context=context,allow_none=True)
-#		self.localclient = xmlrpclib.ServerProxy('https://localhost:9779',allow_none=True)
+		self.localclient = Client()
 		try:
 			self.localclient.get_methods()
 		except:
@@ -50,21 +44,22 @@ class LliurexMirrorN4d:
 	#def connect
 
 	def get_local_credentials(self):
-		try:
-			f = open('/etc/n4d/key','r')
-			key = f.readline().strip()
-			return key
-		except:
+		k = Key.master_key()
+		if k.valid():
+			return k
+		else:
 			return None
 
 	def mirror_list(self):
 		try:
 			if type(self.client) == type(None):
 				return {}
-			result = self.client.get_all_configs(self.credentials,'MirrorManager')
-			if not result['status']:
+			try:
+				result = self.client.MirrorManager.get_all_configs()
+			except Exception as e:
+				print("Unable to get mirror configurations, {}".format(e))
 				return {}
-			return result['msg']
+			return result
 		except:
 			return {}
 			
@@ -72,49 +67,44 @@ class LliurexMirrorN4d:
 
 	def is_alive(self):
 		try:
-			return self.client.is_alive(self.credentials,'MirrorManager')
+			self.client.credential = self.credentials
+			return self.client.MirrorManager.is_alive()
 		except:
 			return {'status':False,'msg':None}
 			
 	#def is_alive
 	
 	def save_config(self,mirror,config):
-		
 		try:
-		
 			parsed_mirror={}
-			
 			for key in self.key_list:
 				parsed_mirror[key]=config[key]
-			
-			
-			result = self.client.update_mirror_config(self.credentials,'MirrorManager',mirror,parsed_mirror)
+			try:
+				self.client.credential = self.credentials
+				result = self.client.MirrorManager.update_mirror_config(mirror,parsed_mirror)
+			except Exception as e:
+				print("Fail to update mirror config, {}".format(e))
+				return None
 			return result
-			
 		except Exception as e:
 			print ("[!] Error saving configuration: [!]")
 			print (e)
 			return None
-		
 	#def save_config
 
 	def create_config(self,config):
-		
 		try:
-		
 			if type(self.client) == type(None):
 				return {}
-			result = self.client.new_mirror_config(self.credentials,'MirrorManager',config)
-		
-			if result['status']:
-				return result['msg']
-				
+			try:
+				self.client.credential = self.credentials
+				result = self.client.MirrorManager.new_mirror_config(config)
+			except Exception as e:
+				print('Error creating new mirror configuration, {}'.format(e))
+				return {}
+			return result
 		except:
-			
 			return {}
-		
-		
-		
 	#def create_conf
 
 	def update(self,mirror,mode,data=None):
@@ -127,127 +117,132 @@ class LliurexMirrorN4d:
 		
 			self.mode = None
 			self.localport = None
-			callback_args = None
+			callback_args = {}
 			if mode == '2':
 				self.mode = 2 
-				result = self.client.get_client_ip('','MirrorManager','')
-				tempserver = result['msg']
-				result = self.localclient.enable_webserver_into_folder(self.localcredentials,'MirrorManager',data)
-				print (result)
-				tempserver = tempserver + ":" + str(result['msg'])
+				try:
+					self.client.credential = self.credentials
+					tempserver = self.client.MirrorManager.get_client_ip('','')
+				except Exception as e:
+					print('Error getting client ip,{}'.format(e))
+					return None
+				try:
+					self.localclient.credential = self.localcredentials
+					result = self.localclient.MirrorManager.enable_webserver_into_folder(data)
+				except Exception as e:
+					print('Error enabling local webserver, {}'.format(e))
+					return None
+				tempserver = "{}:{}".format(tempserver,result)
 				data = tempserver
-				callback_args = {}
-				callback_args['port'] = str(result['msg'])
-				self.localport = str(result['msg'])
+				callback_args['port'] = str(result)
+				self.localport = str(result)
 			if data != None:
-				self.client.set_mirror_orig(self.credentials,'MirrorManager',mirror,data,mode)
-			self.client.set_option_update(self.credentials,'MirrorManager',mirror,mode)
-			result = self.client.update(self.credentials,'MirrorManager','',mirror,callback_args)
-			return result['status']
-			
+				try:
+					self.client.credential = self.credentials
+					self.client.MirrorManager.set_mirror_orig(mirror,data,mode)
+				except Exception as e:
+					print('Error setting mirrir origin,{}'.format(e))
+			try:
+				self.client.credential = self.credentials
+				self.client.MirrorManager.set_option_update(mirror,mode)
+				result = self.client.MirrorManager.update('','',mirror,callback_args)
+			except Exception as e:
+				print('Error updating mirror,{}'.format(e))
+				return None
+			return result
 		except Exception as e:
-			print (e)
-			
+			print(e)
 			return None
-			
 	#def update
 
 	def export(self, mirror,folder):
-		
 		try:
 			# Get config for this mirror
-			result = self.client.get_all_configs(self.credentials,'MirrorManager')
-			config = result['msg'][mirror]
-			result = self.client.get_client_ip('','MirrorManager','')
-			ip = result['msg']
+			self.client.credential = self.credentials
+			result = self.client.MirrorManager.get_all_configs()
+			config = result[mirror]
+			ip = self.client.MirrorManager.get_client_ip('','')
+
 			# Open webserver for mirror and get ip
-			result = self.client.enable_webserver_into_folder(self.credentials,'MirrorManager',config['MIRROR_PATH'])
-			port = str(result['msg'])
-			self.remoteport = port
+			port = self.client.MirrorManager.enable_webserver_into_folder(config['MIRROR_PATH'])
+			self.remoteport = str(port)
 			# Modify Config and write
 			
 			config['MIRROR_PATH'] = folder
 			config['CURRENT_UPDATE_OPTION'] = '3'
 			config['ORIGS']['3'] = self.serverip + ":" + str(port)
-			result = self.client.render_debmirror_config(self.credentials,'MirrorManager',config)
+			result = self.client.MirrorManager.render_debmirror_config(config)
 			temp_file = tempfile.mktemp()
 			f = open(temp_file,'w')
-			f.write(result['msg'])
+			f.write(result)
 			f.close()
 			callback_args = {}
 			callback_args['ip'] = ip
 			callback_args['port'] = port
 			# Execute mirror
-			print (self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args))
+			self.localclient.credential = self.localcredentials
+			print(self.localclient.MirrorManager.get_mirror(temp_file,callback_args))
 			return True
 		except:
-			
 			return False
 	#def export
 
 	def get_percentage_export(self):
 		try:
-			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
-			if isinstance(result,dict):
-			    msg=result.get('msg')
-			elif isinstance(result,(int,str)):
-			    msg=result
-			if isinstance(msg,(int,str)):
-			    return msg
-			elif isinstance(msg,(tuple,list)) and len(msg) > 0:
-			    return msg[0]
+			self.localclient.credential = self.localcredentials
+			result = self.localclient.MirrorManager.is_alive_get_mirror()
+			return result[1]
+			# if isinstance(result,dict):
+			#     msg=result.get('msg')
+			# elif isinstance(result,(int,str)):
+			#     msg=result
+			# if isinstance(msg,(int,str)):
+			#     return msg
+			# elif isinstance(msg,(tuple,list)) and len(msg) > 0:
+			#     return msg[0]
 		except Exception as e:
 			print (e)
 			return None
-			
 	#def get_percentage_export
 
 	def is_alive_export(self):
 		try:
-			result = self.localclient.is_alive_get_mirror(self.localcredentials,'MirrorManager')
+			self.localclient.credential = self.localcredentials
+			result = self.localclient.MirrorManager.is_alive_get_mirror()
+			return result[0]
+		except Exception as e:
+			print (e)
+			return None
+
+	def get_percentage(self,mirror):
+		try:
+			self.client.credential = self.credentials
+			result = self.client.MirrorManager.get_percentage(mirror)
 			return result
 		except Exception as e:
 			print (e)
 			return None
-		
-
-
-	def get_percentage(self,mirror):
-		
-		try:
-		
-			result = self.client.get_percentage(self.credentials,'MirrorManager',mirror)
-			if result['status'] :
-				return result['msg']
-				
-		except Exception as e:
-			print (e)
-			return None
-			
 	#def get_percentage
 
 	
 	def get_status(self,mirror):
-		
 		try:
-			var=self.client.get_variable(self.credentials,"VariablesManager","LLIUREXMIRROR")
+			self.client.credential = self.credentials
+			var=self.client.get_variable("LLIUREXMIRROR")
 			if var[mirror]["status_mirror"]=="Ok":
 				return {"status": True, "msg": None}
 			else:
 				return {"status": False, "msg": var[mirror]["exception_msg"]}
-				
 		except Exception as e:
 			return {"status": False, "msg": str(e) }
-			
 	#def get_status
 
 	
 	def get_last_log(self):
-		
 		try:
-		
-			ret=self.client.get_last_log(self.credentials,"MirrorManager")
-			txt=base64.b64decode(ret["msg"])
+			self.client.credential = self.credentials
+			ret=self.client.MirrorManager.get_last_log()
+			txt=base64.b64decode(ret)
 			if (isinstance(txt,bytes)):
 				txt=txt.decode()
 			tmp_file=tempfile.mkstemp(suffix=".lliurex-mirror.log")
@@ -255,45 +250,50 @@ class LliurexMirrorN4d:
 			f.write(txt)
 			f.close()
 			return tmp_file[1]
-			
 		except Exception as e:
 			print (e)
 			return None
-
 	#def get_last_log
 
 	def is_update_available(self,mirror):
 		try:
-			result = self.client.is_update_available(self.credentials,'MirrorManager',mirror)
-			return result['status']
+			self.client.credential = self.credentials
+			result = self.client.MirrorManager.is_update_available(mirror)
+			return result
 		except Exception as e:
 			print (e)
 			return None
-			
 	#def is_update_available
 
 	def stop_update(self):
 		try:
 			if self.mode == '2':
-				self.localclient.stop_webserver(self.credentials,'MirrorManager',self.localport)
-			result = self.client.stopupdate(self.credentials,'MirrorManager')
-			return result['status']
+				self.localclient.credential = self.localcredentials
+				self.localclient.MirrorManager.stop_webserver(self.localport)
+			self.client.credential = self.credentials
+			result = self.client.MirrorManager.stopupdate()
+			return True
+			#return result['status']
 		except Exception as e:
-			print (e)
+			print("{}".format(e))
 			return None
-			
 	#def stop_update
 
 	def stop_export(self):
-		
 		try:
-			self.client.stop_webserver(self.credentials,'MirrorManager',self.remoteport)
-			result = self.localclient.stopgetmirror(self.credentials,'MirrorManager')
-			return result['status']
+			self.client.credential = self.credentials
+			self.client.MirrorManager.stop_webserver(self.remoteport)
+			self.localclient.credential = self.localcredentials
+			try:
+				result = self.localclient.MirrorManager.stopgetmirror()
+			except Exception as e:
+				print("Error stopping localmirror, {}".format(e))
+				return None
+			return True
+			# result['status']
 		except Exception as e:
 			print (e)
 			return None
-			
 	#def stop_update
 
 

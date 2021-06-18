@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DISTRO='bionic'
+DISTRO='focal'
 #set cleanscript $var_path/clean.sh
 #set defaultarch  amd64
 #set postmirror_script $var_path/postmirror.sh
@@ -31,11 +31,8 @@ set nthreads     20
 set _tilde 0
 set _autoclean 1
 
-deb-i386 http://lliurex.net/$DISTRO $DISTRO main/debian-installer
 deb-amd64 http://lliurex.net/$DISTRO $DISTRO main/debian-installer
-deb-i386 http://lliurex.net/$DISTRO $DISTRO-updates main/debian-installer
 deb-amd64 http://lliurex.net/$DISTRO $DISTRO-updates main/debian-installer
-deb-i386 http://lliurex.net/$DISTRO $DISTRO-security main/debian-installer
 deb-amd64 http://lliurex.net/$DISTRO $DISTRO-security main/debian-installer
 clean http://lliurex.net/$DISTRO
 "
@@ -161,6 +158,7 @@ fi
 if [ ! -d $MIRROR_DIR ]; then
     mkdir -p $MIRROR_DIR
 fi
+MIRROR_DIR=$($REALPATH $MIRROR_DIR)
 VAR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+var_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g'|sed "s@\$base_path@$MIRROR_DIR@g")
 if [ ! -d $VAR_DIR ]; then
     mkdir -p $VAR_DIR
@@ -282,7 +280,7 @@ calcule(){
             fi
         else
             echo $old | xargs -n1 | while read file; do
-                rp=$(realpath -e $MIRROR_DIR/$file >/dev/null 2>&1)
+                rp=$(realpath -e $MIRROR_DIR/$file)
                 if [ $? -eq 0 -a -n "$mirror_dir_len" -a "x0" != "x$mirror_dir_len" ]; then
                     tmp=$(echo $MIRROR_DIR/$file|cut -c -$mirror_dir_len)
                     if [ -n "$tmp" ]; then
@@ -455,7 +453,6 @@ if [ -n "$last_update" ]; then
 else
     echo "WARNING! Can't download time-of-last-update file"
 fi
-make_link
 echo "End apt-mirror"
 if [ -f $TMP_CURRENT ]; then
     rm $TMP_CURRENT

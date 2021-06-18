@@ -1,0 +1,119 @@
+{
+	"SETUP":{
+		"type": "python",
+		"path": "MirrorManager.py",
+		"class": "MirrorManager"
+	},
+	"METHODS":
+	{
+        "set_cname":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "update":{
+            "allowed_groups": ["sudo","admin","admins"],
+            "protected_user": 0,
+            "protected_ip": 1
+        },
+        "set_mirror_info":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "set_mirror_architecture":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "set_mirror_orig":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "set_option_update":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "build_debmirror_config":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "render_debmirror_config":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "enable_webserver_into_folder":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "set_checksum_validation":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "stopupdate":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "download_time_file":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "new_mirror_config":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "update_mirror_config":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "get_mirror":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "stopgetmirror":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "cancel_actions":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "reset_debmirror_config":{
+            "allowed_groups": ["sudo","admin","admins"]
+        },
+        "is_alive":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_mirror_architecture":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_mirror_orig":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_option_update":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_percentage":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "stop_webserver":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_checksum_validation":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_available_mirrors":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_time_file":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "is_update_available":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_all_configs":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_client_ip":{
+            "allowed_groups": ["anonymous","*"],
+            "protected_user": 0,
+            "protected_ip": 1
+        },
+        "is_alive_get_mirror":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_last_log":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "update_size_info":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "is_mirror_available":{
+            "allowed_groups": ["anonymous","*"]
+        },
+        "get_distro_options":{
+            "allowed_groups": ["anonymous","*"]
+        }
+    }
+}

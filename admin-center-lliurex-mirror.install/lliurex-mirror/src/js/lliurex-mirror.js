@@ -1,10 +1,10 @@
 function LliurexMirror(){
-  this.distros = {'llx16':{}, 'llx19':{}};
-  this.activedistro = 'llx19';
+  this.distros = {'llx16':{}, 'llx19':{}, 'llx21':{}};
+  this.activedistro = 'llx21';
   this.progresscolors = {'new':'#4caf50' ,'ok' : '#4caf50' , 'error' : 'red', 'working':'#03A9F4','default':'black'};
   this.bars = {};
   this.edit = null;
-  this.progressoptionsdefault = {color:this.progresscolors['ok'], trailcolor:'#9f9f9f', trailWidth:3, strokeWidth: 3, easing: 'easeInOut', text: {value:''}};
+  this.progressoptionsdefault = {color:this.progresscolors['ok'], trailcolor:'#9f9f9f', trailWidth:3, strokeWidth: 3, easing: 'easeInOut', text: {value:''},duration:10000};
   this.intervalupdate = null;
   this.progress = 0;
   this.credentials = [sessionStorage.username , sessionStorage.password];
@@ -17,17 +17,17 @@ LliurexMirror.prototype.translate = function translate(text){
 
 
 LliurexMirror.prototype.loadMirrorInfo = function loadMirrorInfo(info){
-  var self = this;
-  var availabledistros = Object.keys(this.distros);
+  let self = this;
+  let availabledistros = Object.keys(this.distros);
   availabledistros.forEach(function load(distro){
     $.extend(self.distros[distro],self.distros[distro],info[distro]);
   });
 }
 
 LliurexMirror.prototype.loadProgressBar = function loadProgressBar(container,distro) {
-  var self = this;
-  var progressoptions = self.progressoptionsdefault;
-  var status_mirror = self.distros[distro]['status_mirror'].toLowerCase();
+  let self = this;
+  let progressoptions = self.progressoptionsdefault;
+  let status_mirror = self.distros[distro]['status_mirror'].toLowerCase();
   progressoptions['color'] = self.progresscolors.hasOwnProperty(status_mirror) ? self.progresscolors[status_mirror] : self.progresscolors['default'];  
   progressoptions['text']['value'] = distro;
   self.bars[distro] = new ProgressBar.Circle(container, progressoptions);
@@ -35,13 +35,13 @@ LliurexMirror.prototype.loadProgressBar = function loadProgressBar(container,dis
 }
 
 LliurexMirror.prototype.loadOrigin = function loadOrigin(distro){
-  var self = this;
+  let self = this;
   Utils.n4d(self.credentials, self.n4dclass, "get_option_update", [distro], function getoptionupdate(response){
-    if(response != null && response['status'] == true){
-      Utils.n4d(self.credentials, self.n4dclass, "get_mirror_orig", [distro,response['msg']], function getmirrororig(response){
-        if(response != null && response['status'] == true){
-          self.distros[distro]['orig'] = response['msg'];
-          self.showOrig(response['msg']);
+    if(response != null && $.isNumeric(response)){
+      Utils.n4d(self.credentials, self.n4dclass, "get_mirror_orig", [distro,response], function getmirrororig(response){
+        if(response != null && response != ""){
+          self.distros[distro]['orig'] = response;
+          self.showOrig(response);
         }
       });
     }
@@ -53,13 +53,15 @@ LliurexMirror.prototype.showOrig = function showOrig(text){
 }
 
 LliurexMirror.prototype.bindEvents = function bindEvents(){
-  var self = this;
-  var distro = self.activedistro;
+  let self = this;
+  let distro = self.activedistro;
+  console.log('Binding events')
   $(document).on("moduleLoaded",function(e,args){
   	if (args['moduleName'] != "lliurex-mirror"){
   		return ;
     }
-    Utils.n4d('', 'VariablesManager', 'get_variable', ['LLIUREXMIRROR'], function get_variables(response){
+    Utils.n4d('', '', 'get_variable', ['LLIUREXMIRROR'], function get_variables(response){
+      console.log('Getting mirror variables from server')
       self.loadMirrorInfo(response);
       self.loadProgressBar('#llxmirrorprogress',distro);
       self.loadOrigin(distro);
@@ -69,21 +71,23 @@ LliurexMirror.prototype.bindEvents = function bindEvents(){
     });
   });
   $("#llxmirrormenuarch").on('click',function modifyarch(e,args){
+    console.log('Changing architecture')
     self.showOptionsMenu(self,'#llxmirrormenuarch',self.buildArchMenuConfig);
   });
 
   $("#llxmirrormenuorig").on('click',function modifyarch(e,args){
+    console.log('Changing architecture')
     self.showOptionsMenu(self,'#llxmirrormenuorig',self.buildOrigMenuConfig);
   });
 
-  var buttonupdate = document.querySelector("#llxmirrorupdate");
+  let buttonupdate = document.querySelector("#llxmirrorupdate");
   self._updateMirror = self.updateMirror.bind(self);
   self._stopUpdate = self.stopUpdate.bind(self);
   buttonupdate.addEventListener('click',self._updateMirror,false);
 };
 
 LliurexMirror.prototype.showOptionsMenu = function showOptionsMenu(self,menuid,buildfunction){
-  var configuration = document.querySelectorAll('#llxmirrorconfiguration')[0];
+  let configuration = document.querySelectorAll('#llxmirrorconfiguration')[0];
     if (self.edit != menuid & self.edit != null){
       document.querySelector(self.edit).click();
       setTimeout(function() {document.querySelector(menuid).click();}, 1000);
@@ -101,10 +105,10 @@ LliurexMirror.prototype.showOptionsMenu = function showOptionsMenu(self,menuid,b
 }
 
 LliurexMirror.prototype.buildArchMenuConfig = function buildArchMenuConfig(idcontainer){
-  var self = this;
-  var buttonGroups = document.createElement('div');
-  var enablei386 = document.createElement('a');
-  var enableamd64 = document.createElement('a');
+  let self = this;
+  let buttonGroups = document.createElement('div');
+  let enablei386 = document.createElement('a');
+  let enableamd64 = document.createElement('a');
   buttonGroups.classList.add("btn-group","btn-group-justified","btn-group-raised");
   enablei386.classList.add('btn','btn-raised');
   enableamd64.classList.add('btn','btn-raised');
@@ -123,7 +127,7 @@ LliurexMirror.prototype.buildArchMenuConfig = function buildArchMenuConfig(idcon
     else{
       barch.classList.add('btn-info');
     }
-    var archs = [];
+    let archs = [];
     if (enablei386.classList.contains('btn-info')) archs.push('i386');
     if (enableamd64.classList.contains('btn-info')) archs.push('amd64');
     self.setArchitecture(archs);
@@ -142,8 +146,8 @@ LliurexMirror.prototype.buildArchMenuConfig = function buildArchMenuConfig(idcon
   /*
     Clean container
    */
-  var container = document.querySelector(idcontainer);
-  var fc = container.firstChild;
+  let container = document.querySelector(idcontainer);
+  let fc = container.firstChild;
   while(fc){
     container.removeChild(fc);
     fc=container.firstChild;
@@ -155,13 +159,13 @@ LliurexMirror.prototype.buildArchMenuConfig = function buildArchMenuConfig(idcon
 };
 
 LliurexMirror.prototype.buildOrigMenuConfig = function buildOrigMenuConfig(idcontainer){
-  var self = this;
-  var buttonGroups = document.createElement('div');
+  let self = this;
+  let buttonGroups = document.createElement('div');
   buttonGroups.classList = ["btn-group"];
   buttonGroups.classList.add("btn-group-justified");
   buttonGroups.classList.add("btn-group-raised");
-  var internet = document.createElement('a');
-  var url = document.createElement('a');
+  let internet = document.createElement('a');
+  let url = document.createElement('a');
   internet.classList.add('btn');
   url.classList.add('btn');
   internet.classList.add('btn-raised');
@@ -173,16 +177,16 @@ LliurexMirror.prototype.buildOrigMenuConfig = function buildOrigMenuConfig(idcon
   buttonGroups.appendChild(url);
   
 
-  var customurlform = document.createElement('div');
+  let customurlform = document.createElement('div');
   customurlform.classList.add('form-group');
   customurlform.classList.add('label-floating');
   customurlform.classList.add('llxmirrorhidden');
-  var labelcustomurl = document.createElement('label');
+  let labelcustomurl = document.createElement('label');
   labelcustomurl.classList.add('control-label');
   labelcustomurl.setAttribute('for','customurl');
   labelcustomurl.innerHTML = 'Write mirror url without http://';
-  var inputcustomurl = document.createElement('input');
-  var distro = self.activedistro;
+  let inputcustomurl = document.createElement('input');
+  let distro = self.activedistro;
   inputcustomurl.classList.add("form-control");
   inputcustomurl.type="text";
   inputcustomurl.id="customurl";
@@ -216,13 +220,14 @@ LliurexMirror.prototype.buildOrigMenuConfig = function buildOrigMenuConfig(idcon
   });
 
   Utils.n4d(self.credentials, self.n4dclass, "get_option_update", [distro], function getoptionupdate(response){
-    var credentials=[sessionStorage.username , sessionStorage.password];
-    var n4dclass="MirrorManager";
-    var n4dmethod="get_mirror_orig";
-    var arglist=[self.activedistro,response['msg']];
+    let credentials=[sessionStorage.username , sessionStorage.password];
+    let n4dclass="MirrorManager";
+    let n4dmethod="get_mirror_orig";
+    let arglist=[self.activedistro,response];
+    console.log('Getting optionupdate from server')
     Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function getmirrororig(response){
-      var value = response['msg'];
-      if (value.toLowerCase() == 'lliurex.net/xenial'){
+      let value = response;
+      if (value.toLowerCase() == 'lliurex.net/focal'){
         internet.classList.add('btn-info');
       }
       else{
@@ -237,8 +242,8 @@ LliurexMirror.prototype.buildOrigMenuConfig = function buildOrigMenuConfig(idcon
     Clean container
    */
 
-  var container = document.querySelector(idcontainer);
-  var fc = container.firstChild;
+  let container = document.querySelector(idcontainer);
+  let fc = container.firstChild;
   while(fc){
     container.removeChild(fc);
     fc=container.firstChild;
@@ -251,7 +256,7 @@ LliurexMirror.prototype.buildOrigMenuConfig = function buildOrigMenuConfig(idcon
 }
 
 LliurexMirror.prototype.modifyGuiOrig = function modifyGuiOrig(){
-  var self = this;
+  let self = this;
   clearTimeout(self.urlorig);
   self.urlorig = setTimeout(function(){
     self.setOrig('3',document.querySelector('#customurl').value);
@@ -265,14 +270,14 @@ LliurexMirror.prototype.showOrigin = function showOrigin(){
 }
 
 LliurexMirror.prototype.showArchitecture = function showArchitecture(){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="get_mirror_architecture";
-  var arglist=[self.activedistro];
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="get_mirror_architecture";
+  let arglist=[self.activedistro];
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function getmirrorarchitecture(response){
-    if(response != null && response['status'] == true){
-      self.architectures = response['msg'];
+    if(response != null && Array.isArray(response)){
+      self.architectures = response;
       stringarchitectures = "";
       stringarchitectures += self.architectures.indexOf('i386') > -1 ? "32Bits ":"";
       stringarchitectures += self.architectures.indexOf('amd64') > -1 ? "64Bits":"";
@@ -282,12 +287,13 @@ LliurexMirror.prototype.showArchitecture = function showArchitecture(){
 }
 
 LliurexMirror.prototype.showMirrorSize = function showMirrorSize(){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="VariablesManager";
-  var n4dmethod="get_variable";
-  var arglist=['LLIUREXMIRROR'];
-  var distro = self.activedistro;
+  let self = this;
+  let credentials = null;
+  let n4dclass="";
+  let n4dmethod="get_variable";
+  let arglist=['LLIUREXMIRROR'];
+  let distro = self.activedistro;
+  console.log('Getting mirror variable from server')
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function getvariable(response){
     mirrorinfo = response;
     if ( ! mirrorinfo.hasOwnProperty(self.activedistro)){
@@ -305,135 +311,157 @@ LliurexMirror.prototype.showMirrorSize = function showMirrorSize(){
 }
 
 LliurexMirror.prototype.setArchitecture = function setArchitecture(archs){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="set_mirror_architecture";
-  var distro = self.activedistro;
-  var arglist=[distro,archs];
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="set_mirror_architecture";
+  let distro = self.activedistro;
+  let arglist=[distro,archs];
+  console.log('Setting architecture')
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function(){});
 }
 
 LliurexMirror.prototype.setOrig = function setOrig(option,orig){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="set_mirror_orig";
-  var distro = self.activedistro;
-  var arglist = [distro,orig,option];
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="set_mirror_orig";
+  let distro = self.activedistro;
+  let arglist = [distro,orig,option];
+  console.log('Setting orig')
   Utils.n4d(credentials, n4dclass, 'set_option_update', [distro,option], function(){
     Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function(){});
   });
 }
 
 LliurexMirror.prototype.updateMirror = function updateMirror(){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="update";
-  var arglist=['',self.activedistro,{}];
-  
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="update";
+  let arglist=['','',self.activedistro,'{}'];
+  console.log('Updating mirror')
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function updatemirror(response){
-    if(response['status']){
-      var updatebutton = document.querySelector('#llxmirrorupdate');
+    if(response){
+      let updatebutton = document.querySelector('#llxmirrorupdate');
       updatebutton.classList.remove('btn-success');
       updatebutton.classList.add('btn-danger');
       updatebutton.innerHTML = self.translate("lliurex-mirror.Cancel");
+      console.log('Changing button triggers to stop method')
       updatebutton.removeEventListener('click',self._updateMirror);
       updatebutton.addEventListener('click',self._stopUpdate,false);
       
-      var svg = self.bars[self.activedistro].svg;
-      svg.classList.add('lliurexmirrorloader');
+      let svg = self.bars[self.activedistro].svg;
+      // DISABLED (CPU EATER)
+      // svg.classList.add('lliurexmirrorloader');
 
-      var progresstext = self.bars[self.activedistro].text;
+      let progresstext = self.bars[self.activedistro].text;
       progresstext.style.color = self.progresscolors['working'];
       if (progresstext.querySelector('.lliurexmirrortextprogress') == null){
-        var auxpercentagetext = document.createElement('div');
+        let auxpercentagetext = document.createElement('div');
         auxpercentagetext.classList.add("lliurexmirrortextprogress");
         progresstext.appendChild(auxpercentagetext);
       }
-      var percentagetext = progresstext.querySelector('.lliurexmirrortextprogress');
+      let percentagetext = progresstext.querySelector('.lliurexmirrortextprogress');
 
       self.bars[self.activedistro].path.setAttribute('stroke',self.progresscolors['working']);
 
       self.intervalupdate = setInterval(function(){
+        console.log('Checking alive with interval 15s')
         Utils.n4d(credentials,n4dclass,'is_alive',[],function check_alive(response){
+          console.log('is alive? '+response['status'])
           if (response['status']){
-            
-            Utils.n4d('', n4dclass, 'get_percentage', [response['msg']], function getpercentage(response){
-              percentagetext.innerHTML = response['msg'].toString() + "%";
-              if (response['msg'] < 1){
-                response['msg'] = 1;
+            console.log('Checking percentage')
+            Utils.n4d(credentials, n4dclass, 'get_percentage', [response['msg']], function getpercentage(response){
+              console.log('get_percentage'+(response))
+              //debugger
+              if ($.isNumeric(response)){
+                percentagetext.innerHTML = response + "%";
+                if (response < 1){
+                  response = 1;
+                }
+                self.progress = (100 - response) / 100;
+                self.bars[self.activedistro].animate(1 - self.progress );
+              }else{
+                console.log('Warning! response from get_percentage is not a number')
               }
-              self.progress = (100 - response['msg']) / 100;
-              self.bars[self.activedistro].animate(1 - self.progress );
             });
           }
           else{
-            Utils.n4d(credentials,'VariablesManager','get_variable',['LLIUREXMIRROR'],function get_mirror_info(response){
-
-              var infomirror = response[self.activedistro];
-              var status = infomirror['status_mirror'];
+            console.log('No status in response is_alive, getting mirror server vars')
+            Utils.n4d('','','get_variable',['LLIUREXMIRROR'],function get_mirror_info(response){
+              let infomirror = response[self.activedistro];
+              let status = infomirror['status_mirror'];
 
               if(status == 'Ok'){
                 self.bars[self.activedistro].path.setAttribute('stroke',self.progresscolors['ok']);
                 progresstext.style.color = self.progresscolors['ok'];
                 Utils.msg(self.translate("Mirror finished with success"),"");
+                console.log('Mirror finished successfuly')
               }
               else{
                self.bars[self.activedistro].path.setAttribute('stroke',self.progresscolors['error']); 
                progresstext.style.color = self.progresscolors['error'];
                Utils.msg(self.translate("Mirror finished with error")+infomirror['exception_msg'],"");
+               console.log('Mirror finished with error '+infomirror['exception_msg'])
               }
               percentagetext.remove();
+              console.log('Changing button to success')
               updatebutton.classList.add('btn-success');
               updatebutton.classList.remove('btn-danger');
               updatebutton.innerHTML = self.translate("lliurex-mirror.Update");
               svg.classList.remove('lliurexmirrorloader');
+              console.log('Clearing last interval')
               clearInterval(self.intervalupdate);
+              console.log('Calling checkLliurexPpdate')
               self.checkLliurexUpdate();
               });            
             }
        });
       }
-      ,5000);
+      ,15000);
     }
   });
 }
 
 
 LliurexMirror.prototype.stopUpdate = function stopUpdate(){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="stopupdate";
-  var buttonupdate = document.querySelector('#llxmirrorupdate');
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="stopupdate";
+  let buttonupdate = document.querySelector('#llxmirrorupdate');
+  console.log('Calling stopupdate')
   buttonupdate.removeEventListener('click',self._stopUpdate,false);
   buttonupdate.innerHTML = "Waiting...";
   buttonupdate.classList.remove('btn-danger');
-  var arglist=[];
+  let arglist=[];
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function stopupdate(response){
+    console.log('StopUpdate ended, changing button to allow update again')
     buttonupdate.addEventListener('click',self._updateMirror);
   });
 }
 
 LliurexMirror.prototype.checkLliurexUpdate = function checkLliurexUpdate(){
-  var self = this;
-  var credentials=[sessionStorage.username , sessionStorage.password];
-  var n4dclass="MirrorManager";
-  var n4dmethod="is_update_available";
-  var arglist=[self.activedistro];
-  var mirrorupdatemessage=document.querySelector('#llxmirrorupdatepanel');
+  let self = this;
+  let credentials=[sessionStorage.username , sessionStorage.password];
+  let n4dclass="MirrorManager";
+  let n4dmethod="is_update_available";
+  let arglist=[self.activedistro];
+  let mirrorupdatemessage=document.querySelector('#llxmirrorupdatepanel');
+  console.log('Called checkLliurexUpdate (is_update_available)')
   Utils.n4d(credentials, n4dclass, n4dmethod, arglist, function ismirrorupdate(response){
     if(response == null || response['action']!='update'){   
+      console.log('Update not available')
        $('#llxmirrorupdatepanel').text('')
     }
     else{
-      var messagecontainer = document.createElement('div');
-      var button = document.createElement('button');
-      var tempdiv = document.createElement('div');
-      var message = document.createElement('strong');
-      var z = document.querySelector("#llxmirrorupdatepanel");
+      console.log('Update available')
+      let messagecontainer = document.createElement('div');
+      let button = document.createElement('button');
+      let tempdiv = document.createElement('div');
+      let message = document.createElement('strong');
+      let z = document.querySelector("#llxmirrorupdatepanel");
       
       messagecontainer.classList.add('alert','alert-dismissible','alert-danger');
       button.type = "button";
@@ -451,5 +479,5 @@ LliurexMirror.prototype.checkLliurexUpdate = function checkLliurexUpdate(){
 }
 
 
-var llxmirror = new LliurexMirror();
+let llxmirror = new LliurexMirror();
 llxmirror.bindEvents();
