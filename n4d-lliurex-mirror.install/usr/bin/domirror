@@ -150,7 +150,6 @@ if [ -z "${GPG}" -o ! -f "$GPG" ];then
     exit 1
 fi
 MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
-MIRROR_DIR=$($REALPATH $MIRROR_DIR)
 if [ -z "$MIRROR_DIR" ];then
     echo "Unable to read MIRROR_DIR"
     exit 1
