@@ -1,3 +1,9 @@
+lliurex-mirror (32.2.7) focal; urgency=medium
+
+  * Build with restricted & preschool components
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Mon, 28 Jun 2021 15:51:04 +0200
+
 lliurex-mirror (32.2.6) focal; urgency=medium
 
   * Fix initialization issues
