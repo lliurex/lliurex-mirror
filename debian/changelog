@@ -1,3 +1,9 @@
+lliurex-mirror (32.2.8) focal; urgency=medium
+
+  * No root required to run gui
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 06 Jul 2021 12:57:32 +0200
+
 lliurex-mirror (32.2.7) focal; urgency=medium
 
   * Build with restricted & preschool components
