@@ -153,7 +153,6 @@ if [ -z "${GPG}" -o ! -f "$GPG" ];then
     exit 1
 fi
 MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
-MIRROR_DIR=$($REALPATH $MIRROR_DIR)
 if [ -z "$MIRROR_DIR" ];then
     echo "Unable to read MIRROR_DIR"
     exit 1
@@ -161,6 +160,7 @@ fi
 if [ ! -d $MIRROR_DIR ]; then
     mkdir -p $MIRROR_DIR
 fi
+MIRROR_DIR=$($REALPATH $MIRROR_DIR)
 VAR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+var_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g'|sed "s@\$base_path@$MIRROR_DIR@g")
 if [ ! -d $VAR_DIR ]; then
     mkdir -p $VAR_DIR
