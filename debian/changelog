@@ -1,3 +1,9 @@
+lliurex-mirror (32.2.9) focal; urgency=medium
+
+  * Add option to remove locks
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Mon, 19 Jul 2021 19:53:34 +0200
+
 lliurex-mirror (32.2.8) focal; urgency=medium
 
   * No root required to run gui
