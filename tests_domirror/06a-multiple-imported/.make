@@ -1,0 +1,4 @@
+mkdir -p {{localhost:1111,localhost:2222,localhost:3333}/pool/{main,universe,multiverse}/l/lliurex-version-timestamp,skel/{localhost:1111,localhost:2222,localhost:3333}/dists/{bionic,bionic-updates,bionic-security}/{main,universe,multiverse},lliurex.net/bionic/pool/{main,universe,multiverse}/l/lliurex-version-timestamp,skel/lliurex.net/bionic/dists/{bionic,bionic-updates,bionic-security}/{main,universe,multiverse},var}
+ln -sr -t . skel/localhost:3333/dists
+ln -sr -t . localhost:3333/pool/
+touch {localhost:1111,localhost:2222,localhost:3333}/pool/main/l/lliurex-version-timestamp/lliurex-version-timestamp_19.211005_all.deb
