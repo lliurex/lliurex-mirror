@@ -227,13 +227,14 @@ class MirrorManager:
 		fd.flush()
 		errors_found = False
 		ret = None
+		command_with_args=self.appcommand
 		if self.appneedparams:
 			ret = self.get_checksum_validation(distro)
-			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
-				ret = ret['CHK_MD5']
+			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'msg' in ret and ret['msg']:
+				ret = ret['msg']
 		if ret is not None and (ret == 1 or ret == True):
-			self.appcommand += " -v -rf"
-		self.debmirrorprocess=pexpect.spawn(self.appcommand)
+			command_with_args += " -v -rf"
+		self.debmirrorprocess=pexpect.spawn(command_with_args)
 		download_packages = False
 		emergency_counter = 0
 		try:
@@ -643,7 +644,7 @@ class MirrorManager:
 		config = json.load(open(configpath,'r'))
 		if not os.path.lexists(configpath):
 			return {'status':False,'msg':'not exists {} to {}'.format(self.appconfigfilename,distro) }
-		if "IGN_GPG" in config.keys():
+		if "CHK_MD5" in config.keys():
 			return {'status':True,'msg':config["CHK_MD5"] }
 
 		return {'status':False,'msg':"{} hasn't orig variable".format(self.appconfigfilename) }
@@ -810,13 +811,21 @@ class MirrorManager:
 
 	def _get_mirror(self,config_path,callback_args):
 		ret = None
-		if self.appneedparams:
-			ret = self.get_checksum_validation(distro)
-			if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'CHK_MD5' in ret and ret['CHK_MD5']:
-				ret = ret['CHK_MD5']
-		if ret is not None and (ret == 1 or ret == True):
-			self.appcommand += " -v -rf"
-		self.get_mirror_process = pexpect.spawn("{} --config-file={}".format(self.appcommand,config_path))
+		command_with_args=self.appcommand
+		#
+		# checksum validation not available when export process is selected, source could be corrupted
+		#
+		# if self.appneedparams:
+		# 	ret = self.get_checksum_validation(self.distro)
+		# 	if isinstance(ret,dict) and 'status' in ret and ret['status'] and 'msg' in ret and ret['msg']:
+		# 		ret = ret['msg']
+		# if ret is not None and (ret == 1 or ret == True):
+		# 	command_with_args += " -v -rf"
+		self.get_mirror_process = pexpect.spawn("{} --config-file={}".format(command_with_args,config_path),timeout=60)
+		print("{} --config-file={}".format(command_with_args,config_path))
+		import sys
+		self.get_mirror_process.logfile = sys.stdout
+		max_timeouts=10
 		while True:
 			try:
 				self.get_mirror_process.expect('\n')
@@ -832,6 +841,11 @@ class MirrorManager:
 				status = self.get_mirror_process.exitstatus
 				self.exportpercentage=(self.exportpercentage[0],status)
 				break
+			except pexpect.TIMEOUT:
+				print("Expect process TIMEOUT")
+				max_timeouts=max_timeouts-1
+				if max_timeouts<1:
+					break
 			except Exception as e:
 				break
 		if callback_args.has_key('port') and callback_args.has_key('ip'):
