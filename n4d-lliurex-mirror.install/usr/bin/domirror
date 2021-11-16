@@ -268,8 +268,11 @@ calcule(){
         retry=2
         while [ $retry -gt 0 ]; do
             asize1=$(echo $(ls -s "$ALL_FILE" |cut -d/ -f1))
-            sleep 1
+            sleep 2
             asize2=$(echo $(ls -s "$ALL_FILE" |cut -d/ -f1))
+            if [ -n "$asize1" -a "x$asize1" == "x$asize2" ]; then 
+                break
+            fi
             retry=$(($retry-1))
         done
         if [ -n "$asize1" -a "x$asize1" != "x$asize2" ]; then
@@ -277,7 +280,7 @@ calcule(){
         fi
         cat "$ALL_FILE" |sort|uniq > $TMP_ALL
         first_dir=$(head -1 "$ALL_FILE" | cut -d'/' -f1)
-        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
+        find "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
         declare -a old
         readarray -d $'\0' old < <($COMM -23 $TMP_CURRENT $TMP_ALL|tr '\n' '\0')
         
@@ -298,8 +301,9 @@ calcule(){
                 fi
             done
         fi
-    
-        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
+        if [ "${#old[@]}" -ne 0 ];then
+            find "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
+        fi
         ncurrent=$(cat $TMP_CURRENT|wc -l)
         nall=$(cat $TMP_ALL|wc -l)
         if [ -n "$nall" -a -n "$ncurrent" -a $ncurrent -gt 0 -a $nall -ge $ncurrent ]; then
