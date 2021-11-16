@@ -1,0 +1,6 @@
+Depuration example:
+
+cd 01-old-to-new
+bash -x .make
+bash -x domirror-fix-repo -i -s -m . # interesting options: -dr (dry-run, can be piped through bash), -ro (remove old data & backups generated when move dirs)
+bash -x domirror --config-file="`pwd`/mirror.sample" # interesting options: -c (remove old data), -v -rf (check sanity of repo)
