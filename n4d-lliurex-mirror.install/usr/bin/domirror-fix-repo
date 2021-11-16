@@ -271,10 +271,18 @@ if [ ! -d "$MIRROR_DIR" ];then
 fi
 
 # Bash array for task operation queues, holds paths allowing spaces into it
-declare -a to_remove
-declare -a to_create
-declare -a to_move
-declare -a to_link
+init_executor_array(){
+    unset to_remove
+    unset to_create
+    unset to_move
+    unset to_link
+    unset to_remove_old
+    declare -a to_remove
+    declare -a to_create
+    declare -a to_move
+    declare -a to_link
+    declare -a to_remove_old
+}
 
 # Print bash array contents
 function print_array(){
@@ -297,6 +305,7 @@ function print_queues(){
     print_array 'REMOVE' to_remove[@]
     print_array 'LINK' to_link[@]
     print_array 'MOVE' to_move[@]
+    print_array 'MOVE' to_remove_old[@]
     info '------------------------------------------------------'
 }
 
@@ -325,6 +334,9 @@ function add(){
                     to_move+=("$2")
                     to_move+=("$3")
                 fi
+            ;;
+            old)
+                to_remove_old+=("$2")
             ;;
         esac
         #info 'Adding to ' "$@"
@@ -368,7 +380,24 @@ function execute(){
             if [ -n "$orig" -a -n "$dest" ];then
                 if check_valid "$orig"; then
                     if check_valid "$dest"; then
-                        $DUMMY $MV "$orig" "$dest"
+                        old=""
+                        if [ -d "$orig" -a -d "$dest" ];then
+                            bn=$($BASENAME "$orig")
+                            if [ -n "$bn" -a -e "$dest/$bn" ];then
+                                old="$dest/$bn.old"
+                                info "'$old' generated during move operation"
+                            fi
+                        fi
+                        $DUMMY $MV -S .old -b "$orig" "$dest"
+                        if [ -n "$old" ];then
+                            if [ -n "$dry" ];then
+                                add 'old' "$old"
+                            else
+                                if [ -e "$old" ];then
+                                    add 'old' "$old"
+                                fi
+                            fi
+                        fi
                     fi
                 fi
                 orig=
@@ -399,7 +428,19 @@ function execute(){
             $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
         fi
     done
+    if [ -n "$remove_old" ];then
+        # Fifth remove useless things
+        for r in "${to_remove_old[@]}"; do
+            if check_valid "$r"; then
+                $DUMMY $RM -r "$r"
+                continue
+            fi
+        done
+    fi
+    init_executor_array
 }
+
+init_executor_array
 
 # Create needed initial parent structure for lliurex mirror
 
@@ -903,9 +944,22 @@ if [ -n "$remove_old" ];then
         for old in $olds; do
             if check_valid "$old"; then
                 if [ -d "$old" ];then
-                    add 'remove' "$old"
+                    add 'old' "$old"
                 else
-                    add 'remove' "$old"
+                    add 'old' "$old"
+                fi
+            fi
+        done
+    fi
+    olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*[.]old" -prune)
+    if [ -n "$olds" ];then
+        info 'Old data: (Seems safe to remove them)'
+        for old in $olds; do
+            if check_valid "$old"; then
+                if [ -d "$old" ];then
+                    add 'old' "$old"
+                else
+                    add 'old' "$old"
                 fi
             fi
         done
