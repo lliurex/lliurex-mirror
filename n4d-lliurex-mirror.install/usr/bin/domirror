@@ -277,37 +277,29 @@ calcule(){
         fi
         cat "$ALL_FILE" |sort|uniq > $TMP_ALL
         first_dir=$(head -1 "$ALL_FILE" | cut -d'/' -f1)
-        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -E "s@.*($first_dir)(.*)@\1\2@" |sort|uniq > $TMP_CURRENT
+        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
         declare -a old
         readarray -d $'\0' old < <($COMM -23 $TMP_CURRENT $TMP_ALL|tr '\n' '\0')
-        mirror_dir_len=$(($(echo "$MIRROR_DIR" | wc -c)-1))
-        mirror_next_path_len=$(($mirror_dir_len+2))
         
         # move (incremental) or delete (not incremental, (default)) old files
         if [ "${#old[@]}" -gt 0 ];then
             for file in "${old[@]}"; do
-                rp=$(realpath -e "$file" >/dev/null 2>&1)
-                if [ $? -eq 0 -a -n "$mirror_dir_len" -a "x0" != "x$mirror_dir_len" ]; then
-                    start_of_file=$(echo "$file"|cut -c -$mirror_dir_len)
-                    continuation_of_file=$(echo "$file"|cut -c $mirror_next_path_len-)
-                    if [ -n "$continuation_of_file" -a -n "$start_of_file" ];then
-                        start_of_continuation=$(echo $continuation_of_file|cut -c -$(( $(echo $first_dir|wc -c)+1 )) )
-                        if [ "x$start_of_file" == "x$MIRROR_DIR" -a -f "$file" -a "x$first_dir" ==  "x$start_of_continuation" ];then
-                            if [ -n "$incremental "];then
-                                dn=$($DIRNAME "$x")
-                                bn=$($BASENAME "$x")
-                                mkdir -p "$OLD_DIR/$dn"
-                                mv "$x" "$OLD_DIR/$dn/$bn"
-                            else
-                                rm "$file"
-                            fi
-                        fi
+                fullfilepath="$MIRROR_DIR/$file"
+                startwith=$(echo $file|cut -d'/' -f1)
+                if [ -e "$fullfilepath" -a "x$startwith" == "x$first_dir" ]; then
+                    if [ -n "$incremental" ];then
+                        dn=$($DIRNAME "$fullfilepath")
+                        bn=$($BASENAME "$fullfilepath")
+                        mkdir -p "$OLD_DIR/$dn"
+                        mv "$fullfilepath" "$OLD_DIR/$dn/$bn"
+                    else
+                        rm "$fullfilepath"
                     fi
                 fi
             done
         fi
     
-        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -E 's@.*(lliurex\.net)(.*)@\1\2@' |sort|uniq > $TMP_CURRENT
+        find "$MIRROR_DIR" -type f \( -iname '*.deb' -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
         ncurrent=$(cat $TMP_CURRENT|wc -l)
         nall=$(cat $TMP_ALL|wc -l)
         if [ -n "$nall" -a -n "$ncurrent" -a $ncurrent -gt 0 -a $nall -ge $ncurrent ]; then
