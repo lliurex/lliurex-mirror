@@ -42,7 +42,7 @@ MIRROR_CONF_DIR="/etc/lliurex-mirror/conf/"
 GLADE_FILE=BASE_DIR+"rsrc/lliurex-mirror.ui"
 ADD_IMAGE=BASE_DIR+"rsrc/a1.png"
 ADD_IMAGE_OVER=BASE_DIR+"rsrc/a2.png"
-TOKEN_FILE="/tmp/lliurex-mirror.pid"
+TOKEN_FILE="/run/lliurex-mirror.pid"
 ERROR=Gtk.MessageType.ERROR
 INFO=Gtk.MessageType.INFO
 
