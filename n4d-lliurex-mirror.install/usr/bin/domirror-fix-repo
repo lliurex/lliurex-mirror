@@ -46,6 +46,7 @@ help(){
     $ECHO '      -s  | --sample-conf     (optional) (make sample conf into repo)'
     $ECHO '      -u  | --unprivileged    (optional) (disable use of "sudo" tool)'
     $ECHO '      -ro | --remove-old      (optional) (remove old data from pool)'
+    $ECHO '      -w  | --write-n4dvar    (optional) (update n4d variable)'
     $ECHO ''
 }
 
@@ -60,6 +61,7 @@ inf=
 sample_conf=
 unprivileged=1
 remove_old=
+write_n4dvar=
 
 while test -n "$1"; do
     case $1 in
@@ -91,6 +93,9 @@ while test -n "$1"; do
         ;;
         -ro|--remove-olds)
             remove_old=1
+        ;;
+        -w|--write-n4dvar)
+            write_n4dvar=1
         ;;
         -h|--help)
             help
@@ -973,24 +978,27 @@ execute
 if [ -z "$last_update" ];then
     info 'Unable to get last update date from pool'
 fi
-write_variable $last_update
 
-if [ -n "$dry" ];then
-    info "Dumping n4d variable to stdout"
-    info "Contents of '$LLXMIRRORPATH':"
-    $ECHO $SUDO $BASH -c "\"$CAT > '$LLXMIRRORPATH' << _EOF"
-    eval $ECHO -e "$RETURNED"|$SED 's/"/\\"/g'
-    $ECHO '_EOF"'
-    $DUMMY $N4DVARS readinbox
-else
-    info "Dumping n4d variable to tempfile '$tmpfile'"
-    tmpfile="$($TEMPFILE)"
-    if [ -f "$tmpfile" ];then
-        eval $ECHO -e "$RETURNED" > $tmpfile
-        info $($CAT $tmpfile)
-        info "Moving '$tmpfile' to '$LLXMIRRORPATH'"
-        $DUMMY $MV "$tmpfile" "$LLXMIRRORPATH"
+if [ -n "$write_n4dvar" ];then
+    write_variable $last_update
+
+    if [ -n "$dry" ];then
+        info "Dumping n4d variable to stdout"
+        info "Contents of '$LLXMIRRORPATH':"
+        $ECHO $SUDO $BASH -c "\"$CAT > '$LLXMIRRORPATH' << _EOF"
+        eval $ECHO -e "$RETURNED"|$SED 's/"/\\"/g'
+        $ECHO '_EOF"'
         $DUMMY $N4DVARS readinbox
+    else
+        info "Dumping n4d variable to tempfile '$tmpfile'"
+        tmpfile="$($TEMPFILE)"
+        if [ -f "$tmpfile" ];then
+            eval $ECHO -e "$RETURNED" > $tmpfile
+            info $($CAT $tmpfile)
+            info "Moving '$tmpfile' to '$LLXMIRRORPATH'"
+            $DUMMY $MV "$tmpfile" "$LLXMIRRORPATH"
+            $DUMMY $N4DVARS readinbox
+        fi
     fi
 fi
 
