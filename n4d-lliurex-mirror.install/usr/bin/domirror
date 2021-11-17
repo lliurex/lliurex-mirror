@@ -162,7 +162,12 @@ if [ -z "${PERL}" -o ! -f "$PERL" ];then
     echo "perl not found, install perl first!, unable to continue"
     exit 1
 fi
-MIRROR_DIR="$(sed -r "/\s*\S+\s+base_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g" "$config_used")"
+SED=$(which sed)
+if [ -z "${SED}" -o ! -f "$SED" ];then
+    echo "sed not found, install sed first!, unable to continue"
+    exit 1
+fi
+MIRROR_DIR="$($SED -r "/\s*\S+\s+base_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g" "$config_used")"
 MIRROR_DIR=$(echo $MIRROR_DIR | tr -d "\"'")
 if [ -z "$MIRROR_DIR" ];then
     echo "Unable to read MIRROR_DIR"
@@ -172,7 +177,7 @@ if [ ! -d "$MIRROR_DIR" ]; then
     mkdir -p $MIRROR_DIR
 fi
 MIRROR_DIR=$($REALPATH "$MIRROR_DIR")
-VAR_DIR="$(sed -r "/\s*\S+\s+var_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g; s@\\\$base_path@$MIRROR_DIR@g" "$config_used")"
+VAR_DIR="$($SED -r "/\s*\S+\s+var_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g; s@\\\$base_path@$MIRROR_DIR@g" "$config_used")"
 if [ ! -d "$VAR_DIR" ]; then
     mkdir -p "$VAR_DIR"
 fi
@@ -223,7 +228,6 @@ run(){
         $(nice -n5 $APTMIRROR >/dev/null 2>$TMP_STATUS &)
     fi
     pid=$($PGREP -P $ME||true)
-    $PGREP -P $ME
 }
 
 getpids(){
