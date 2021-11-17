@@ -169,6 +169,8 @@ class LliurexMirrorN4d:
 			config['MIRROR_PATH'] = folder
 			config['CURRENT_UPDATE_OPTION'] = '3'
 			config['ORIGS']['3'] = self.serverip + ":" + str(port)
+			config['NTHREADS'] = 1
+			config['LRATE'] = '50m'
 			result = self.client.render_debmirror_config(self.credentials,'MirrorManager',config)
 			temp_file = tempfile.mktemp()
 			f = open(temp_file,'w')
@@ -177,6 +179,8 @@ class LliurexMirrorN4d:
 			callback_args = {}
 			callback_args['ip'] = ip
 			callback_args['port'] = port
+			import time
+			time.sleep(5)
 			# Execute mirror
 			print (self.localclient.get_mirror(self.localcredentials,'MirrorManager',temp_file,callback_args))
 			return True

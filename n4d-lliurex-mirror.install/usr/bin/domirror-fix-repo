@@ -1,0 +1,1075 @@
+#!/bin/bash
+
+# Copyright (c) 2021 M.Angel Juan <m.angel.juan@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+set -e 
+
+# START EDITABLE VARS
+DISTRO='bionic'
+LLXMIRRORPATH='/var/lib/n4d/variables-inbox/LLIUREXMIRROR'
+SAMPLE_CONF_TPL='/usr/share/n4d/templates/lliurex-mirror/mirror.list'
+ARCHES="amd64 i386"
+SECTIONS="bionic bionic-security bionic-updates"
+COMPONENTS="main/debian-installer main universe multiverse restricted"
+DEBUG=1
+# END EDITABLE VARS
+
+ECHO=$(which echo)
+if [ -z "$DEBUG" ]; then
+    ECHO=$(which echo)
+fi
+if [ -z "$ECHO" -o ! -f "$ECHO" ];then
+    exit 1
+fi
+
+help(){
+    $ECHO 'domirror-fix-repo: lliurex-mirror fix repository structure'
+    $ECHO ''
+    $ECHO 'available options:'
+    $ECHO '      -c  | --config-file=    (optional) (use a config file, default /etc/apt/mirror.list)'
+    $ECHO '      -m  | --mirror-dir=     (optional) (sets the mirror location)'
+    $ECHO '      -dr | --dry-run         (optional) (disable modifications, only shows commands to do)'
+    $ECHO '      -i  | --info            (optional) (turn on dump informational detections)'
+    $ECHO '      -s  | --sample-conf     (optional) (make sample conf into repo)'
+    $ECHO '      -u  | --unprivileged    (optional) (disable use of "sudo" tool)'
+    $ECHO '      -ro | --remove-old      (optional) (remove old data from pool)'
+    $ECHO '      -w  | --write-n4dvar    (optional) (update n4d variable)'
+    $ECHO ''
+}
+
+# 
+# Parameter processing
+# (If initialized with no empty value will be used by default)
+# 
+
+config_file=
+dry=
+inf=
+sample_conf=
+unprivileged=1
+remove_old=
+write_n4dvar=
+
+while test -n "$1"; do
+    case $1 in
+        --config-file=*)
+            config_file=$($ECHO $1|sed -r "s/--config-file=(.*)/\1/g")
+        ;;
+        -c)
+            shift
+            config_file=$1
+        ;;
+        --mirror-dir=*)
+            MIRROR_DIR=$($ECHO $1|sed -r "s/--mirror-dir=(.*)/\1/g")
+        ;;
+        -m)
+            shift
+            MIRROR_DIR=$1
+        ;;
+        -dr|--dry-run)
+            dry=1
+        ;;
+        -i|--info)
+            inf=1
+        ;;
+        -s|--sample-conf)
+            sample_conf=1
+        ;;
+        -u|--unprivileged)
+            unprivileged=1
+        ;;
+        -ro|--remove-olds)
+            remove_old=1
+        ;;
+        -w|--write-n4dvar)
+            write_n4dvar=1
+        ;;
+        -h|--help)
+            help
+            exit 0
+        ;;
+    esac
+    shift
+done
+
+# 
+# READ CONFIGURATION PHASE 
+# 
+
+config_used=
+if [ ! $config_file ]; then
+    if [ -f /etc/apt/mirror.list ]; then
+        config_used=/etc/apt/mirror.list
+    else
+        $ECHO "No config file found"
+        exit 1
+    fi
+else
+    if [ -f $config_file ]; then
+        config_used=$config_file
+    else
+        $ECHO "Provided config '$config_file' file not found"
+        exit 1
+    fi
+fi
+
+# Set-up for dummy procesing & info system
+DUMMY=""
+if [ $dry ]; then
+    $ECHO 'set -e'
+    DUMMY="$ECHO"
+fi
+INFO="$(which /bin/true)"
+if [ $inf ];then
+    INFO="$ECHO"
+fi
+function info(){
+    >&2 $INFO '#INFO:' $@
+}
+
+# 
+# Checks for used tools
+# 
+REALPATH=$(which realpath)
+if [ -z "${REALPATH}" -o ! -f "$REALPATH" ];then
+    $ECHO "Realpath not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+DU=$(which du)
+if [ -z "${DU}" -o ! -f "$DU" ];then
+    $ECHO "du not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+CAT=$(which cat)
+if [ -z "${CAT}" -o ! -f "$CAT" ];then
+    $ECHO "cat not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+TR=$(which tr)
+if [ -z "${TR}" -o ! -f "$TR" ];then
+    $ECHO "TR not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+MKDIR=$(which mkdir)
+if [ -z "${MKDIR}" -o ! -f "$MKDIR" ];then
+    $ECHO "mkdir not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+CP=$(which cp)
+if [ -z "${CP}" -o ! -f "$CP" ];then
+    $ECHO "cp not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+MV=$(which mv)
+if [ -z "${MV}" -o ! -f "$MV" ];then
+    $ECHO "mv not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+LN=$(which ln)
+if [ -z "${LN}" -o ! -f "$LN" ];then
+    $ECHO "ln not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+RM=$(which rm)
+if [ -z "${RM}" -o ! -f "$RM" ];then
+    $ECHO "rm not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+FIND=$(which find)
+if [ -z "${FIND}" -o ! -f "$FIND" ];then
+    $ECHO "find not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+SORT=$(which sort)
+if [ -z "${SORT}" -o ! -f "$SORT" ];then
+    $ECHO "sort not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+UNIQ=$(which uniq)
+if [ -z "${UNIQ}" -o ! -f "$UNIQ" ];then
+    $ECHO "uniq not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+WC=$(which wc)
+if [ -z "${WC}" -o ! -f "$WC" ];then
+    $ECHO "wc not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+BASENAME=$(which basename)
+if [ -z "${BASENAME}" -o ! -f "$BASENAME" ];then
+    $ECHO "basename not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+SED=$(which sed)
+if [ -z "${SED}" -o ! -f "$SED" ];then
+    $ECHO "sed not found, install sed first!, unable to continue"
+    exit 1
+fi
+XARGS=$(which xargs)
+if [ -z "${XARGS}" -o ! -f "$XARGS" ];then
+    $ECHO "xargs not found, install findutils first!, unable to continue"
+    exit 1
+fi
+TEMPFILE=$(which tempfile)
+if [ -z "${TEMPFILE}" -o ! -f "$TEMPFILE" ];then
+    $ECHO "tempfile not found, install debianutils first!, unable to continue"
+    exit 1
+fi
+
+if [ -z "$unprivileged" ];then
+    SUDO=$(which sudo)
+    if [ -z "${SUDO}" -o ! -f "$SUDO" ];then
+        [ -z "$dry" ] && $ECHO "sudo not found, install sudo first!, unable to continue" && exit 1
+    fi
+fi
+N4DVARS=$(which n4d-vars)
+if [ -z "${N4DVARS}" -o ! -f "$N4DVARS" ];then
+    [ -z "$dry" ] && $ECHO "sudo not found, install n4d first!, unable to continue" && exit 1
+fi
+BASH=$(which bash)
+if [ -z "${BASH}" -o ! -f "$BASH" ];then
+    [ -z "$dry" ] && $ECHO "bash not found, install bash first!, unable to continue" exit 1
+fi
+if [ "$EUID" -ne "0" -a -z "$unprivileged" ];then
+    DUMMY="$DUMMY $SUDO"
+fi
+# $DISTRO safe checks
+DISTRO="$($ECHO "$DISTRO"|$TR 'A-Z' 'a-z')"
+if [ -n "$DISTRO" ]; then
+    if [ "$DISTRO" != 'bionic' -a "$DISTRO" != 'focal' ];then
+        $ECHO "Invalid distro '$DISTRO'"
+        exit 1
+    fi
+else
+    $ECHO 'Invalid distro'
+    exit 1
+fi
+# $MIRROR_DIR checks
+if [ -z "$MIRROR_DIR" ];then
+    MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
+fi
+if [ -z "$MIRROR_DIR" ];then
+    $ECHO "Unable to read MIRROR_DIR"
+    exit 1
+fi
+if [ ! -d "$MIRROR_DIR" ];then
+    $ECHO "'$MIRROR_DIR', not a valid directory"
+    exit 1
+fi
+MIRROR_DIR=$($REALPATH "$MIRROR_DIR")
+if [ ! -d "$MIRROR_DIR" ];then
+    $ECHO "'$MIRROR_DIR', not a valid directory"
+    exit 1
+fi
+
+# Bash array for task operation queues, holds paths allowing spaces into it
+init_executor_array(){
+    unset to_remove
+    unset to_create
+    unset to_move
+    unset to_link
+    unset to_remove_old
+    declare -a to_remove
+    declare -a to_create
+    declare -a to_move
+    declare -a to_link
+    declare -a to_remove_old
+}
+
+# Print bash array contents
+function print_array(){
+    declare name=$1
+    declare -a arr=("${!2}")
+    info "Total $name=${#arr[@]}"
+    if [ ${#arr[@]} -ne 0 ];then
+        # info "ALL: ${arr[*]}"
+        for i in "${arr[@]}"; do
+            info "'$i'"
+        done
+        # info "Last: '${arr[${#arr[@]}-1]}'"
+    fi
+}
+
+# Debug function if needed
+function print_queues(){
+    info '------------------------------------------------------'
+    print_array 'CREATE' to_create[@]
+    print_array 'REMOVE' to_remove[@]
+    print_array 'LINK' to_link[@]
+    print_array 'MOVE' to_move[@]
+    print_array 'MOVE' to_remove_old[@]
+    info '------------------------------------------------------'
+}
+
+#
+# Add operation to queues
+#   Parameters: $1 (operation) (create|remove|link|move)
+#               $2 first path
+#               $3 second path (only when move operation, link is only with same name on $MIRROR_DIR)
+#
+function add(){
+    if [ -n "$1" -a -n "$2" ];then
+        case $1 in
+            create)
+                to_create+=("$2")
+            ;;
+            remove)
+                if [ -e "$2" ];then
+                    to_remove+=("$2")
+                fi
+            ;;
+            link)
+                to_link+=("$2")
+            ;;
+            move)
+                if [ -n "$3" ];then
+                    to_move+=("$2")
+                    to_move+=("$3")
+                fi
+            ;;
+            old)
+                to_remove_old+=("$2")
+            ;;
+        esac
+        #info 'Adding to ' "$@"
+        #print_queues
+    fi
+}
+
+# Check valid path in case of error processing ensuring no outer $MIRROR_DIR or / operations are valid
+
+function check_valid(){
+    len=$(( $($ECHO "$MIRROR_DIR"|wc -c) - 1))
+    if [ -n "$1" ];then
+        if [ $len -gt 3 -a "$($ECHO "$1"|cut -c -$len)" = "$MIRROR_DIR" ];then
+            return 0
+        fi
+        info "Not valid '$1'"
+    fi
+    return 1
+}
+
+#
+# Execute needed actions to fix repository based on actions queued on arrays $to_(create|move|remove|link)
+#
+function execute(){
+    # First all creation tasks
+    for c in "${to_create[@]}"; do
+        if check_valid "$c"; then
+            $DUMMY $MKDIR -p "$c"
+        fi
+    done
+    # Second move things from $orig location to $dest location
+    orig=
+    dest=
+    for m in "${to_move[@]}"; do
+        if [ -z "$orig" ];then
+            orig="$m"
+            continue
+        fi
+        if [ -z "$dest" ];then
+            dest="$m"
+            if [ -n "$orig" -a -n "$dest" ];then
+                if check_valid "$orig"; then
+                    if check_valid "$dest"; then
+                        old=""
+                        if [ -d "$orig" -a -d "$dest" ];then
+                            bn=$($BASENAME "$orig")
+                            if [ -n "$bn" -a -e "$dest/$bn" ];then
+                                old="$dest/$bn.old"
+                                info "'$old' generated during move operation"
+                            fi
+                        fi
+                        $DUMMY $MV -S .old -b "$orig" "$dest"
+                        if [ -n "$old" ];then
+                            if [ -n "$dry" ];then
+                                add 'old' "$old"
+                            else
+                                if [ -e "$old" ];then
+                                    add 'old' "$old"
+                                fi
+                            fi
+                        fi
+                    fi
+                fi
+                orig=
+                dest=
+            fi
+        fi
+    done
+    # Third remove useless things
+    for r in "${to_remove[@]}"; do
+        if check_valid "$r"; then
+            if [ -L "$r" ];then
+                $DUMMY $RM "$r"
+                continue
+            fi
+            if [ -d "$r" ];then
+                $DUMMY $RM -r "$r"
+                continue
+            fi
+            if [ -f "$r" ];then
+                $DUMMY $RM "$r"
+                continue
+            fi
+        fi
+    done
+    # Fourth link properly (symbolic & relative) dirs into $MIRROR_DIR
+    for l in "${to_link[@]}"; do
+        if check_valid "$l"; then
+            $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
+        fi
+    done
+    if [ -n "$remove_old" ];then
+        # Fifth remove useless things
+        for r in "${to_remove_old[@]}"; do
+            if check_valid "$r"; then
+                $DUMMY $RM -r "$r"
+                continue
+            fi
+        done
+    fi
+    init_executor_array
+}
+
+init_executor_array
+
+# Create needed initial parent structure for lliurex mirror
+
+if [ ! -d '/net/mirror' ]; then
+    add 'create' '/net/mirror'
+    if [ "$DISTRO" == 'bionic' ];then
+        add 'create' '/net/mirror/llx19'
+    else
+        if [ "$DISTRO" == 'focal' ];then
+            add 'create' '/net/mirror/llx21'
+        else
+            info "Unknown DISTRO value, unable to continue"
+            exit 1
+        fi
+    fi
+fi
+
+info "Using: '$MIRROR_DIR' as MIRROR_DIR"
+SIZE=$($DU -ms "$MIRROR_DIR" |cut -f1)
+info "Size of '$MIRROR_DIR' is '$SIZE' MB"
+
+# $MIRROR_DIR/dists folder detection
+
+has_mirror_dists=
+dists_location=
+dists_available=
+if [ ! -e "$MIRROR_DIR/dists" ];then
+    info "'$MIRROR_DIR/dists' not found!"
+    has_mirror_dists='no'
+else
+    if [ -L "$MIRROR_DIR/dists" ];then
+        info "Detected new format on '$MIRROR_DIR/dists'"
+        has_mirror_dists='new'
+        dists_location=$($REALPATH "$MIRROR_DIR/dists")
+        if [ -e "$dists_location" ];then
+            info "Detected dists location '$dists_location'"
+            dists_available=1
+        else
+            info "Detected unavailable dists location '$dists_location'"
+        fi
+    else
+        if [ -d "$MIRROR_DIR/dists" ];then
+            info "Detected old format on '$MIRROR_DIR/dists'"
+            dists_location="$MIRROR_DIR/dists"
+            has_mirror_dists='old'
+            dists_available=1
+        else
+            info "Detected other format on '$MIRROR_DIR/dists'"
+            has_mirror_dists='other'
+        fi
+    fi
+fi
+
+# $MIRROR_DIR/pool folder detection
+
+has_mirror_pool=
+pool_location=
+pool_available=
+if [ ! -e "$MIRROR_DIR/pool" ];then
+    info "'$MIRROR_DIR/pool' not found!"
+    has_mirror_pool='no'
+else
+    if [ -L "$MIRROR_DIR/pool" ];then
+        info "Detected new format on '$MIRROR_DIR/pool'"
+        has_mirror_pool='new'
+        pool_location=$($REALPATH "$MIRROR_DIR/pool")
+        if [ -e "$pool_location" ];then
+            info "Detected pool location '$pool_location'"
+            pool_available=1
+        else
+            info "Detected unavailable pool location '$pool_location'"
+        fi
+    else
+        if [ -d "$MIRROR_DIR/pool" ];then
+            info "Detected old format on '$MIRROR_DIR/pool'"
+            pool_location="$MIRROR_DIR/pool"
+            has_mirror_pool='old'
+            pool_available=1
+        else
+            info "Detected other format on '$MIRROR_DIR/pool'"
+            has_mirror_pool='other'
+        fi
+    fi
+fi
+
+# $MIRROR_DIR/var folder detection
+
+has_mirror_var=
+var_location=
+var_available=
+if [ ! -e "$MIRROR_DIR/var" ];then
+    info "'$MIRROR_DIR/var' not found!"
+    has_mirror_var='no'
+else
+    if [ -L "$MIRROR_DIR/var" ];then
+        info "Detected link on '$MIRROR_DIR/var'"
+        has_mirror_var='link'
+        var_location=$($REALPATH "$MIRROR_DIR/var")
+        if [ -e "$var_location" ];then
+            info "Detected var location '$var_location'"
+            var_available=1
+        else
+            info "Detected unavailable var location '$var_location'"
+        fi
+    else
+        if [ -d "$MIRROR_DIR/var" ];then
+            var_location="$MIRROR_DIR/var"
+            has_mirror_var='dir'
+            var_available=1
+        else
+            info "Detected other format on '$MIRROR_DIR/var'"
+            has_mirror_var='other'
+        fi
+    fi
+fi
+
+# $MIRROR_DIR/skel folder detection
+
+has_mirror_skel=
+skel_location=
+skel_available=
+if [ ! -e "$MIRROR_DIR/skel" ];then
+    info "'$MIRROR_DIR/skel' not found!"
+    has_mirror_skel='no'
+else
+    if [ -L "$MIRROR_DIR/skel" ];then
+        info "Detected link on '$MIRROR_DIR/skel'"
+        has_mirror_skel='link'
+        skel_location=$($REALPATH "$MIRROR_DIR/skel")
+        if [ -e "$skel_location" ];then
+            info "Detected skel location '$skel_location'"
+            skel_available=1
+        else
+            info "Detected unavailable skel location '$skel_location'"
+        fi
+    else
+        if [ -d "$MIRROR_DIR/skel" ];then
+            skel_location="$MIRROR_DIR/skel"
+            skel_available=1
+            has_mirror_skel='dir'
+        else
+            info "Detected other format on '$MIRROR_DIR/skel'"
+            has_mirror_skel='other'
+        fi
+    fi
+fi
+
+# 
+# Get timestamp of a pool structure looking for lliurex-version-timestamp_VALUE.deb
+# 
+
+function get_pool_timestamp(){
+    folder=
+    if [ -n "$1" -a -d "$1" ];then
+        d="$($REALPATH "$1")"
+        if [ -d "$d/pool" ];then
+            folder=$1
+        fi
+        if [ -L "$d/pool" ];then
+            folder=$1
+        fi
+    else
+        if [ -n "$MIRROR_DIR" -a -d "$MIRROR_DIR" ];then
+            if [ -d "$MIRROR_DIR/pool" ];then
+                folder=$MIRROR_DIR
+            fi
+            if [ -L "$MIRROR_DIR/pool" ];then
+                folder=$MIRROR_DIR
+            fi
+        else
+            if [ -n "$1" ];then
+                info "Unable to get timestamp from '$1'"
+            else
+                info "Unable to get timestamp from '$MIRROR_DIR'"
+            fi
+        fi
+    fi
+    if [ -z "$folder" ];then
+        return
+    fi
+    found_llx_timestamp=$($FIND -L "$folder"/pool -type f \( -not -regex "$folder/.*old.*" -a -name 'lliurex-version-timestamp_*' \))
+    timestamp_date=
+    if [ -n "$found_llx_timestamp" ];then
+        timestamp_date=$($ECHO $found_llx_timestamp|$SED -E s@\.*lliurex-version-timestamp_[0-9]+.\([0-9]{2}\)\([0-9]{2}\)\([0-9]{2}\).*@\\3/\\2/20\\1@g)
+        if [ -n "$timestamp_date" ];then
+            info "Detected pool timestamp '$timestamp_date'"
+        else
+            timestamp_date=""   
+        fi
+    else
+        info "Unable to locate lliurex-version-timestamp package into pool '$MIRROR_DIR/pool'"
+    fi
+    RETURNED=$timestamp_date
+}
+
+#
+# Write valid n4d variable format with current date or provided date with dd/mm/yyyy format
+#
+function write_variable(){
+    if [ -n "$1" ];then
+        d=$1
+    else
+        d=$(date +'%d/%m/%Y')
+    fi
+    printf -v RETURNED '%q' "{\n\t\"LLIUREXMIRROR\": {\n\t\t\"function\": \"\",\n\t\t\"root_protected\": false,\n\t\t\"description\": \"Lliurex Mirror info variable\",\n\t\t\"force_update\": true,\n\t\t\"value\": {\n\t\t\t\"llx19\": {\n\t\t\t\t\"exception_msg\": \"\",\n\t\t\t\t\"status_mirror\": \"Ok\",\n\t\t\t\t\"last_mirror_date\": \"$d\",\n\t\t\t\t\"mirror_size\": \"33.1815584237\",\n\t\t\t\t\"progress\": 100\n\t\t\t}\n\t\t},\n\t\t\"volatile\": false,\n\t\t\"packages\": [\n\t\t\t\"n4d-lliurex-mirror\"\n\t\t]\n\t}\n}\n"
+}
+
+function compare_newer(){
+    # Compare two dates (a,b) with format dd/mm/yyyy
+    # return (RETURNED var) '-1' if a newer than b
+    # return (RETURNED var) '0' if equal
+    # return (RETURNED var) '1' if b newer than a
+    # return 0 if no error
+    # return 1 if error
+    if [ -n "$1" -a -n "$2" ];then
+        d1=$($ECHO $1 | cut -d/ -f1)
+        m1=$($ECHO $1 | cut -d/ -f2)
+        y1=$($ECHO $1 | cut -d/ -f3)
+        d2=$($ECHO $2 | cut -d/ -f1)
+        m2=$($ECHO $2 | cut -d/ -f2)
+        y2=$($ECHO $2 | cut -d/ -f3)
+        if [ -z "$d1" -o -z "$d2" -o -z "$m1" -o -z "$m2" -o -z "$y1" -o -z "$y2" ];then
+            info "Error comparing dates '$1' & '$2'"
+            exit 1
+        fi
+        datets1=$(date --date="$m1/$d1/$y1" +%s)
+        datets2=$(date --date="$m2/$d2/$y2" +%s)
+        if [ -n "$datets1" -a -n "$datets2" ];then
+            if [ $datets1 -gt $datets2 ];then
+                RETURNED='-1'
+                return 0
+            else
+                if [ $datets1 -lt $datets2 ];then
+                    RETURNED='1'
+                    return 0
+                else
+                    RETURNED='0'
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    return 1
+}
+
+# 
+# Search function to select any $MIRROR_DIR/localhost:XXXXX valid pool
+# If multiple: Select newer based on timestamp contained into lliurex-version-timestamp_VALUE.deb
+#          OR: If all timestamps are equal, try to select bigger pool
+# Return: Empty $found_exported variable if search has no results
+#         Pool path on $found_exported variable
+# If result is returned, old and invalid pools will be marked for deletion
+#
+
+function search_exported(){
+    declare -a found_exported
+    readarray -d '' found_exported < <($FIND "$MIRROR_DIR" -maxdepth 1 -type d \( -not -regex "$MIRROR_DIR/.*old.*" -a -regex '[^:]+:[0-9]+' \) -print0)
+    # print_array 'FOUND_EXPORTED'  found_exported[@]
+    if [ ${#found_exported[@]} -gt 0 ];then
+        if [ ${#found_exported[@]} -ne 1 ]; then
+            #info 'Detected multiple exported repos, trying last one'
+            #found_exported=$($FIND "$MIRROR_DIR" -maxdepth 1 -type d -printf '%T@ %p\n' \( -not -regex "$MIRROR_DIR/.*old.*" -a -regex '[^:]+:[0-9]+' \)|$SORT -n )
+            info 'Seems like there is multiple exported repos, trying valid and newer or bigger'
+            best=
+            size=
+            timestamp=
+            tmp=
+            remove=()
+            duplicate=
+            timestamplist=
+            for repo in "${found_exported[@]}"; do
+                if [ ! -d "$repo/pool" ];then
+                    add 'remove' "$repo"
+                    continue
+                fi
+                # IF based on timestamp
+                get_pool_timestamp "$repo"
+                tmp=$RETURNED
+                timestamplist="$timestamplist $tmp"
+                if [ -z "$tmp" ];then
+                    remove+=("$repo")
+                fi
+                if [ -z "$timestamp" ];then
+                    timestamp=$tmp
+                    best="$repo"
+                else
+                    compare_newer $timestamp $tmp
+                    c=$RETURNED
+                    if [ $? -eq 1 ];then
+                        continue
+                    fi
+                    if [ "$c" = "1" ];then
+                        timestamp=$tmp
+                        remove+=("$best")
+                        best="$repo"
+                    fi
+                    if [ "$c" = "-1" ];then
+                        remove+=("$repo")
+                    fi
+                    if [ "$c" = "0" ];then
+                        duplicate='yes'
+                        info "Same timestamp for '$best' ($timestamp) and '$repo' ($tmp)"
+                        tmp1=$($DU -ms "$best"|cut -f1)
+                        tmp2=$($DU -ms "$repo"|cut -f1)
+                        if [ $tmp1 -gt $tmp2 ];then
+                            info "Selected until now '$best' ($timestamp) with '$tmp1' MB"
+                            remove+=("$repo")
+                        fi
+                        if [ $tmp1 -lt $tmp2 ];then
+                            info "Selected until now '$repo' ($tmp) with '$tmp2' MB"
+                            timestamp=$tmp
+                            remove+=("$best")
+                            best="$repo"
+                        fi
+                        if [ $tmp1 -eq $tmp2 ];then
+                            info "Same size: Selected until now '$best' ($timestamp) with '$tmp1' MB"
+                            remove+=("$repo")
+                        fi
+                    fi
+                fi
+            done
+            if [ $($ECHO $timestamplist|$XARGS -n1|$SORT|$UNIQ|$WC -l) -eq 1 ];then
+                info "By timestamp is not possible, trying by size"
+                best=
+                size=
+                declare -a remove
+            fi
+            if [ -n "$best" ];then
+                info "Selected '$best' by timestamp with '$timestamp'"
+                found_exported="$best"
+                for r in "${remove[@]}"; do
+                    name=$($BASENAME "'$r'")
+                    add 'remove' "$r"
+                    add 'remove' "$MIRROR_DIR/skel/$name"
+                done
+            else
+                for repo in ${found_exported[@]}; do
+                    if [ ! -d "$repo/pool" ];then
+                        add 'remove' "$repo"
+                        continue
+                    fi
+                    # IF based in size
+                    tmp=$($DU -ms "$repo"|cut -f1)
+                    if [ -z "$size" ];then
+                        size=$tmp
+                        best="$repo"
+                    else
+                        if [ $size -lt $tmp ];then
+                            size=$tmp
+                            add 'remove' "$best"
+                            name=$($BASENAME "'$best'")
+                            add 'remove' "$MIRROR_DIR/skel/$name"
+                            best="$repo"         
+                        else
+                            add 'remove' "$repo"
+                            name=$($BASENAME "'$repo'")
+                            add 'remove' "$MIRROR_DIR/skel/$name"
+                        fi
+                    fi
+                done
+                if [ -n "$best" ];then
+                    info "Selected '$best' by size with '$size' MB"
+                    found_exported="$best"
+                fi
+            fi
+        fi
+    fi
+    RETURNED=${found_exported}
+}
+
+# 
+# Main execution
+# 
+
+if [ ! -d "$MIRROR_DIR/lliurex.net/$DISTRO/pool" ];then
+    add 'create' "$MIRROR_DIR/lliurex.net/$DISTRO/pool"
+fi
+if [ ! -d "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists" ];then
+    add 'create' "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists"
+fi
+if [ "$has_mirror_dists" = "other" ]; then
+    add 'remove' "$MIRROR_DIR/dists"
+fi
+dists_ok=
+if [ "$has_mirror_dists" = "new" -a "$dists_location" = "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists" ];then
+    dists_ok=1
+    info "dists folder seems ok"
+else
+    add 'remove' "$MIRROR_DIR/dists"
+fi
+if [ "$has_mirror_skel" = "link" -o "$has_mirror_skel" = "other" ];then
+    add 'remove' "$MIRROR_DIR/skel"
+fi
+if [ "$has_mirror_pool" = "other" ]; then
+    add 'remove' "$MIRROR_DIR/pool"
+fi
+current_timestamp=
+pool_ok=
+if [ "$has_mirror_pool" = "new" -a "$pool_location" = "$MIRROR_DIR/lliurex.net/$DISTRO/pool" ]; then
+    pool_ok=1
+    get_pool_timestamp "$MIRROR_DIR/lliurex.net/$DISTRO"
+    current_timestamp=$RETURNED
+    info "pool folder seems ok"
+else
+    add 'remove' "$MIRROR_DIR/pool"
+fi
+
+search_exported
+found_exported="$RETURNED"
+
+found_exported_name=
+if [ -n "$found_exported" ];then
+    found_exported_name=$(basename "$found_exported")
+fi
+
+texporteddir=
+if [ -n "$found_exported" ];then
+    get_pool_timestamp "$found_exported"
+    texporteddir="$RETURNED"
+fi
+if [ -n "$current_timestamp" -a "$texporteddir" ];then
+    compare_newer "$current_timestamp" "$texporteddir"
+    ret="$RETURNED"
+    if [ "$ret" = "1" ];then
+        add 'remove' "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists"
+        add 'remove' "$MIRROR_DIR/lliurex.net/pool"
+    fi
+    if [ "$ret" = "-1" -o "$ret" = "0" ];then
+        add 'remove' "$MIRROR_DIR/skel/$found_exported_name"
+        add 'remove' "$MIRROR_DIR/$found_exported_name"
+        found_exported=
+        found_exported_name=
+        texporteddir=
+    fi
+fi
+old_pool_moved=
+last_update=
+if [ "$has_mirror_pool" = "old" ];then
+    get_pool_timestamp "$MIRROR_DIR"
+    tpooldir="$RETURNED"
+    if [ -z "$found_exported" ];then
+        add 'move' "$MIRROR_DIR/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
+        old_pool_moved=1
+        last_update=$tpooldir
+    else
+        compare_newer $texporteddir $tpooldir
+        c="$RETURNED"
+        if [ "$c" = "0" ];then
+            add 'remove' $found_exported
+        fi
+        if [ "$c" = "1" ];then
+            add 'move' "$MIRROR_DIR/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
+            old_pool_moved=1
+            last_update=$texporteddir
+        fi 
+    fi
+fi
+if [ -n "$found_exported" ];then
+    get_pool_timestamp "$found_exported"
+    last_update="$RETURNED"
+    add 'move' "$found_exported/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
+    add 'remove' "$found_exported" "$MIRROR_DIR/lliurex.net/$DISTRO"
+    if [ -d "$MIRROR_DIR/skel/$found_exported_name/dists" ];then
+        add 'move' "$MIRROR_DIR/skel/$found_exported_name/dists" "$MIRROR_DIR/skel/lliurex.net/$DISTRO"
+        add 'remove' "$MIRROR_DIR/skel/$found_exported_name"
+        info "Exported meta-info found on '$MIRROR_DIR/skel/$found_exported_name/dists'"
+        add 'link' "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists"
+    else
+        info 'Warning: exported repo seems like not have valid dists meta-info'
+    fi
+else
+    if [ -z "$old_pool_moved" ];then
+        if [ -z "$pool_ok" ];then
+            info 'Pool not found, aborting...'
+            exit 1
+        else
+            get_pool_timestamp "$MIRROR_DIR/lliurex.net/$DISTRO"
+            last_update="$RETURNED"
+        fi
+    else
+        if [ -d "$MIRROR_DIR/dists" ];then
+            add 'move' "$MIRROR_DIR/dists" "$MIRROR_DIR/skel/lliurex.net/$DISTRO"
+            add 'link' "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists"
+        fi
+    fi
+fi
+if [ -z "$pool_ok" ];then
+    add 'link' "$MIRROR_DIR/lliurex.net/$DISTRO/pool"
+fi
+if [ -z "$pool_ok" ];then
+    if [ -f "$MIRROR_DIR/time-of-last-update" ];then
+       add 'remove' "$MIRROR_DIR/time-of-last-update"
+    fi
+fi
+
+# search for useless old data
+if [ -n "$remove_old" ];then
+    olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*old_.*" -prune)
+    if [ -n "$olds" ];then
+        info 'Old data: (Seems safe to remove them)'
+        for old in $olds; do
+            if check_valid "$old"; then
+                if [ -d "$old" ];then
+                    add 'old' "$old"
+                else
+                    add 'old' "$old"
+                fi
+            fi
+        done
+    fi
+    olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*[.]old" -prune)
+    if [ -n "$olds" ];then
+        info 'Old data: (Seems safe to remove them)'
+        for old in $olds; do
+            if check_valid "$old"; then
+                if [ -d "$old" ];then
+                    add 'old' "$old"
+                else
+                    add 'old' "$old"
+                fi
+            fi
+        done
+    fi
+fi
+
+# execute all planned operations
+execute
+
+# setup valid n4d-var
+if [ -z "$last_update" ];then
+    info 'Unable to get last update date from pool'
+fi
+
+if [ -n "$write_n4dvar" ];then
+    write_variable $last_update
+
+    if [ -n "$dry" ];then
+        info "Dumping n4d variable to stdout"
+        info "Contents of '$LLXMIRRORPATH':"
+        $ECHO $SUDO $BASH -c "\"$CAT > '$LLXMIRRORPATH' << _EOF"
+        eval $ECHO -e "$RETURNED"|$SED 's/"/\\"/g'
+        $ECHO '_EOF"'
+        $DUMMY $N4DVARS readinbox
+    else
+        info "Dumping n4d variable to tempfile '$tmpfile'"
+        tmpfile="$($TEMPFILE)"
+        if [ -f "$tmpfile" ];then
+            eval $ECHO -e "$RETURNED" > $tmpfile
+            info $($CAT $tmpfile)
+            info "Moving '$tmpfile' to '$LLXMIRRORPATH'"
+            $DUMMY $MV "$tmpfile" "$LLXMIRRORPATH"
+            $DUMMY $N4DVARS readinbox
+        fi
+    fi
+fi
+
+# setup time-of-last-update file
+
+if [ ! -f "$MIRROR_DIR/time-of-last-update" -a -n "$last_update" ];then
+    d=$($ECHO $last_update|cut -d/ -f1)
+    m=$($ECHO $last_update|cut -d/ -f2)
+    y=$($ECHO $last_update|cut -d/ -f3)
+    if [ -n "$dry" ];then
+        info "Dumping time-of-last-update to stdout"
+        info "Contents of '$MIRROR_DIR/time-of-last-update'"
+        $ECHO $SUDO bash -c \"$ECHO "'$y/$m/${d}_00:01' > '$MIRROR_DIR/time-of-last-update'\""
+    else
+        tmpfile="$($TEMPFILE)"
+        if [ -f "$tmpfile" ];then
+            info "Dumping time-of-last-update to tempfile '$tmpfile'"
+            $ECHO "$y/$m/${d}_00:01" > $tmpfile
+            info $($CAT $tmpfile)
+            info "Moving '$tmpfile' to '$MIRROR_DIR/time-of-last-update'"
+            $DUMMY $MV "$tmpfile" "$MIRROR_DIR/time-of-last-update"
+        fi
+    fi
+fi
+
+# build sample configuration
+if [ -n "$sample_conf" ];then
+    FILE="$MIRROR_DIR/mirror.sample"
+    if [ -f "$SAMPLE_CONF_TPL" ];then
+        if [ -z "$dry" ];then
+            tmpfile=$($TEMPFILE)
+            if [ -f "$tmpfile" ];then
+                info "Dumping sample config to tempfile '$tmpfile'"
+                $SED -nr "s@(set\s+base_path\s*)\{\{[^}]*\}\}@\1 '$MIRROR_DIR'@g; s@(set\s+nthreads\s*)\{\{[^}]*\}\}@\1 2@g; s@(set\s+limit_rate\s*)\{\{[^}]*\}\}@\1 100m@g; /^(set\s+)/p" < $SAMPLE_CONF_TPL > $tmpfile
+                for arch in $ARCHES; do 
+                    for sect in $SECTIONS; do
+                        $ECHO -n "deb-$arch http://lliurex.net/bionic $sect " >> $tmpfile
+                        for comp in $COMPONENTS; do
+                            $ECHO -n "$comp " >> $tmpfile
+                        done
+                        if [ "$sect" = "$DISTRO" ];then
+                            $ECHO -n "preschool" >> $tmpfile
+                        fi
+                        $ECHO >> $tmpfile
+                        # info $($CAT $tmpfile)
+                    done
+                done
+                info "Moving '$tmpfile' to '$FILE'"
+                $DUMMY $MV "$tmpfile" "$FILE"
+            fi
+        else
+            info 'Dumping sample config to stdout'
+            $ECHO $SUDO "$BASH -c \"$CAT > '$FILE' << _EOF" 
+            $SED -nr "s@(set\s+base_path\s*)\{\{[^}]*\}\}@\1 '$MIRROR_DIR'@g; s@(set\s+nthreads\s*)\{\{[^}]*\}\}@\1 2@g; s@(set\s+limit_rate\s*)\{\{[^}]*\}\}@\1 100m@g; s@[$]@\\\\\\\\\\\\\$@g; /^(set\s+)/p" < $SAMPLE_CONF_TPL 
+            for arch in $ARCHES; do 
+                for sect in $SECTIONS; do
+                    $ECHO -n "deb-$arch http://lliurex.net/bionic $sect "
+                    for comp in $COMPONENTS; do
+                        $ECHO -n "$comp " 
+                    done
+                    if [ "$sect" = "$DISTRO" ];then
+                        $ECHO -n "preschool"
+                    fi
+                    $ECHO 
+                done
+            done
+            $ECHO "_EOF\""
+        fi
+    else
+        info "Template not found on '$SAMPLE_CONF_TPL'"
+    fi
+fi
+exit 0
+

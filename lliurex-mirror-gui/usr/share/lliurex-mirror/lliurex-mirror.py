@@ -1217,7 +1217,7 @@ class LliurexMirror:
 
 			
 		else:
-			
+			self.llx_conn.stop_export()
 			self.updating_mirror.info["exporting"]=False
 			self.updating_mirror.info["executing"]=False
 			self.updating_mirror.info["cancelled"]=True
@@ -1672,6 +1672,9 @@ class LliurexMirror:
 			percentage=self.percentage
 		else:
 			percentage=110
+
+		if not percentage:
+			percentage=0
 
 		ctx.set_source_rgba(1,1,1,1)
 		ctx.rectangle(0,0,self.frame_size,self.frame_size)
