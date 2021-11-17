@@ -51,6 +51,7 @@ help(){
     echo '      --config-file=  (optional) (use a config file, default /etc/apt/mirror.list)'
     echo '      -i              (always used) (interactive mode)'
     echo '      -e              (always used) (execute)'
+    echo '      -f              (optional) (remove possibly mirror lockfiles)'
     echo '      -v              (optional) (verify downloaded files)'
     echo '      -rf             (optional) (retry failed files)'
     echo '      -c              (optional) (incremental pool & failed)'
@@ -64,6 +65,7 @@ incremental=
 verify=
 retry_failed=
 config_file=
+remove_locks=
 
 while test -n "$1"; do
     case $1 in
@@ -84,6 +86,9 @@ while test -n "$1"; do
         ;;
         -c)
             incremental=1
+        ;;
+        -f)
+            remove_locks=1
         ;;
         -h|--help)
             help
@@ -164,6 +169,7 @@ if [ ! -d $VAR_DIR ]; then
 fi
 ALL_FILE=$VAR_DIR/ALL
 SIG_DIR=$VAR_DIR
+LOCKFILE="$VAR_DIR/apt-mirror.lock"
 # DEFAULT FILE CHECKING METHOD
 SIGFILES="MD5"
 KEYRING=/etc/apt/trusted.gpg.d/lliurex-archive-keyring-gpg.gpg
@@ -172,10 +178,15 @@ OLD_DIR=$MIRROR_DIR/old
 if [ -n "$incremental" ];then
     mkdir -p $OLD_DIR
 fi
-
+if [ -n "$remove_locks" ];then
+   if [ -f "$LOCKFILE" ];then
+       rm -f $LOCKFILE
+   fi
+fi
 make_temps(){
     TMP_CURRENT="$($MKTEMP)"
     TMP_ALL="$($MKTEMP)"
+    TMP_STATUS="$($MKTEMP)"
 }
 make_temps
 
@@ -198,9 +209,9 @@ badthings(){
 run(){
     make_link
     if [ $config_file ];then
-        $($APTMIRROR $config_file &>/dev/null &)
+        $($APTMIRROR $config_file >/dev/null 2>$TMP_STATUS &)
     else
-        $($APTMIRROR &>/dev/null &)
+        $($APTMIRROR >/dev/null 2>$TMP_STATUS &)
     fi
     pid=$($PGREP -P $ME||true)
 }
@@ -323,6 +334,19 @@ if [ $interactive -a $execute ]; then
         getpids
     done;
     printf "[%3s%%]\n" "100"
+    if [ -f "$TMP_STATUS" ];then
+        if grep 'apt-mirror is already running' $TMP_STATUS; then
+            locked=1
+        else
+            locked=
+        fi
+    fi
+fi
+
+if [ -n "$locked" ];then
+    echo 'Some errors ocurred, locking detected, if you are sure re-run with "-f" parameter'
+    echo 'End apt-mirror'
+    exit 1
 fi
 
 if [ $verify ]; then
