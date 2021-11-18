@@ -171,6 +171,8 @@ class LliurexMirrorN4d:
 			config['MIRROR_PATH'] = folder
 			config['CURRENT_UPDATE_OPTION'] = '3'
 			config['ORIGS']['3'] = self.serverip + ":" + str(port)
+			config['NTHREADS'] = 1
+			config['LRATE'] = '50m'
 			result = self.client.MirrorManager.render_debmirror_config(config)
 			temp_file = tempfile.mktemp()
 			f = open(temp_file,'w')
