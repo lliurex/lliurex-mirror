@@ -221,7 +221,24 @@ class MirrorManager:
         # return {'status':True,'msg':'running'}
 
     #def update
-    
+
+    def get_server_from_url(self,url):
+        import re
+        m=re.search('^(http://|https://)?(?P<server>[^/]+)',url)
+        server=None
+        if m:
+            # f"{m.group('server')}"
+            server="{}".format(m.group('server'))
+            parts=server.split(':')
+            if len(parts) == 1:
+                pass
+            elif len(parts) > 1 and parts[1] and parts[1] != '80':
+                pass
+            elif len(parts) > 1 and parts[1] and parts[1] == '80':
+                server="{}".format(parts[0])
+        return server
+    #def get_server_from_url(self,url)
+
     def _update(self,ip,distro,callback_args,restore_info):
         if distro is None:
             distro = self.distro
@@ -322,6 +339,13 @@ class MirrorManager:
         fd.flush()
         
         need_fix_repo=False
+        option_update=self.get_option_update(distro)
+        if isinstance(option_update,dict) and option_update.get('status',None) == 0 and option_update.get('return') == "3":
+            need_fix_repo=True
+            location_option_3=self.get_mirror_orig(distro,'3')
+            if isinstance(location_option_3,dict) and location_option_3.get('status',None) == 0 and location_option_3.get('return',None):
+                location_option_3=location_option_3.get('return')
+                force_pool=self.get_server_from_url(location_option_3)
         if restore_info and isinstance(restore_info,dict):
             if 'distro' in restore_info:
                 self.debug(restore=restore_info)
@@ -353,7 +377,7 @@ class MirrorManager:
                 need_fix_repo=True
 
         if need_fix_repo:
-            self.fix_repo_paths(None)
+            self.fix_repo_paths(None,force_pool)
 
         self.download_time_file(distro)
         self.set_mirror_info(distro)
@@ -366,11 +390,20 @@ class MirrorManager:
 
     #def _update
     
-    def fix_repo_paths(self,config_file=None):
+    def fix_repo_paths(self,config_file=None,force_pool=None):
         if config_file is None:
-            subprocess.check_call(['domirror-fix-repo','-ro'])
+            if force_pool:
+                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
+            else:
+                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro'],stderr=subprocess.STDOUT,shell=False)
         else:
-            subprocess.check_call(['domirror-fix-repo','-ro','-c',config_file])
+            if force_pool:
+                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file,'-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
+            else:
+                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file],stderr=subprocess.STDOUT,shell=False)
+            with open('/tmp/dmrfx.log','w') as fp:
+                fp.write(out.decode('utf8'))
+        return out
     #def fix_repo_paths(config_file):
 
     def is_alive(self):
