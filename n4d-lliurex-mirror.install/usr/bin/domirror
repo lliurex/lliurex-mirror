@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Copyright (c) 2021 M.Angel Juan <m.angel.juan@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 DISTRO='focal'
 #set cleanscript $var_path/clean.sh
 #set defaultarch  amd64
@@ -44,17 +59,35 @@ clean http://lliurex.net/$DISTRO
 # KEYRING=/etc/apt/trusted.gpg.d/lliurex-archive-keyring-gpg.gpg
 # KEYRINGS=$(find /etc/apt -type f -name '*.gpg')
 
+WHICH="/usr/bin/which"
+if [ ! -f "$WHICH" ];then
+    echo "which not found, install debianutils first!, unable to continue"
+    exit 1
+fi
+
+ECHO=$($WHICH echo)
+if [ -z "${ECHO}" -o ! -f "$ECHO" ];then
+    echo "echo not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+
+SED=$($WHICH sed)
+if [ -z "${SED}" -o ! -f "$SED" ];then
+    $ECHO "sed not found, install sed first!, unable to continue"
+    exit 1
+fi
+
 help(){
-    echo 'domirror: lliurex-mirror helper tool'
-    echo ''
-    echo 'available options:'
-    echo '      --config-file=  (optional) (use a config file, default /etc/apt/mirror.list)'
-    echo '      -i              (always used) (interactive mode)'
-    echo '      -e              (always used) (execute)'
-    echo '      -f              (optional) (remove possibly mirror lockfiles)'
-    echo '      -v              (optional) (verify downloaded files)'
-    echo '      -rf             (optional) (retry failed files)'
-    echo '      -c              (optional) (incremental pool & failed)'
+    $ECHO 'domirror: lliurex-mirror helper tool'
+    $ECHO ''
+    $ECHO 'available options:'
+    $ECHO '      --config-file=  (optional) (use a config file, default /etc/apt/mirror.list)'
+    $ECHO '      -i              (always used) (interactive mode)'
+    $ECHO '      -e              (always used) (execute)'
+    $ECHO '      -f              (optional) (remove possibly mirror lockfiles)'
+    $ECHO '      -v              (optional) (verify downloaded files)'
+    $ECHO '      -rf             (optional) (retry failed files)'
+    $ECHO '      -c              (optional) (incremental pool & failed)'
 }
 
 ME=$$
@@ -70,7 +103,7 @@ remove_locks=
 while test -n "$1"; do
     case $1 in
         --config-file=*)
-            config_file=$(echo $1|sed -r "s/--config-file=(.*)/\1/g")
+            config_file=$($ECHO $1|$SED -r "s/--config-file=(.*)/\1/g")
         ;;
         -i)
             interactive=1
@@ -103,80 +136,186 @@ if [ -z "$config_file" ]; then
     if [ -f /etc/apt/mirror.list ]; then
         config_used=/etc/apt/mirror.list
     else
-        echo "No config file found"
+        $ECHO "No config file found"
         exit 1
     fi
 else
     if [ -f "$config_file" ];then
         config_used="$config_file"
     else
-        echo "Provided config file not found"
+        $ECHO "Provided config file not found"
         exit 1
     fi
 fi
-REALPATH=$(which realpath)
+REALPATH=$($WHICH realpath)
 if [ -z "${REALPATH}" -o ! -f "$REALPATH" ];then
-    echo "Realpath not found, install coreutils first!, unable to continue"
+    $ECHO "Realpath not found, install coreutils first!, unable to continue"
     exit 1
 fi
-COMM=$(which comm)
+COMM=$($WHICH comm)
 if [ -z "${COMM}" -o ! -f "$COMM" ];then
-    echo "Comm not found, install coreutils first!, unable to continue"
+    $ECHO "Comm not found, install coreutils first!, unable to continue"
     exit 1
 fi
-DIRNAME=$(which dirname)
+DIRNAME=$($WHICH dirname)
 if [ -z "${DIRNAME}" -o ! -f "$DIRNAME" ];then
-    echo "dirname not found, install coreutils first!, unable to continue"
+    $ECHO "dirname not found, install coreutils first!, unable to continue"
     exit 1
 fi
-BASENAME=$(which basename)
+BASENAME=$($WHICH basename)
 if [ -z "${BASENAME}" -o ! -f "$BASENAME" ];then
-    echo "Basename not found, install coreutils first!, unable to continue"
+    $ECHO "Basename not found, install coreutils first!, unable to continue"
     exit 1
 fi
-MKTEMP=$(which mktemp)
+MKTEMP=$($WHICH mktemp)
 if [ -z "${MKTEMP}" -o ! -f "$MKTEMP" ];then
-    echo "mktemp not found, install coreutils first!, unable to continue"
+    $ECHO "mktemp not found, install coreutils first!, unable to continue"
     exit 1
 fi
-APTMIRROR=$(which apt-mirror)
+APTMIRROR=$($WHICH apt-mirror)
 if [ -z "${APTMIRROR}" -o ! -f "$APTMIRROR" ];then
-    echo "apt-mirror not found, install apt-mirror first!, unable to continue"
+    $ECHO "apt-mirror not found, install apt-mirror first!, unable to continue"
     exit 1
 fi
-PGREP=$(which pgrep)
+PGREP=$($WHICH pgrep)
 if [ -z "${PGREP}" -o ! -f "$PGREP" ];then
-    echo "pgrep not found, install procps first!, unable to continue"
+    $ECHO "pgrep not found, install procps first!, unable to continue"
     exit 1
 fi
-GPG=$(which gpg)
+GREP=$($WHICH grep)
+if [ -z "${GREP}" -o ! -f "$GREP" ];then
+    $ECHO "grep not found, install grep first!, unable to continue"
+    exit 1
+fi
+GPG=$($WHICH gpg)
 if [ -z "${GPG}" -o ! -f "$GPG" ];then
-    echo "gpg not found, install gpg first!, unable to continue"
+    $ECHO "gpg not found, install gpg first!, unable to continue"
     exit 1
 fi
-PERL=$(which perl)
+PERL=$($WHICH perl)
 if [ -z "${PERL}" -o ! -f "$PERL" ];then
-    echo "perl not found, install perl first!, unable to continue"
+    $ECHO "perl not found, install perl first!, unable to continue"
     exit 1
 fi
-SED=$(which sed)
-if [ -z "${SED}" -o ! -f "$SED" ];then
-    echo "sed not found, install sed first!, unable to continue"
+MKDIR=$($WHICH mkdir)
+if [ -z "${MKDIR}" -o ! -f "$MKDIR" ];then
+    $ECHO "mkdir not found, install coreutils first!, unable to continue"
     exit 1
 fi
+RM=$($WHICH rm)
+if [ -z "${RM}" -o ! -f "$RM" ];then
+    $ECHO "rm not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+KILL=$($WHICH kill)
+if [ -z "${KILL}" -o ! -f "$KILL" ];then
+    $ECHO "kill not found, install procps first!, unable to continue"
+    exit 1
+fi
+NICE=$($WHICH nice)
+if [ -z "${NICE}" -o ! -f "$NICE" ];then
+    $ECHO "nice not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+MV=$($WHICH mv)
+if [ -z "${MV}" -o ! -f "$MV" ];then
+    $ECHO "mv not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+LN=$($WHICH ln)
+if [ -z "${LN}" -o ! -f "$LN" ];then
+    $ECHO "ln not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+CAT=$($WHICH cat)
+if [ -z "${CAT}" -o ! -f "$CAT" ];then
+    $ECHO "cat not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+SORT=$($WHICH sort)
+if [ -z "${SORT}" -o ! -f "$SORT" ];then
+    $ECHO "sort not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+UNIQ=$($WHICH uniq)
+if [ -z "${UNIQ}" -o ! -f "$UNIQ" ];then
+    $ECHO "uniq not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+FIND=$($WHICH find)
+if [ -z "${FIND}" -o ! -f "$FIND" ];then
+    $ECHO "find not found, install findutils first!, unable to continue"
+    exit 1
+fi
+TRUE=$($WHICH true)
+if [ -z "${TRUE}" -o ! -f "$TRUE" ];then
+    $ECHO "true not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+TR=$($WHICH tr)
+if [ -z "${TR}" -o ! -f "$TR" ];then
+    $ECHO "tr not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+WC=$($WHICH wc)
+if [ -z "${WC}" -o ! -f "$WC" ];then
+    $ECHO "wc not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+BC=$($WHICH bc)
+if [ -z "${BC}" -o ! -f "$BC" ];then
+    $ECHO "bc not found, install bc first!, unable to continue"
+    exit 1
+fi
+LS=$($WHICH ls)
+if [ -z "${LS}" -o ! -f "$LS" ];then
+    $ECHO "ls not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+CUT=$($WHICH cut)
+if [ -z "${CUT}" -o ! -f "$CUT" ];then
+    $ECHO "cut not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+SLEEP=$($WHICH sleep)
+if [ -z "${SLEEP}" -o ! -f "$SLEEP" ];then
+    $ECHO "sleep not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+HEAD=$($WHICH head)
+if [ -z "${HEAD}" -o ! -f "$HEAD" ];then
+    $ECHO "head not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+PRINTF=$($WHICH printf)
+if [ -z "${PRINTF}" -o ! -f "$PRINTF" ];then
+    $ECHO "printf not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+XARGS=$($WHICH xargs)
+if [ -z "${XARGS}" -o ! -f "$XARGS" ];then
+    $ECHO "xargs not found, install findutils first!, unable to continue"
+    exit 1
+fi
+WGET=$($WHICH wget)
+if [ -z "${WGET}" -o ! -f "$WGET" ];then
+    $ECHO "wget not found, install wget first!, unable to continue"
+    exit 1
+fi
+
 MIRROR_DIR="$($SED -r "/\s*\S+\s+base_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g" "$config_used")"
-MIRROR_DIR=$(echo $MIRROR_DIR | tr -d "\"'")
+MIRROR_DIR=$($ECHO "$MIRROR_DIR" | $TR -d "\"'")
 if [ -z "$MIRROR_DIR" ];then
-    echo "Unable to read MIRROR_DIR"
+    $ECHO "Unable to read MIRROR_DIR"
     exit 1
 fi
 if [ ! -d "$MIRROR_DIR" ]; then
-    mkdir -p $MIRROR_DIR
+    $MKDIR -p "$MIRROR_DIR"
 fi
 MIRROR_DIR=$($REALPATH "$MIRROR_DIR")
 VAR_DIR="$($SED -r "/\s*\S+\s+var_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g; s@\\\$base_path@$MIRROR_DIR@g" "$config_used")"
 if [ ! -d "$VAR_DIR" ]; then
-    mkdir -p "$VAR_DIR"
+    $MKDIR -p "$VAR_DIR"
 fi
 ALL_FILE="$VAR_DIR/ALL"
 SIG_DIR="$VAR_DIR"
@@ -184,14 +323,14 @@ LOCKFILE="$VAR_DIR/apt-mirror.lock"
 # DEFAULT FILE CHECKING METHOD
 SIGFILES="MD5"
 KEYRING=/etc/apt/trusted.gpg.d/lliurex-archive-keyring-gpg.gpg
-KEYRINGS=$(find /etc/apt -type f -name '*.gpg')
+KEYRINGS=$($FIND /etc/apt -type f -name '*.gpg')
 OLD_DIR="$MIRROR_DIR/old"
 if [ -n "$incremental" ];then
-    mkdir -p "$OLD_DIR"
+    $MKDIR -p "$OLD_DIR"
 fi
 if [ -n "$remove_locks" ];then
    if [ -f "$LOCKFILE" ];then
-       rm -f "$LOCKFILE"
+       $RM -f "$LOCKFILE"
    fi
 fi
 make_temps(){
@@ -205,67 +344,67 @@ trap badthings SIGINT
 trap badthings SIGUSR1
 
 badthings(){
-    echo Killing $SON
+    $ECHO Killing $SON
     if [ -z "$gets" ]; then
-        echo Nothing to kill
+        $ECHO Nothing to kill
         return
     fi
     for x in $gets; do 
-        kill -9 $x &> /dev/null
+        $KILL -9 $x &> /dev/null
     done
-    kill -9 $pid &> /dev/null
-    kill -9 $ME &> /dev/null
+    $KILL -9 $pid &> /dev/null
+    $KILL -9 $ME &> /dev/null
 }
 
 run(){
     make_link
     if [ -n "$config_file" ];then
-        $(nice -n5 $APTMIRROR "$config_file" >/dev/null 2>$TMP_STATUS &)
+        $($NICE -n5 $APTMIRROR "$config_file" >/dev/null 2>$TMP_STATUS &)
     else
-        $(nice -n5 $APTMIRROR >/dev/null 2>$TMP_STATUS &)
+        $($NICE -n5 $APTMIRROR >/dev/null 2>$TMP_STATUS &)
     fi
     pid=$($PGREP -P $ME||true)
 }
 
 getpids(){
-    pid=$($PGREP -f "$PERL $APTMIRROR"||true)
+    pid=$($PGREP -f "$PERL $APTMIRROR"||$TRUE)
     gets=""
     if [ -n "$pid" ];then
         for p in $pid; do       
-            gets="$gets $($PGREP -P $pid -f wget||true)"
+            gets="$gets $($PGREP -P $pid -f wget||$TRUE)"
         done;
     fi;
 }
 
 make_link(){
     if [ -d "$MIRROR_DIR/pool" -a ! -L "$MIRROR_DIR/pool" ]; then
-        mkdir -p "$MIRROR_DIR/lliurex.net/$DISTRO"
-        mv "$MIRROR_DIR/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
+        $MKDIR -p "$MIRROR_DIR/lliurex.net/$DISTRO"
+        $MV "$MIRROR_DIR/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
     fi
     if [ ! -L "$MIRROR_DIR/pool" ];then
-        POOL=$(find "$MIRROR_DIR" -type d -not -path '*/skel/*' -name 'pool' -print)
+        POOL=$($FIND "$MIRROR_DIR" -type d -not -path '*/skel/*' -name 'pool' -print)
         if [ -n "$POOL" ]; then
-            if [ "$(echo "$POOL"|tr '\n' ' '| wc -w)" -gt 1 ];then
-                POOL=$(echo "$POOL"|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
+            if [ "$($ECHO "$POOL"|$TR '\n' ' '|$WC -w)" -gt 1 ];then
+                POOL=$($ECHO "$POOL"|$TR '\n' ' '|$TR ' ' '\n'|$GREP lliurex)
             fi
             rp="$($REALPATH --relative-to="$MIRROR_DIR" "$POOL")"
             if [ -n "$rp" ];then
-                ln -s "$rp" "$MIRROR_DIR/pool"
+                $LN -s "$rp" "$MIRROR_DIR/pool"
             fi
         fi
     fi
     if [ -d "$MIRROR_DIR/dists" -a ! -L "$MIRROR_DIR/dists" ];then
-        mv "$MIRROR_DIR/dists" "$MIRROR_DIR/old_dists"
+        $MV "$MIRROR_DIR/dists" "$MIRROR_DIR/old_dists"
     fi
     if [ ! -L "$MIRROR_DIR/dists" ];then
-        DISTS=$(find "$MIRROR_DIR" -type d -path '*/skel/*' -name 'dists' -print)
+        DISTS=$($FIND "$MIRROR_DIR" -type d -path '*/skel/*' -name 'dists' -print)
         if [ -n "$DISTS" ]; then
-            if [ "$(echo "$DISTS"|tr '\n' ' '|wc -w)" -gt 1 ];then
-                DISTS=$(echo "$DISTS"|tr '\n' ' '|tr ' ' '\n'|grep lliurex)
+            if [ "$($ECHO "$DISTS"|$TR '\n' ' '|$WC -w)" -gt 1 ];then
+                DISTS=$($ECHO "$DISTS"|$TR '\n' ' '|$TR ' ' '\n'|$GREP lliurex)
             fi
             rp="$($REALPATH --relative-to="$MIRROR_DIR" "$DISTS")"
             if [ -n "$rp" ];then
-                ln -s "$rp" "$MIRROR_DIR/dists"
+                $LN -s "$rp" "$MIRROR_DIR/dists"
             fi
         fi
     fi
@@ -279,9 +418,9 @@ calcule(){
     if [ -f "$ALL_FILE" ]; then
         retry=2
         while [ $retry -gt 0 ]; do
-            asize1=$(echo $(ls -s "$ALL_FILE" |cut -d/ -f1))
-            sleep 2
-            asize2=$(echo $(ls -s "$ALL_FILE" |cut -d/ -f1))
+            asize1=$($ECHO $($LS -s "$ALL_FILE" |$CUT -d/ -f1))
+            $SLEEP 2
+            asize2=$($ECHO $($LS -s "$ALL_FILE" |$CUT -d/ -f1))
             if [ -n "$asize1" -a "x$asize1" == "x$asize2" ]; then 
                 break
             fi
@@ -290,9 +429,9 @@ calcule(){
         if [ -n "$asize1" -a "x$asize1" != "x$asize2" ]; then
             return $OLD_PERCENT
         fi
-        cat "$ALL_FILE" |sort|uniq > $TMP_ALL
-        first_dir=$(head -1 "$ALL_FILE" | cut -d'/' -f1)
-        find "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
+        $CAT "$ALL_FILE" |$SORT|$UNIQ > $TMP_ALL
+        first_dir=$($HEAD -1 "$ALL_FILE" | $CUT -d'/' -f1)
+        $FIND "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |$GREP -v time-of-last-update|$SED -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|$SORT|$UNIQ > $TMP_CURRENT
         declare -a old
         readarray -d $'\0' old < <($COMM -23 $TMP_CURRENT $TMP_ALL|tr '\n' '\0')
         
@@ -300,26 +439,26 @@ calcule(){
         if [ "${#old[@]}" -gt 0 ];then
             for file in "${old[@]}"; do
                 fullfilepath="$MIRROR_DIR/$file"
-                startwith=$(echo $file|cut -d'/' -f1)
+                startwith=$($ECHO $file|$CUT -d'/' -f1)
                 if [ -e "$fullfilepath" -a "x$startwith" == "x$first_dir" ]; then
                     if [ -n "$incremental" ];then
                         dn=$($DIRNAME "$fullfilepath")
                         bn=$($BASENAME "$fullfilepath")
-                        mkdir -p "$OLD_DIR/$dn"
-                        mv "$fullfilepath" "$OLD_DIR/$dn/$bn"
+                        $MKDIR -p "$OLD_DIR/$dn"
+                        $MV "$fullfilepath" "$OLD_DIR/$dn/$bn"
                     else
-                        rm "$fullfilepath"
+                        $RM "$fullfilepath"
                     fi
                 fi
             done
         fi
         if [ "${#old[@]}" -ne 0 ];then
-            find "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |grep -v time-of-last-update|sed -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|sort|uniq > $TMP_CURRENT
+            $FIND "$MIRROR_DIR" -type f \( \( -iname '*.deb' -or -iname '*.udeb' \) -not -path '*/old/*' -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/dists/*' \) -print |$GREP -v time-of-last-update|$SED -rn "s@^$MIRROR_DIR/($first_dir)(.*)@\1\2@p;"|$SORT|$UNIQ > $TMP_CURRENT
         fi
-        ncurrent=$(cat $TMP_CURRENT|wc -l)
-        nall=$(cat $TMP_ALL|wc -l)
+        ncurrent=$($CAT $TMP_CURRENT|$WC -l)
+        nall=$($CAT $TMP_ALL|$WC -l)
         if [ -n "$nall" -a -n "$ncurrent" -a $ncurrent -gt 0 -a $nall -ge $ncurrent ]; then
-            percent=$(echo $ncurrent*100/$nall|bc -q)
+            percent=$($ECHO $ncurrent*100/$nall|$BC -q)
             make_link;
             OLD_PERCENT=$percent
             return $percent
@@ -332,24 +471,24 @@ calcule(){
 }
 
 if [ $execute ]; then
-    echo Starting apt-mirror
+    $ECHO Starting apt-mirror
     run
 fi
 
 getpids
 calcule
-printf "[%3s%%]\n" "$?"
+$PRINTF "[%3s%%]\n" "$?"
 
 if [ $interactive -a $execute ]; then
     while [ -n "$pid" ]; do
         sleep 1
         calcule
-        printf "[%3s%%]\n" "$?"
+        $PRINTF "[%3s%%]\n" "$?"
         getpids
     done;
-    printf "[%3s%%]\n" "100"
+    $PRINTF "[%3s%%]\n" "100"
     if [ -f "$TMP_STATUS" ];then
-        if grep 'apt-mirror is already running' "$TMP_STATUS"; then
+        if $GREP 'apt-mirror is already running' "$TMP_STATUS"; then
             locked=1
         else
             locked=
@@ -358,14 +497,14 @@ if [ $interactive -a $execute ]; then
 fi
 
 if [ -n "$locked" ];then
-    echo 'Some errors ocurred, locking detected, if you are sure re-run with "-f" parameter'
-    echo 'End apt-mirror'
+    $ECHO 'Some errors ocurred, locking detected, if you are sure re-run with "-f" parameter'
+    $ECHO 'End apt-mirror'
     exit 1
 fi
 
 if [ $verify ]; then
-    echo "Verifying mirror"
-    find "$MIRROR_DIR" -type f -name InRelease \( -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/old/*' \) | while read file; do
+    $ECHO "Verifying mirror"
+    $FIND "$MIRROR_DIR" -type f -name InRelease \( -not -path '*/var/*' -not -path '*/skel/*' -not -path '*/old/*' \) | while read file; do
         valid=0
         for kring in $KEYRINGS; do
             if $GPG --keyring "$kring" --verify "$file" &> /dev/null ; then
@@ -374,7 +513,7 @@ if [ $verify ]; then
             fi
         done;
         if [ $valid -eq 0 ];then
-            echo "Failed file verification $file"
+            $ECHO "Failed file verification $file"
         fi
     done;
     ret1=
@@ -383,53 +522,53 @@ if [ $verify ]; then
     for t in $SIGFILES; do
         case $t in
             SHA1)
-                SHA1SUM=$(which sha1sum)
+                SHA1SUM=$($WHICH sha1sum)
                 if [ -z "${SHA1SUM}" -o ! -f "$SHA1SUM" ];then
-                    echo "sha1sum not found, install coreutils first!, skipping verify process"
+                    $ECHO "sha1sum not found, install coreutils first!, skipping verify process"
                 else
                     if [ -f "$VAR_DIR/$t" ]; then
-                        ret1=$(cd "$MIRROR_DIR";LANG=C sha1sum --quiet -c "$VAR_DIR/$t" 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                        ret1=$(cd "$MIRROR_DIR";LANG=C $SHA1SUM --quiet -c "$VAR_DIR/$t" 2>/dev/null|$SED -E 's/([^:]+):\s+FAILED/\1/g')
                     else
-                        echo "skipping $t checking, sumfile not available"
+                        $ECHO "skipping $t checking, sumfile not available"
                     fi
                 fi
             ;;
             SHA256)
-                SHA256SUM=$(which sha256sum)
+                SHA256SUM=$($WHICH sha256sum)
                 if [ -z "${SHA256SUM}" -o ! -f "$SHA256SUM" ];then
-                    echo "sha256sum not found, install coreutils first!, skipping verify process"
+                    $ECHO "sha256sum not found, install coreutils first!, skipping verify process"
                 else
                     if [ -f "$VAR_DIR/$t" ]; then
-                        ret2=$(cd "$MIRROR_DIR";LANG=C sha256sum --quiet -c "$VAR_DIR/$t" 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                        ret2=$(cd "$MIRROR_DIR";LANG=C $SHA256SUM --quiet -c "$VAR_DIR/$t" 2>/dev/null|$SED -E 's/([^:]+):\s+FAILED/\1/g')
                     else
-                        echo "skipping $t checking, sumfile not available"
+                        $ECHO "skipping $t checking, sumfile not available"
                     fi
                 fi
             ;;
             MD5)
-                MD5SUM=$(which md5sum)
+                MD5SUM=$($WHICH md5sum)
                 if [ -z "${MD5SUM}" -o ! -f "$MD5SUM" ];then
-                    echo "md5sum not found, install coreutils first!, skipping verify process"
+                    $ECHO "md5sum not found, install coreutils first!, skipping verify process"
                 else
                     if [ -f "$VAR_DIR/$t" ]; then
-                        ret3=$(cd "$MIRROR_DIR";LANG=C md5sum --quiet -c "$VAR_DIR/$t" 2>/dev/null|sed -E 's/([^:]+):\s+FAILED/\1/g')
+                        ret3=$(cd "$MIRROR_DIR";LANG=C $MD5SUM --quiet -c "$VAR_DIR/$t" 2>/dev/null|$SED -E 's/([^:]+):\s+FAILED/\1/g')
                     else
-                        echo "skipping $t checking, sumfile not available"
+                        $ECHO "skipping $t checking, sumfile not available"
                     fi
                 fi
             ;;
         esac
     done
-    failed=$(printf "%s\n%s\n%s\n" "$ret1" "$ret2" "$ret3"|sort|uniq|xargs -n1)
-    nfailed=$(echo $failed|wc -l)
+    failed=$($PRINTF "%s\n%s\n%s\n" "$ret1" "$ret2" "$ret3"|$SORT|$UNIQ|$XARGS -n1)
+    nfailed=$($ECHO $failed|$WC -l)
     q=0
     if [ ! $retry_failed ];then
         while [ $q -eq 0 ]; do
-            echo -n "$nfailed files failed verify process, [R|r]etry [S|s]how [C|c]ontinue ?"
+            $ECHO -n "$nfailed files failed verify process, [R|r]etry [S|s]how [C|c]ontinue ?"
             read x;
             case $x in
                 s|S)
-                    echo $failed
+                    $ECHO $failed
                 ;;
                 r|R)
                     q=1
@@ -441,15 +580,15 @@ if [ $verify ]; then
         done
     fi
     if [ $q -eq 1 -o ! -z "$retry_failed" ];then
-        if [ $(echo $ret1|wc -c) -gt 1 -o $(echo $ret2|wc -c) -gt 1  -o $(echo $ret3|wc -c) -gt 1 ];then
-            echo "Retrying some packages"
+        if [ $($ECHO $ret1|$WC -c) -gt 1 -o $($ECHO $ret2|$WC -c) -gt 1  -o $($ECHO $ret3|$WC -c) -gt 1 ];then
+            $ECHO "Retrying some packages"
             nretry=0
             for x in $ret1; do
                 if [ -f "$MIRROR_DIR/$x" ];then
                     if [ -n "$incremental" ];then
-                        mv "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
+                        $MV "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
                     else
-                        rm "$MIRROR_DIR/$x"
+                        $RM "$MIRROR_DIR/$x"
                     fi
                     nretry=$(($nretry+1))
                 fi
@@ -457,9 +596,9 @@ if [ $verify ]; then
             for x in $ret2; do
                 if [ -f "$MIRROR_DIR/$x" ];then
                     if [ -n "$incremental" ];then
-                        mv "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
+                        $MV "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
                     else
-                        rm "$MIRROR_DIR/$x"
+                        $RM "$MIRROR_DIR/$x"
                     fi
                     nretry=$(($nretry+1))
                 fi
@@ -467,35 +606,38 @@ if [ $verify ]; then
             for x in $ret3; do
                 if [ -f "$MIRROR_DIR/$x" ];then
                     if [ -n "$incremental" ];then
-                        mv "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
+                        $MV "$MIRROR_DIR/$x" "$MIRROR_DIR/$x.failed"
                     else
-                        rm "$MIRROR_DIR/$x"
+                        $RM "$MIRROR_DIR/$x"
                     fi
                     nretry=$(($nretry+1))
                 fi
             done
-            echo "$nretry files for redownload"
+            $ECHO "$nretry files for redownload"
             if [ -f $TMP_CURRENT ]; then
-                rm $TMP_CURRENT
+                $RM $TMP_CURRENT
             fi
             if [ -f $TMP_ALL ]; then
-                rm $TMP_ALL
+                $RM $TMP_ALL
             fi
             exec bash $0 --config-file="$config_used"
         fi
     fi
 fi
-last_update="$(wget -q http://lliurex.net/$DISTRO/time-of-last-update -O -)"
+last_update="$($WGET -q http://lliurex.net/$DISTRO/time-of-last-update -O -)"
 if [ -n "$last_update" ]; then
-    echo $last_update > "$MIRROR_DIR/time-of-last-update"
+    $ECHO $last_update > "$MIRROR_DIR/time-of-last-update"
 else
-    echo "WARNING! Can't download time-of-last-update file"
+    $ECHO "WARNING! Can't download time-of-last-update file"
 fi
 make_link
-echo "End apt-mirror"
+$ECHO "End apt-mirror"
 if [ -f $TMP_CURRENT ]; then
-    rm $TMP_CURRENT
+    $RM $TMP_CURRENT
 fi
 if [ -f $TMP_ALL ]; then
-    rm $TMP_ALL
+    $RM $TMP_ALL
 fi
+#if [ -f $TMP_STATUS ]; then
+#    $RM $TMP_STATUS
+#fi
