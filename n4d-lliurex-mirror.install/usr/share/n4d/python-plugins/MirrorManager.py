@@ -321,12 +321,14 @@ class MirrorManager:
 		fd.write("EXITTING LOOP errors_found={}\n".format(errors_found))
 		fd.flush()
 		
+		need_fix_repo=False
 		if restore_info and isinstance(restore_info,dict):
 			if 'distro' in restore_info:
 				self.debug(restore=restore_info)
 				if 'mirrororig' in restore_info and 'optionorig' in restore_info:
 					self.debug(msg='setting mirror orig')
 					self.set_mirror_orig(restore_info['distro'],restore_info['mirrororig'],restore_info['optionused'])
+					need_fix_repo=True
 				if 'optionorig' in restore_info:
 					self.debug(msg='setting option orig')
 					self.set_option_update(restore_info['distro'],restore_info['optionorig'])
@@ -348,6 +350,10 @@ class MirrorManager:
 			if 'port' in callback_args:
 				n4d_cli = Client(address='https://' + ip + ':9779')
 				n4d_cli.MirrorManager.stop_webserver(callback_args['port'])
+                need_fix_repo=True
+
+        if need_fix_repo:
+			self.fix_repo_paths(None)
 
 		self.download_time_file(distro)
 		self.set_mirror_info(distro)
@@ -360,6 +366,13 @@ class MirrorManager:
 
 	#def _update
 	
+	def fix_repo_paths(self,config_file=None):
+		if config_file is None:
+			subprocess.check_call(['domirror-fix-repo','-ro'])
+		else:
+			subprocess.check_call(['domirror-fix-repo','-ro','-c',config_file])
+	#def fix_repo_paths(config_file):
+
 	def is_alive(self):
 		ret = {'status':self.update_thread.is_alive(),'msg':'{}'.format(self.mirrorworking)}
 		return n4d.responses.build_successful_call_response(ret)
