@@ -430,6 +430,13 @@ function execute(){
     # Fourth link properly (symbolic & relative) dirs into $MIRROR_DIR
     for l in "${to_link[@]}"; do
         if check_valid "$l"; then
+            bn=$($BASENAME "$l")
+            if [ -L "$MIRROR_DIR/$bn" ];then
+                rp=$($REALPATH "$MIRROR_DIR/$bn")
+                if [ "x$rp" == "x$l" ];then
+                    $DUMMY $RM "$MIRROR_DIR/$bn"
+                fi
+            fi
             $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
         fi
     done
@@ -816,6 +823,42 @@ function search_exported(){
     RETURNED=${found_exported}
 }
 
+function search_old_data(){
+    # search for useless old data
+    if [ -n "$remove_old" ];then
+        olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*old_.*" -prune)
+        if [ -n "$olds" ];then
+            info 'Old data: (Seems safe to remove them)'
+            for old in $olds; do
+                if check_valid "$old"; then
+                    if [ -d "$old" ];then
+                        add 'old' "$old"
+                    else
+                        add 'old' "$old"
+                    fi
+                fi
+            done
+        fi
+        olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*[.]old" -prune)
+        if [ -n "$olds" ];then
+            info 'Old data: (Seems safe to remove them)'
+            for old in $olds; do
+                if check_valid "$old"; then
+                    if [ -d "$old" ];then
+                        add 'old' "$old"
+                    else
+                        add 'old' "$old"
+                    fi
+                fi
+            done
+        fi
+    fi
+}
+
+search_old_data
+
+execute
+
 # 
 # Main execution
 # 
@@ -941,35 +984,7 @@ if [ -z "$pool_ok" ];then
     fi
 fi
 
-# search for useless old data
-if [ -n "$remove_old" ];then
-    olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*old_.*" -prune)
-    if [ -n "$olds" ];then
-        info 'Old data: (Seems safe to remove them)'
-        for old in $olds; do
-            if check_valid "$old"; then
-                if [ -d "$old" ];then
-                    add 'old' "$old"
-                else
-                    add 'old' "$old"
-                fi
-            fi
-        done
-    fi
-    olds=$($FIND "$MIRROR_DIR" -iregex "$MIRROR_DIR/.*[.]old" -prune)
-    if [ -n "$olds" ];then
-        info 'Old data: (Seems safe to remove them)'
-        for old in $olds; do
-            if check_valid "$old"; then
-                if [ -d "$old" ];then
-                    add 'old' "$old"
-                else
-                    add 'old' "$old"
-                fi
-            fi
-        done
-    fi
-fi
+search_old_data
 
 # execute all planned operations
 execute
