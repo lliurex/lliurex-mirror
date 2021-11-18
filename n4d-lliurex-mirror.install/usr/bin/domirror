@@ -63,7 +63,7 @@ clean http://lliurex.net/$DISTRO
 # KEYRINGS=$(find /etc/apt -type f -name '*.gpg')
 
 WHICH="/usr/bin/which"
-if [ -f "$WHICH" ];then
+if [ ! -f "$WHICH" ];then
     echo "which not found, install debianutils first!, unable to continue"
     exit 1
 fi
@@ -641,6 +641,6 @@ fi
 if [ -f $TMP_ALL ]; then
     $RM $TMP_ALL
 fi
-if [ -f $TMP_STATUS ]; then
+#if [ -f $TMP_STATUS ]; then
 #    $RM $TMP_STATUS
-fi
+#fi
