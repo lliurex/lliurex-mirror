@@ -27,14 +27,23 @@ COMPONENTS="main/debian-installer main universe multiverse restricted"
 DEBUG=1
 # END EDITABLE VARS
 
-ECHO=$(which echo)
+WHICH="/usr/bin/which"
+if [ ! -f "$WHICH" ];then
+    echo "which not found, install debianutils first!, unable to continue"
+    exit 1
+fi
+ECHO=$($WHICH echo)
 if [ -z "$DEBUG" ]; then
-    ECHO=$(which echo)
+    ECHO=$($WHICH echo)
 fi
 if [ -z "$ECHO" -o ! -f "$ECHO" ];then
     exit 1
 fi
-
+SED=$($WHICH sed)
+if [ -z "${SED}" -o ! -f "$SED" ];then
+    $ECHO "sed not found, install sed first!, unable to continue"
+    exit 1
+fi
 help(){
     $ECHO 'domirror-fix-repo: lliurex-mirror fix repository structure'
     $ECHO ''
@@ -47,6 +56,7 @@ help(){
     $ECHO '      -u  | --unprivileged    (optional) (disable use of "sudo" tool)'
     $ECHO '      -ro | --remove-old      (optional) (remove old data from pool)'
     $ECHO '      -w  | --write-n4dvar    (optional) (update n4d variable)'
+    $ECHO '      -fp | --force-pool      (optional) (force pool from directory)'
     $ECHO ''
 }
 
@@ -62,22 +72,30 @@ sample_conf=
 unprivileged=1
 remove_old=
 write_n4dvar=
+force_pool=
 
 while test -n "$1"; do
     case $1 in
         --config-file=*)
-            config_file=$($ECHO $1|sed -r "s/--config-file=(.*)/\1/g")
+            config_file=$($ECHO $1|$SED -r "s/--config-file=(.*)/\1/g")
         ;;
         -c)
             shift
             config_file=$1
         ;;
         --mirror-dir=*)
-            MIRROR_DIR=$($ECHO $1|sed -r "s/--mirror-dir=(.*)/\1/g")
+            MIRROR_DIR=$($ECHO $1|$SED -r "s/--mirror-dir=(.*)/\1/g")
         ;;
         -m)
             shift
             MIRROR_DIR=$1
+        ;;
+        --force-pool=*)
+            force_pool=$($ECHO $1|$SED -r "s/--force-pool=(.*)/\1/g")
+        ;;
+        -fp)
+            shift
+            force_pool=$1
         ;;
         -dr|--dry-run)
             dry=1
@@ -104,7 +122,6 @@ while test -n "$1"; do
     esac
     shift
 done
-
 # 
 # READ CONFIGURATION PHASE 
 # 
@@ -132,7 +149,7 @@ if [ $dry ]; then
     $ECHO 'set -e'
     DUMMY="$ECHO"
 fi
-INFO="$(which /bin/true)"
+INFO="$($WHICH /bin/true)"
 if [ $inf ];then
     INFO="$ECHO"
 fi
@@ -143,105 +160,110 @@ function info(){
 # 
 # Checks for used tools
 # 
-REALPATH=$(which realpath)
+REALPATH=$($WHICH realpath)
 if [ -z "${REALPATH}" -o ! -f "$REALPATH" ];then
     $ECHO "Realpath not found, install coreutils first!, unable to continue"
     exit 1
 fi
-DU=$(which du)
+DU=$($WHICH du)
 if [ -z "${DU}" -o ! -f "$DU" ];then
     $ECHO "du not found, install coreutils first!, unable to continue"
     exit 1
 fi
-CAT=$(which cat)
+CAT=$($WHICH cat)
 if [ -z "${CAT}" -o ! -f "$CAT" ];then
     $ECHO "cat not found, install coreutils first!, unable to continue"
     exit 1
 fi
-TR=$(which tr)
+TR=$($WHICH tr)
 if [ -z "${TR}" -o ! -f "$TR" ];then
     $ECHO "TR not found, install coreutils first!, unable to continue"
     exit 1
 fi
-MKDIR=$(which mkdir)
+MKDIR=$($WHICH mkdir)
 if [ -z "${MKDIR}" -o ! -f "$MKDIR" ];then
     $ECHO "mkdir not found, install coreutils first!, unable to continue"
     exit 1
 fi
-CP=$(which cp)
+CP=$($WHICH cp)
 if [ -z "${CP}" -o ! -f "$CP" ];then
     $ECHO "cp not found, install coreutils first!, unable to continue"
     exit 1
 fi
-MV=$(which mv)
+MV=$($WHICH mv)
 if [ -z "${MV}" -o ! -f "$MV" ];then
     $ECHO "mv not found, install coreutils first!, unable to continue"
     exit 1
 fi
-LN=$(which ln)
+LN=$($WHICH ln)
 if [ -z "${LN}" -o ! -f "$LN" ];then
     $ECHO "ln not found, install coreutils first!, unable to continue"
     exit 1
 fi
-RM=$(which rm)
+RM=$($WHICH rm)
 if [ -z "${RM}" -o ! -f "$RM" ];then
     $ECHO "rm not found, install coreutils first!, unable to continue"
     exit 1
 fi
-FIND=$(which find)
+FIND=$($WHICH find)
 if [ -z "${FIND}" -o ! -f "$FIND" ];then
     $ECHO "find not found, install coreutils first!, unable to continue"
     exit 1
 fi
-SORT=$(which sort)
+SORT=$($WHICH sort)
 if [ -z "${SORT}" -o ! -f "$SORT" ];then
     $ECHO "sort not found, install coreutils first!, unable to continue"
     exit 1
 fi
-UNIQ=$(which uniq)
+UNIQ=$($WHICH uniq)
 if [ -z "${UNIQ}" -o ! -f "$UNIQ" ];then
     $ECHO "uniq not found, install coreutils first!, unable to continue"
     exit 1
 fi
-WC=$(which wc)
+WC=$($WHICH wc)
 if [ -z "${WC}" -o ! -f "$WC" ];then
     $ECHO "wc not found, install coreutils first!, unable to continue"
     exit 1
 fi
-BASENAME=$(which basename)
+BASENAME=$($WHICH basename)
 if [ -z "${BASENAME}" -o ! -f "$BASENAME" ];then
     $ECHO "basename not found, install coreutils first!, unable to continue"
     exit 1
 fi
-SED=$(which sed)
-if [ -z "${SED}" -o ! -f "$SED" ];then
-    $ECHO "sed not found, install sed first!, unable to continue"
-    exit 1
-fi
-XARGS=$(which xargs)
+XARGS=$($WHICH xargs)
 if [ -z "${XARGS}" -o ! -f "$XARGS" ];then
     $ECHO "xargs not found, install findutils first!, unable to continue"
     exit 1
 fi
-TEMPFILE=$(which tempfile)
+TEMPFILE=$($WHICH tempfile)
 if [ -z "${TEMPFILE}" -o ! -f "$TEMPFILE" ];then
     $ECHO "tempfile not found, install debianutils first!, unable to continue"
     exit 1
 fi
 
 if [ -z "$unprivileged" ];then
-    SUDO=$(which sudo)
+    SUDO=$($WHICH sudo)
     if [ -z "${SUDO}" -o ! -f "$SUDO" ];then
         [ -z "$dry" ] && $ECHO "sudo not found, install sudo first!, unable to continue" && exit 1
     fi
 fi
-N4DVARS=$(which n4d-vars)
+N4DVARS=$($WHICH n4d-vars)
 if [ -z "${N4DVARS}" -o ! -f "$N4DVARS" ];then
     [ -z "$dry" ] && $ECHO "sudo not found, install n4d first!, unable to continue" && exit 1
 fi
-BASH=$(which bash)
+BASH=$($WHICH bash)
 if [ -z "${BASH}" -o ! -f "$BASH" ];then
     [ -z "$dry" ] && $ECHO "bash not found, install bash first!, unable to continue" exit 1
+fi
+CUT=$($WHICH cut)
+if [ -z "${CUT}" -o ! -f "$CUT" ];then
+    $ECHO "cut not found, install coreutils first!, unable to continue"
+    exit 1
+fi
+HEAD=$($WHICH head)
+if [ -z "${HEAD}" -o ! -f "$HEAD" ];then
+    $ECHO "head not found, install coreutils first!, unable to continue"
+    exit 1
 fi
 if [ "$EUID" -ne "0" -a -z "$unprivileged" ];then
     DUMMY="$DUMMY $SUDO"
@@ -265,7 +287,7 @@ else
 fi
 # $MIRROR_DIR checks
 if [ -z "$MIRROR_DIR" ];then
-    MIRROR_DIR=$(cat $config_used |sed -r '/\s*\S+\s+base_path\s+\S+/!d'|sed -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
+    MIRROR_DIR=$($CAT $config_used |$SED -r '/\s*\S+\s+base_path\s+\S+/!d'|$SED -r 's@\s*\S+\s+\S+\s+(\S+)@\1@g')
 fi
 if [ -z "$MIRROR_DIR" ];then
     $ECHO "Unable to read MIRROR_DIR"
@@ -279,6 +301,17 @@ MIRROR_DIR=$($REALPATH "$MIRROR_DIR")
 if [ ! -d "$MIRROR_DIR" ];then
     $ECHO "'$MIRROR_DIR', not a valid directory"
     exit 1
+fi
+
+# $force_pool checks
+if [ -n "$force_pool" ]; then
+    force_pool=$($BASENAME "$force_pool")
+    if [ -e "$MIRROR_DIR/$force_pool" ];then
+        info "Using '$force_pool' inside '$MIRROR_DIR' as forced pool"
+    else
+        $ECHO "'$force_pool' not valid to be forced, try relative or absolute path... but inside '$MIRROR_DIR'"
+        exit 1
+    fi
 fi
 
 # Bash array for task operation queues, holds paths allowing spaces into it
@@ -358,9 +391,9 @@ function add(){
 # Check valid path in case of error processing ensuring no outer $MIRROR_DIR or / operations are valid
 
 function check_valid(){
-    len=$(( $($ECHO "$MIRROR_DIR"|wc -c) - 1))
+    len=$(( $($ECHO "$MIRROR_DIR"|$WC -c) - 1))
     if [ -n "$1" ];then
-        if [ $len -gt 3 -a "$($ECHO "$1"|cut -c -$len)" = "$MIRROR_DIR" ];then
+        if [ $len -gt 3 -a "$($ECHO "$1"|$CUT -c -$len)" = "$MIRROR_DIR" ];then
             return 0
         fi
         info "Not valid '$1'"
@@ -439,11 +472,14 @@ function execute(){
             bn=$($BASENAME "$l")
             if [ -L "$MIRROR_DIR/$bn" ];then
                 rp=$($REALPATH "$MIRROR_DIR/$bn")
-                if [ "x$rp" == "x$l" ];then
+                if [ "x$rp" != "x$l" ];then
+                    info "Exception: NEED TO REMOVE '$MIRROR_DIR/$bn' before link"
                     $DUMMY $RM "$MIRROR_DIR/$bn"
+                    $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
                 fi
+            else
+                $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
             fi
-            $DUMMY $LN -sr -t "$MIRROR_DIR" "$l"
         fi
     done
     if [ -n "$remove_old" ];then
@@ -477,7 +513,7 @@ if [ ! -d '/net/mirror' ]; then
 fi
 
 info "Using: '$MIRROR_DIR' as MIRROR_DIR"
-SIZE=$($DU -ms "$MIRROR_DIR" |cut -f1)
+SIZE=$($DU -ms "$MIRROR_DIR" |$CUT -f1)
 info "Size of '$MIRROR_DIR' is '$SIZE' MB"
 
 # $MIRROR_DIR/dists folder detection
@@ -674,12 +710,12 @@ function compare_newer(){
     # return 0 if no error
     # return 1 if error
     if [ -n "$1" -a -n "$2" ];then
-        d1=$($ECHO $1 | cut -d/ -f1)
-        m1=$($ECHO $1 | cut -d/ -f2)
-        y1=$($ECHO $1 | cut -d/ -f3)
-        d2=$($ECHO $2 | cut -d/ -f1)
-        m2=$($ECHO $2 | cut -d/ -f2)
-        y2=$($ECHO $2 | cut -d/ -f3)
+        d1=$($ECHO $1 | $CUT -d/ -f1)
+        m1=$($ECHO $1 | $CUT -d/ -f2)
+        y1=$($ECHO $1 | $CUT -d/ -f3)
+        d2=$($ECHO $2 | $CUT -d/ -f1)
+        m2=$($ECHO $2 | $CUT -d/ -f2)
+        y2=$($ECHO $2 | $CUT -d/ -f3)
         if [ -z "$d1" -o -z "$d2" -o -z "$m1" -o -z "$m2" -o -z "$y1" -o -z "$y2" ];then
             info "Error comparing dates '$1' & '$2'"
             exit 1
@@ -829,6 +865,47 @@ function search_exported(){
     RETURNED=${found_exported}
 }
 
+function search_folder_into_hierarchy(){
+    RETURNED=""
+    what=$1
+    if [ "x$what" != "xpool" -a "x$what" != "xdists" ];then
+        info "Unknown parameter for search!!"
+        return 2
+    fi
+    search_from=
+    if [ -e "$2" ];then
+        if check_valid "$2"; then
+            bn="$($BASENAME "$2")"
+            if [ "x$what" == "xpool" ];then
+                search_from="$MIRROR_DIR/$bn"
+            fi
+            if [ "x$what" == "xdists" ];then
+                search_from="$MIRROR_DIR/skel/$bn"
+            fi  
+        fi
+    else
+        if [ "x$what" == "xpool" -a -e "$MIRROR_DIR/$2" ];then
+            if check_valid "$MIRROR_DIR/$2";then
+                search_from="$MIRROR_DIR/$2"
+            fi
+        fi
+        if [ "x$what" == "xdists" -a -e "$MIRROR_DIR/skel/$2" ];then
+            if check_valid "$MIRROR_DIR/skel/$2";then
+                search_from="$MIRROR_DIR/skel/$2"
+            fi
+        fi
+    fi
+    if [ -z "$search_from" ];then
+        return 1
+    fi
+    location="$($FIND "$search_from" -type d -name "$what" -prune | $HEAD -1)"
+    if [ -z "$location" ];then
+        return 1
+    fi
+    RETURNED="$location"
+    return 0
+}
+
 function search_old_data(){
     # search for useless old data
     if [ -n "$remove_old" ];then
@@ -868,6 +945,16 @@ execute
 # 
 # Main execution
 # 
+if [ -n "$force_pool" ];then
+    if [ ! -d "$MIRROR_DIR/$force_pool/$DISTRO/pool" ];then
+        echo "'$MIRROR_DIR/$force_pool/$DISTRO/pool' doesn't exists, aborting"
+        exit 1
+    fi
+    if [ ! -d "$MIRROR_DIR/skel/$force_pool/$DISTRO/dists" ];then
+        echo "'$MIRROR_DIR/skel/$force_pool/$DISTRO/dists' doesn't exists, aborting"
+        exit 1
+    fi
+fi
 
 if [ ! -d "$MIRROR_DIR/lliurex.net/$DISTRO/pool" ];then
     add 'create' "$MIRROR_DIR/lliurex.net/$DISTRO/pool"
@@ -903,11 +990,26 @@ else
 fi
 
 search_exported
-found_exported="$RETURNED"
+if [ -z "$force_pool" ];then
+    found_exported="$RETURNED"
+else
+    exported_winner="$RETURNED"
+    if [ -n "$exported_winner" ];then
+        bn=$($BASENAME "$exported_winner")
+        if [ -d "$MIRROR_DIR/$bn" ];then
+            add 'remove' "$MIRROR_DIR/$bn"
+        fi
+        if search_folder_into_hierarchy 'dists' "$exported_winner";then
+            add 'remove' "$RETURNED"
+        fi
+    fi
+    found_exported="$MIRROR_DIR/$force_pool"
+    add 'remove' '/very123/large123/path123'
+fi
 
 found_exported_name=
 if [ -n "$found_exported" ];then
-    found_exported_name=$(basename "$found_exported")
+    found_exported_name=$($BASENAME "$found_exported")
 fi
 
 texporteddir=
@@ -915,7 +1017,7 @@ if [ -n "$found_exported" ];then
     get_pool_timestamp "$found_exported"
     texporteddir="$RETURNED"
 fi
-if [ -n "$current_timestamp" -a "$texporteddir" ];then
+if [ -n "$current_timestamp" -a "$texporteddir" -a -z "$force_pool" ];then
     compare_newer "$current_timestamp" "$texporteddir"
     ret="$RETURNED"
     if [ "$ret" = "1" ];then
@@ -932,7 +1034,7 @@ if [ -n "$current_timestamp" -a "$texporteddir" ];then
 fi
 old_pool_moved=
 last_update=
-if [ "$has_mirror_pool" = "old" ];then
+if [ "$has_mirror_pool" = "old" -a -z "$force_pool" ];then
     get_pool_timestamp "$MIRROR_DIR"
     tpooldir="$RETURNED"
     if [ -z "$found_exported" ];then
@@ -955,10 +1057,25 @@ fi
 if [ -n "$found_exported" ];then
     get_pool_timestamp "$found_exported"
     last_update="$RETURNED"
-    add 'move' "$found_exported/pool" "$MIRROR_DIR/lliurex.net/$DISTRO"
-    add 'remove' "$found_exported" "$MIRROR_DIR/lliurex.net/$DISTRO"
-    if [ -d "$MIRROR_DIR/skel/$found_exported_name/dists" ];then
-        add 'move' "$MIRROR_DIR/skel/$found_exported_name/dists" "$MIRROR_DIR/skel/lliurex.net/$DISTRO"
+    pool_location=
+    dists_location=
+    if search_folder_into_hierarchy "pool" "$found_exported";then
+        pool_location="$RETURNED"
+    else
+        $ECHO "pool folder doesn't appear to exists inside '$MIRROR_DIR/$found_exported'"
+        exit 1
+    fi
+    if search_folder_into_hierarchy "dists" "$found_exported";then
+        dists_location="$RETURNED"
+    else
+        $ECHO "dists folder doesn't appear to exists inside '$MIRROR_DIR/skel/$found_exported'"
+        exit 1
+    fi
+    
+    add 'move' "$pool_location" "$MIRROR_DIR/lliurex.net/$DISTRO"
+    add 'remove' "$MIRROR_DIR/$found_exported_name"
+    if [ -d "$dists_location" ];then
+        add 'move' "$dists_location" "$MIRROR_DIR/skel/lliurex.net/$DISTRO"
         add 'remove' "$MIRROR_DIR/skel/$found_exported_name"
         info "Exported meta-info found on '$MIRROR_DIR/skel/$found_exported_name/dists'"
         add 'link' "$MIRROR_DIR/skel/lliurex.net/$DISTRO/dists"
