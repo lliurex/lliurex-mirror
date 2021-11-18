@@ -253,6 +253,12 @@ if [ -n "$DISTRO" ]; then
         $ECHO "Invalid distro '$DISTRO'"
         exit 1
     fi
+    if [ "$DISTRO" == "bionic" ];then
+        DISTRO_CODE="llx19"
+    fi
+    if [ "$DISTRO" == "focal" ];then
+        DISTRO_CODE="llx21"
+    fi
 else
     $ECHO 'Invalid distro'
     exit 1
@@ -459,10 +465,10 @@ init_executor_array
 if [ ! -d '/net/mirror' ]; then
     add 'create' '/net/mirror'
     if [ "$DISTRO" == 'bionic' ];then
-        add 'create' '/net/mirror/llx19'
+        add 'create' "/net/mirror/$DISTRO_CODE"
     else
         if [ "$DISTRO" == 'focal' ];then
-            add 'create' '/net/mirror/llx21'
+            add 'create' "/net/mirror/$DISTRO_CODE"
         else
             info "Unknown DISTRO value, unable to continue"
             exit 1
@@ -657,7 +663,7 @@ function write_variable(){
     else
         d=$(date +'%d/%m/%Y')
     fi
-    printf -v RETURNED '%q' "{\n\t\"LLIUREXMIRROR\": {\n\t\t\"function\": \"\",\n\t\t\"root_protected\": false,\n\t\t\"description\": \"Lliurex Mirror info variable\",\n\t\t\"force_update\": true,\n\t\t\"value\": {\n\t\t\t\"llx19\": {\n\t\t\t\t\"exception_msg\": \"\",\n\t\t\t\t\"status_mirror\": \"Ok\",\n\t\t\t\t\"last_mirror_date\": \"$d\",\n\t\t\t\t\"mirror_size\": \"33.1815584237\",\n\t\t\t\t\"progress\": 100\n\t\t\t}\n\t\t},\n\t\t\"volatile\": false,\n\t\t\"packages\": [\n\t\t\t\"n4d-lliurex-mirror\"\n\t\t]\n\t}\n}\n"
+    printf -v RETURNED '%q' "{\n\t\"LLIUREXMIRROR\": {\n\t\t\"function\": \"\",\n\t\t\"root_protected\": false,\n\t\t\"description\": \"Lliurex Mirror info variable\",\n\t\t\"force_update\": true,\n\t\t\"value\": {\n\t\t\t\"$DISTRO_CODE\": {\n\t\t\t\t\"exception_msg\": \"\",\n\t\t\t\t\"status_mirror\": \"Ok\",\n\t\t\t\t\"last_mirror_date\": \"$d\",\n\t\t\t\t\"mirror_size\": \"33.1815584237\",\n\t\t\t\t\"progress\": 100\n\t\t\t}\n\t\t},\n\t\t\"volatile\": false,\n\t\t\"packages\": [\n\t\t\t\"n4d-lliurex-mirror\"\n\t\t]\n\t}\n}\n"
 }
 
 function compare_newer(){
