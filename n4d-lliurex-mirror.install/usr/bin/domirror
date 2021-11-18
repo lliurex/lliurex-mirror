@@ -307,7 +307,7 @@ if [ -z "${WGET}" -o ! -f "$WGET" ];then
 fi
 
 MIRROR_DIR="$($SED -r "/\s*\S+\s+base_path\s+\S+/!d; s@\s*\S+\s+\S+\s+(\S+)@\1@g" "$config_used")"
-MIRROR_DIR=$(echo "$MIRROR_DIR" | $TR -d "\"'")
+MIRROR_DIR=$($ECHO "$MIRROR_DIR" | $TR -d "\"'")
 if [ -z "$MIRROR_DIR" ];then
     $ECHO "Unable to read MIRROR_DIR"
     exit 1
@@ -402,7 +402,7 @@ make_link(){
     if [ ! -L "$MIRROR_DIR/dists" ];then
         DISTS=$($FIND "$MIRROR_DIR" -type d -path '*/skel/*' -name 'dists' -print)
         if [ -n "$DISTS" ]; then
-            if [ "$($ECHO "$DISTS"|$TR '\n' ' '|wc -w)" -gt 1 ];then
+            if [ "$($ECHO "$DISTS"|$TR '\n' ' '|$WC -w)" -gt 1 ];then
                 DISTS=$($ECHO "$DISTS"|$TR '\n' ' '|$TR ' ' '\n'|$GREP lliurex)
             fi
             rp="$($REALPATH --relative-to="$MIRROR_DIR" "$DISTS")"
@@ -583,7 +583,7 @@ if [ $verify ]; then
         done
     fi
     if [ $q -eq 1 -o ! -z "$retry_failed" ];then
-        if [ $($ECHO $ret1|$WC -c) -gt 1 -o $(echo $ret2|$WC -c) -gt 1  -o $($ECHO $ret3|$WC -c) -gt 1 ];then
+        if [ $($ECHO $ret1|$WC -c) -gt 1 -o $($ECHO $ret2|$WC -c) -gt 1  -o $($ECHO $ret3|$WC -c) -gt 1 ];then
             $ECHO "Retrying some packages"
             nretry=0
             for x in $ret1; do
