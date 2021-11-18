@@ -243,6 +243,7 @@ class MirrorManager:
 			pass
 		fd.write('Starting Loop, reading {} process {}\n'.format(self.app,self.debmirrorprocess.pid))
 		fd.flush()
+		self.exitting=False
 		while True and not self.exitting:
 			try:
 				emergency_counter += 1
