@@ -1,3 +1,10 @@
+lliurex-mirror (30.4) bionic-updates; urgency=medium
+
+  * Fix import export process
+  * Reviewed code
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Thu, 18 Nov 2021 11:41:25 +0100
+
 lliurex-mirror (30.3.5) bionic; urgency=medium
 
   * Fix missing mirrordir creation at startup
