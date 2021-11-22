@@ -340,6 +340,7 @@ class MirrorManager:
         
         need_fix_repo=False
         option_update=self.get_option_update(distro)
+        force_pool=None
         if isinstance(option_update,dict) and option_update.get('status',None) == 0 and option_update.get('return') == "3":
             need_fix_repo=True
             location_option_3=self.get_mirror_orig(distro,'3')
@@ -391,18 +392,22 @@ class MirrorManager:
     #def _update
     
     def fix_repo_paths(self,config_file=None,force_pool=None):
-        if config_file is None:
-            if force_pool:
-                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
+        try:
+            if config_file is None:
+                if force_pool:
+                    out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
+                else:
+                    out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro'],stderr=subprocess.STDOUT,shell=False)
             else:
-                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro'],stderr=subprocess.STDOUT,shell=False)
-        else:
-            if force_pool:
-                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file,'-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
-            else:
-                out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file],stderr=subprocess.STDOUT,shell=False)
-            with open('/tmp/dmrfx.log','w') as fp:
-                fp.write(out.decode('utf8'))
+                if force_pool:
+                    out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file,'-fp',force_pool],stderr=subprocess.STDOUT,shell=False)
+                else:
+                    out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file],stderr=subprocess.STDOUT,shell=False)
+        except Exception as e:
+            out="{}".format(e)
+            out.encode('utf8')
+        with open('/tmp/dmrfx.log','w') as fp:
+            fp.write(out.decode('utf8'))
         return out
     #def fix_repo_paths(config_file):
 
