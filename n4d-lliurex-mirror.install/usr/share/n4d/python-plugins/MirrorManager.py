@@ -11,6 +11,7 @@ import pexpect
 import signal
 import re
 import json
+import time
 
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
@@ -387,7 +388,7 @@ class MirrorManager:
 					out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file],stderr=subprocess.STDOUT,shell=False)
 		except Exception as e:
 			out="{}".format(e)
-			out.encode('utf8')
+			out=out.encode('utf8')
 		with open('/tmp/dmrfx.log','w') as fp:
 			fp.write(out.decode('utf8'))
 		return out
@@ -648,6 +649,8 @@ class MirrorManager:
 		s.close()
 		self.webserverprocess[str(port)] = Process(target=self._enable_webserver_into_folder,args=(port,path,))
 		self.webserverprocess[str(port)].start()
+		# wait a bit for server ready before return ok as already enabled
+		time.sleep(2)
 		return {'status':True,'msg':port}
 	#enable_webserver_into_folder
 
