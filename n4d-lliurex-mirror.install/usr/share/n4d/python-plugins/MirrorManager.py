@@ -405,7 +405,7 @@ class MirrorManager:
                     out=subprocess.check_output(['/usr/bin/domirror-fix-repo','-i','-ro','-c',config_file],stderr=subprocess.STDOUT,shell=False)
         except Exception as e:
             out="{}".format(e)
-            out.encode('utf8')
+            out=out.encode('utf8')
         with open('/tmp/dmrfx.log','w') as fp:
             fp.write(out.decode('utf8'))
         return out
@@ -723,6 +723,8 @@ class MirrorManager:
             s.close()
             self.webserverprocess[str(port)] = Process(target=self._enable_webserver_into_folder,args=(port,path,))
             self.webserverprocess[str(port)].start()
+            # wait a bit for server ready before return ok as already enabled
+            time.sleep(2)
         except Exception as e:
             return n4d.responses.build_failed_call_response(ret_msg='{}'.format(e))
         return n4d.responses.build_successful_call_response(port)
@@ -1026,6 +1028,7 @@ class MirrorManager:
         if isinstance(callback_args,dict) and 'port' in callback_args and 'ip' in callback_args:
             n4d_cli = Client(address='https://' + callback_args['ip'] + ':9779')
             n4d_cli.MirrorManager.stop_webserver(callback_args['port'])
+            self.fix_repo_paths(config_path)
     #def _get
 
     def get_last_log(self):
