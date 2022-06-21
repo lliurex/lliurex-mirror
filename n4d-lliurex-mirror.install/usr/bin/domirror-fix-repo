@@ -22,7 +22,7 @@ DISTRO='focal'
 LLXMIRRORPATH='/var/lib/n4d/variables-inbox/LLIUREXMIRROR'
 SAMPLE_CONF_TPL='/usr/share/n4d/templates/lliurex-mirror/mirror.list'
 ARCHES="amd64 i386"
-SECTIONS="bionic bionic-security bionic-updates"
+SECTIONS="$DISTRO $DISTRO-security $DISTRO-updates"
 COMPONENTS="main/debian-installer main universe multiverse restricted"
 DEBUG=1
 # END EDITABLE VARS
@@ -1174,7 +1174,7 @@ if [ -n "$sample_conf" ];then
                 $SED -nr "s@(set\s+base_path\s*)\{\{[^}]*\}\}@\1 '$MIRROR_DIR'@g; s@(set\s+nthreads\s*)\{\{[^}]*\}\}@\1 2@g; s@(set\s+limit_rate\s*)\{\{[^}]*\}\}@\1 100m@g; /^(set\s+)/p" < $SAMPLE_CONF_TPL > $tmpfile
                 for arch in $ARCHES; do 
                     for sect in $SECTIONS; do
-                        $ECHO -n "deb-$arch http://lliurex.net/bionic $sect " >> $tmpfile
+                        $ECHO -n "deb-$arch http://lliurex.net/$DISTRO $sect " >> $tmpfile
                         for comp in $COMPONENTS; do
                             $ECHO -n "$comp " >> $tmpfile
                         done
@@ -1194,7 +1194,7 @@ if [ -n "$sample_conf" ];then
             $SED -nr "s@(set\s+base_path\s*)\{\{[^}]*\}\}@\1 '$MIRROR_DIR'@g; s@(set\s+nthreads\s*)\{\{[^}]*\}\}@\1 2@g; s@(set\s+limit_rate\s*)\{\{[^}]*\}\}@\1 100m@g; s@[$]@\\\\\\\\\\\\\$@g; /^(set\s+)/p" < $SAMPLE_CONF_TPL 
             for arch in $ARCHES; do 
                 for sect in $SECTIONS; do
-                    $ECHO -n "deb-$arch http://lliurex.net/bionic $sect "
+                    $ECHO -n "deb-$arch http://lliurex.net/$DISTRO $sect "
                     for comp in $COMPONENTS; do
                         $ECHO -n "$comp " 
                     done
