@@ -1,3 +1,9 @@
+lliurex-mirror (32.3.23) jammy; urgency=medium
+
+  * First jammy release 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 24 Jan 2024 10:02:32 +0100
+
 lliurex-mirror (32.3) focal-updates; urgency=medium
 
   * Fix import export features
