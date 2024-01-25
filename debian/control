@@ -42,7 +42,8 @@ Description: LliureX Mirror - N4D plugin
 
 Package: admin-center-lliurex-mirror
 Architecture: all
-Depends: ${misc:Depends}, admin-center 
+#Depends: ${misc:Depends}, admin-center 
+Depends: ${misc:Depends} 
 Description: LliureX Mirror - N4D plugin
  n4d-lliurex-mirror provides a n4d plugin
 

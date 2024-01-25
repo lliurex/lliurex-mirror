@@ -1,3 +1,9 @@
+lliurex-mirror (32.3.23.1) jammy; urgency=medium
+
+  * Removing admin-center dependency for now 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 25 Jan 2024 08:53:36 +0100
+
 lliurex-mirror (32.3.23) jammy; urgency=medium
 
   * First jammy release 
