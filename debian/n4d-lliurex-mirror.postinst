@@ -23,8 +23,8 @@ case $1 in
         #     fi
         # done
 
-        if [ ! -e "/etc/lliurex-mirror/conf/llx21.json" ]; then
-            cp /usr/share/lliurex-mirror/conf/llx21.json /etc/lliurex-mirror/conf
+        if [ ! -e "/etc/lliurex-mirror/conf/llx23.json" ]; then
+            cp /usr/share/lliurex-mirror/conf/llx23.json /etc/lliurex-mirror/conf
         fi
         # Fix, enable plugin doesn't execute new startup when update, ensure full restart
         systemctl restart n4d || true
