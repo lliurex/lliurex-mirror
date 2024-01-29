@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-DISTRO='focal'
+DISTRO='jammy'
 #set cleanscript $var_path/clean.sh
 #set defaultarch  amd64
 #set postmirror_script $var_path/postmirror.sh
@@ -42,7 +42,7 @@ set base_path    /tmp
 set mirror_path  $base_path/mirror-$DISTRO
 set skel_path    $mirror_path/skel
 set var_path     $mirror_path/var
-set nthreads     20
+set nthreads     10
 set _tilde 0
 set _autoclean 1
 

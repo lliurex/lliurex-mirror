@@ -83,17 +83,18 @@ class MirrorManager:
         self.default_path_configs = { 
                         'llx21':	'/usr/share/lliurex-mirror/conf/llx21.json',
                         'llx19':	'/usr/share/lliurex-mirror/conf/llx19.json',
+                        'llx23':	'/usr/share/lliurex-mirror/conf/llx23.json',
                         }
         self.variable = {}
         self.default_mirror_config = '''
 {
     "NAME": "",
     "BANNER": "",
-    "ORIGS" : {"1":"lliurex.net/focal","2":"","3":""}, # 1 ORIGINAL ; 2 LOCALFILESYSTEM; 3 REMOTEURL
+    "ORIGS" : {"1":"lliurex.net/jammy","2":"","3":""}, # 1 ORIGINAL ; 2 LOCALFILESYSTEM; 3 REMOTEURL
     "ARCHITECTURES": [ "amd64" ],
     "SECTIONS": ["main", "main/debian-installer", "universe", "multiverse"],
-    "MIRROR_PATH": "/net/mirror/llx21",
-    "DISTROS": ["focal","focal-updates","focal-security"],
+    "MIRROR_PATH": "/net/mirror/llx23",
+    "DISTROS": ["jammy","jammy-updates","jammy-security"],
     "IGN_GPG":1,
     "IGN_RELEASE":0,
     "CHK_MD5":0,

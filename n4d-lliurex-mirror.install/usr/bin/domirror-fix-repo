@@ -18,7 +18,7 @@
 set -e 
 
 # START EDITABLE VARS
-DISTRO='focal'
+DISTRO='jammy'
 LLXMIRRORPATH='/var/lib/n4d/variables-inbox/LLIUREXMIRROR'
 SAMPLE_CONF_TPL='/usr/share/n4d/templates/lliurex-mirror/mirror.list'
 ARCHES="amd64 i386"
@@ -272,7 +272,7 @@ fi
 # $DISTRO safe checks
 DISTRO="$($ECHO "$DISTRO"|$TR 'A-Z' 'a-z')"
 if [ -n "$DISTRO" ]; then
-    if [ "$DISTRO" != 'bionic' -a "$DISTRO" != 'focal' ];then
+    if [ "$DISTRO" != 'bionic' -a "$DISTRO" != 'focal' -a "$DISTRO" != 'jammy' ];then
         $ECHO "Invalid distro '$DISTRO'"
         exit 1
     fi
@@ -281,6 +281,9 @@ if [ -n "$DISTRO" ]; then
     fi
     if [ "$DISTRO" == "focal" ];then
         DISTRO_CODE="llx21"
+    fi
+    if [ "$DISTRO" == "jammy" ]; then
+	    DISTRO_CODE="llx23"
     fi
 else
     $ECHO 'Invalid distro'
@@ -507,8 +510,12 @@ if [ ! -d '/net/mirror' ]; then
         if [ "$DISTRO" == 'focal' ];then
             add 'create' "/net/mirror/$DISTRO_CODE"
         else
-            info "Unknown DISTRO value, unable to continue"
-            exit 1
+            if [ "$DISTRO" == 'jammy' ];then
+	        add 'create' "/net/mirror/$DISTRO_CODE"
+	    else
+            	info "Unknown DISTRO value, unable to continue"
+	            exit 1
+	   fi
         fi
     fi
 fi

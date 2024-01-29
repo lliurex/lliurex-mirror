@@ -1,0 +1,13 @@
+{
+	"NAME":"LliureX Jammy",
+	"BANNER": "lliurex-jammy",
+	"ORIGS":{"1":"lliurex.net/jammy","2":"","3":""},
+	"ARCHITECTURES": [ "amd64", "i386" ], 
+	"SECTIONS": ["main", "main/debian-installer","restricted" ,"universe", "multiverse","preschool"],
+	"MIRROR_PATH": "/net/mirror/llx23", 
+	"DISTROS": ["jammy","jammy-updates","jammy-security"],
+	"IGN_GPG":1,
+	"IGN_RELEASE":0,
+	"CHK_MD5":0,
+	"CURRENT_UPDATE_OPTION":"1"
+}
