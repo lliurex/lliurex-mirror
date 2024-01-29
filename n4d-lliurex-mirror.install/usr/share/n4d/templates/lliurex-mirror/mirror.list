@@ -26,7 +26,7 @@ set var_path    $base_path/var
 set cleanscript        $base_path/clean.sh
 set postmirror_script   $base_path/postmirror.sh
 set default_arch        amd64
-set nthreads    {{NTHREADS|default(20)}}
+set nthreads    {{NTHREADS|default(10)}}
 set _tilde      0
 set _autoclean  1
 set run_postmirror      0
