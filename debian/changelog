@@ -1,3 +1,9 @@
+lliurex-mirror (32.4) jammy; urgency=medium
+
+  * Replace banner to jammy
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 12 Feb 2024 09:12:26 +0100
+
 lliurex-mirror (32.3.25) jammy; urgency=medium
 
   * Fix size of temporary jammy banner
