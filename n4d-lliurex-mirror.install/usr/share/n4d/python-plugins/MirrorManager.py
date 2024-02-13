@@ -41,7 +41,7 @@ class MirrorManager:
             sys.exit(1)
         #Default values
         self.app="domirror" # debmirror
-        self.distro="llx21"
+        self.distro="llx23"
         self.llxpath = '/etc/lliurex-mirror/'
         self.applications={
             "domirror":{
